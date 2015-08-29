@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <!--http://bl.ocks.org/stepheneb/1182434-->
+    <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    <title>One Graph</title>
+    <!--<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>-->
+    <script type="text/javascript" src="iGrow.7.js"></script>
+
+
+  <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+  <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+  <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+  <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+<!--https://gist.github.com/stepheneb/1182434-->
+    <style type="text/css">
+    select {
+      width: 120px;
+    }
+    
+      body { font: 13px sans-serif; }
+      rect { fill: #fff; }
+      ul {
+        list-style-type: none;
+        margin: 0.5em 0em 0.5em 0em;
+        width: 100%; }
+        ul li {
+          display: table-cell;
+          vertical-align: middle;
+          margin: 0em;
+          padding: 0em 1em; }
+      .axis { font-size: 1.5em; }
+      .chart {
+        background-color: #F7F2C5;
+        width: 960px;
+        height: 500px; }
+      circle, .line {
+        fill: none;
+        
+         }
+      circle {
+        fill: white;
+        fill-opacity: 0.2;
+        cursor: move; }
+        circle.selected {
+          fill: #ff7f0e;
+          stroke: #ff7f0e; }
+        circle:hover {
+          fill: #ff7f0e;
+          stroke: #707f0e; }
+        circle.selected:hover {
+          fill: #ff7f0e;
+          stroke: #ff7f0e; }
+    </style>
+  </head>
+  <body>
+    <div id="chart1" class="chart"></div>
+
+
+
+
+
+
+<select id="dropdown" value = ""></select>
+
+<div id="dialog" title="Add a baby">
+  <p>Please add a baby's name, gender and birthdate</p>
+  <input id="inputfordropdown" type="text" name="dropdown" value="Name">
+      <select name="genderinput" id="genderinput">
+          <option selected disabled>Gender</option>
+          <option>Female</option>
+          <option>Male</option>
+      </select>
+      <input type="text" style="height:31px" id="birthdatep" value="Birthdate" >
+</div>
+<button id="editBabyButton">Edit babies</button>
+
+<hr>
+<p>Selections: </p>
+<p>Date <input type="text" style="height:31px; width:80px" id="datep">
+
+  <label for="spinner">Weight </label>
+  <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px" >
+  &nbsp;
+  <button id="PlotDataButton" style="height:31px" autofocus>Add weight</button> 
+  <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button> 
+</p>
+<hr>
+<pre>
+TO DO: 
+*) bug: make it work without any baby. Check:
+    populateDropdown(baby.Name);
+    updateMinDate
+    getName returns null, ok but getBirthdate looks for baby
+    Found one place after     //Autocomplete for baby name input. put 
+    if (typeof baby == 'undefined') { return false}
+
+
+  *) Zoom and panning limit. Lens?
+
+  *) Dialog to include Date, Weight, Add weight?
+  *) Layouts? 
+  *) Move jQuery code to a different js file?
+</pre>
+
+<script> //Scripts about the "add a baby" dialog
+function updateDataAndGraph(){
+    var currentName = getName();
+    graph.setPoints();
+    graph.setCurrrentDataWeight();
+    graph.title = currentName;
+    graph.redraw();
+    graph.update();
+    graph.setTitle();
+}
+//Track baby selected in dropdown
+jQuery(document).on("change", "#dropdown", function(e) {
+    //deselect any possible circle
+    deselectCircle(1);
+    //Update the lines, circles, title
+    var currentName = this.options[e.target.selectedIndex].text;
+    updateDataAndGraph();
+    //Update the minDate in date picker
+    updateMinDate("#datep");
+});
+//Create a baby instance, for testing purposes
+var baby = new Baby();
+baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
+baby.AddBaby({"name":"Nijntje", "gender":1, "birthdate": "01/01/2015"});
+
+baby.Data[0].Append({"Date": "01/08/2015" ,"Weeks" : 200 / 7, "Weight" : 6});
+baby.Data[0].Append({"Date": "01/08/2015" ,"Weeks" : 100 / 7, "Weight" : 4});
+baby.Data[1].Append({"Date": "10/08/2015" ,"Weeks" : 150 / 7, "Weight" : 5});
+
+
+
+//Functions for the dialog
+jQuery(function() {
+    jQuery("#dialog").dialog({
+      autoOpen: false,
+      show: { effect: "blind", duration: 500 },
+      hide: { effect: "blind", duration: 500 },
+      buttons: {
+        "Add baby" : {
+        	text : "Add baby",
+        	id : "dialog_AddBaby",
+        	click : function() {
+          		addToDropdown();
+          		jQuery( this ).dialog("close");          
+        	}
+        },
+        Cancel: function() {
+            jQuery( this ).dialog("close");
+          },
+        "Delete this baby" : {
+        	text : "Delete this baby",
+        	disabled : true,
+        	id : "dialog_DelBaby",
+        	click : function() {
+          var text = jQuery("#inputfordropdown").val();
+          removeBaby(text);
+          jQuery( this ).dialog("close");
+        }
+      }        
+      }
+    });
+    //Fire up the dialog 
+    jQuery("#editBabyButton").click(function() {
+      jQuery("#dialog").dialog("open");
+    });    
+    //Autocomplete for baby name input
+    jQuery(function() {
+        var names = baby.Name.toString().split(",");
+        jQuery("#inputfordropdown").autocomplete({
+          source: names
+        });
+      });
+    //Behavior when dropdown changes
+    jQuery(document).on("change", "#inputfordropdown", function(e) {
+    	var names = baby.Name.toString().split(",");
+    	var text = jQuery("#inputfordropdown").val();
+    	if (names.indexOf(text) > -1) {
+    		//Load the birthdate and gender
+    		var ind = baby.Name.indexOf(text);
+    		jQuery("#birthdatep").val(baby.BirthDate[ind]);
+    		var gender = (baby.Gender[ind] == 1 ? "Male" : "Female");
+    		jQuery("#genderinput").val(gender);
+    		//Disable birthdatep and genderinput
+    		document.getElementById('birthdatep').disabled = true;
+    		document.getElementById('genderinput').disabled = true;    		
+    		//"enable Delete this baby"
+    		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("enable");
+    	} else {
+    		//enable birthdatep 
+    		document.getElementById('birthdatep').disabled = false;
+    		document.getElementById('genderinput').disabled = false;    
+    		//"disable Delete this baby"
+    		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
+    	}
+    });    
+});
+//Helper functions related to the dialog
+function emptyDropdown(){
+  //empty() removes all child nodes
+  jQuery("#dropdown").empty();
+}
+function populateDropdown(array){
+console.log("populateDropdown array")
+  console.log(array)
+  //append children
+  jQuery.each(array, function(val, text) {
+      jQuery('#dropdown').append(jQuery('<option></option>').val(text).html(text).addClass("dropdownBaby") )
+    });
+}
+function removeBaby(name){
+  var success = baby.RemoveBabyByName(name);
+  if (success == false) {
+    alert(name+" was not found");
+  } else {
+    var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
+    if (conf){
+      emptyDropdown();
+      populateDropdown(baby.Name);
+    }
+  }
+}
+function areInputsValid(){
+  var text = jQuery("#inputfordropdown").val();
+  //We will check whether the name in "text" is already present in the baby instance
+  var existing = getExistingElements();
+  if (existing.indexOf(text) > -1) {
+    alert("This name already exists");
+    return false;
+  }
+  else if (text == "") {
+    alert("The name cannot be empty"); 
+    return false;
+  }
+  else if (text in existing) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+function addToDropdown(){
+  if (areInputsValid()){
+    var text = jQuery("#inputfordropdown").val();  
+    var gender = jQuery("#genderinput").val();
+    if (gender == "Female") {
+      gender = 2;
+    } else if (gender == "Male") {
+      gender = 1;
+    }
+    var birthdate = jQuery("#birthdatep").val();
+    //Add to baby instance
+    baby.AddBaby({"name": text, "birthdate": birthdate, "gender": gender})
+    //Switch dropdown in UI to new baby 
+    emptyDropdown();
+    populateDropdown(baby.Name);
+    jQuery("select option[value='"+text+"']").attr("selected","selected");
+    //Replot
+    updateDataAndGraph();
+    //Update minDate in #datep
+    updateMinDate("#datep");
+  }
+}
+function getExistingElements(){
+  var elem = new Array();
+  jQuery(".dropdownBaby").each(
+    function(index) { 
+      elem.push(jQuery( this ).text());
+  });
+    return elem;
+}
+//Get the baby's name from the dropdown
+function getName(){
+  var value = jQuery("#dropdown").val();
+  return value;
+}
+//Get the baby's gender from the dropdown
+function getGender(){
+  var name = getName();
+  var index = baby.Name.indexOf(name);
+  var gender = baby.Gender[index]
+  // solved problem: when I add a baby using the dropdown I get Male/Female, not 1/2.
+  if (gender == "Female") {
+    gender = 2;
+  } else if (gender == "Male") {
+    gender = 1
+  }
+  return gender;
+}
+//Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
+function getBirthdate(){
+  var name = jQuery("#dropdown").val();
+  var index = baby.Name.indexOf(name);
+  return baby.BirthDate[index];
+}
+//Update minDate for e.g. #datep
+function updateMinDate(selector){
+    var birthdateDMY = getBirthdate().split("/");
+    jQuery(selector).datepicker("option", "minDate", new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0]) );
+}
+//At startup populate the dropdown menu
+populateDropdown(baby.Name);
+
+</script>
+
+
+<script type="text/javascript"> //Scripts about adding and plotting the data
+//Set date picker to today
+if (jQuery("#datep").val() == "") {
+//if (jQuery("#datep").val() == "") {
+  var today = new Date();
+  var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + today.getMonth()).slice(-2)+"/"+today.getFullYear()
+  jQuery("#datep").val(todayDMY);
+}
+//Set birthdate picker to yesterday 
+if (jQuery("#birthdatep").val() == "") {
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  var yesterdayDMY = ("00" + yesterday.getDate()).slice(-2)+"/"+("00" + yesterday.getMonth()).slice(-2)+"/"+yesterday.getFullYear()
+  jQuery("#birthdatep").val(yesterdayDMY);
+}
+//Define behaviour of date pickers and spinner
+var birthdateDMY = getBirthdate().split("/");
+jQuery(function() {   
+  jQuery("#datep").datepicker({
+    minDate: (new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0])),
+    maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
+  });
+  jQuery("#birthdatep").datepicker({
+    maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
+  });
+jQuery.widget( "ui.pcntspinner", jQuery.ui.spinner, {
+    _format: function( value ) { 
+        var suffix = this.options.suffix;
+        return value +" "+ suffix; 
+    },    
+    _parse: function(value) { return parseFloat(value); }
+});
+jQuery("#weightSpinner").pcntspinner({ 
+    min: 1,
+    suffix:'Kg',
+    max: 100,
+    step: .1 });
+
+});
+													//format Date input: height!!
+//PlotDataButton: store and plot data
+jQuery(function() {
+    jQuery("#PlotDataButton").click(function() {
+        //First remove circle selection, if any
+        deselectCircle(1);
+        if (jQuery(weightSpinner).pcntspinner("isValid") == false) {
+          alert("Please insert a correct weight");
+          return False;
+        }
+        var birthdateYMD = new Date(dateToYMD(getBirthdate()));
+        var weight = jQuery(weightSpinner).pcntspinner( "value" );
+      	//Check if data already exists
+        if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && 
+        		(baby.Data[index].Weight.indexOf(weight) > -1)) { 
+        	alert("This point already exists");
+        	return false;
+        }
+        var dateDMY = jQuery(datep).val();
+        var date = new Date(dateToYMD(dateDMY));
+        var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
+        var index = baby.GetIndex(getName());
+        var obj = {
+          	"Date" : jQuery(datep).val(),
+          	"Weeks" : days / 7,
+          	"Weight" : weight
+        };
+        //Append data to baby
+        baby.Data[index].Append(obj);
+        //Remove plotted lines only if user has changed the child's gender      
+        if (getGender() != getPlottedGender()) {
+          graph.removePathsInSVG();
+          graph.plotLines();
+        }
+        graph.update();
+        return true;
+        });    
+      //jQuery("button").button();  format for buttons?
+ });
+//Delete point button
+jQuery(function() {
+    jQuery("#DeleteMeasure").click(function() {
+      	var deleted = deleteWeight(graph.selectCircle.id);
+      	if (deleted) {
+        	deselectCircle(1);
+        	graph.update();
+        	return true;
+      	}
+    return false;
+    })
+});
+
+///Helper functions
+ function deselectCircle(nullify) {
+    if (graph.selectCircle) {
+        document.getElementById(graph.selectCircle.id).setAttribute("r",6);
+        if (nullify) {
+          graph.selectCircle = null;
+          document.getElementById('DeleteMeasure').disabled = true;
+        }
+    }
+}
+//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+function dateToYMD(dmy) {
+  return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
+ };
+//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+function DMYToDate(dmy) {
+	return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
+  };
+
+//Clear the graph from lines
+function removePathsInSVG() {
+   //d3.select("svg").selectAll("*").remove(); //all children
+   d3.selectAll(".pathArea").remove(); //
+  }
+//Get the currently plotted gender: 1,2,-1 for male/female/unknown
+function getPlottedGender() {
+  var stroke = jQuery('[id*="sigma"]').css("stroke");
+  if (stroke == "rgb(0, 255, 255)") {
+    return 1; 
+  } else if (stroke == "rgb(255, 0, 255)") {
+    return 2;
+  } else {
+    throw "getPlottedGender: cannot determine the plotted gender. color in style>stroke not recognized";
+    return -1;
+  } 
+}
+function deleteWeight(id){
+	var index = id.split("_").pop();
+	var babyindex = baby.GetIndex(getName());
+	var string = "Weight was "+baby.Data[babyindex].Weight[index]+"Kg on "+baby.Data[babyindex].Date[index]
+	var conf = confirm("Do you really want to remove this point from the data?\n"+string);
+	if (conf){
+		baby.Data[babyindex].Date.splice(index, 1);
+		baby.Data[babyindex].Weeks.splice(index, 1);
+		baby.Data[babyindex].Weight.splice(index, 1);
+		//Update the circles and the scatterplot
+		graph.setCurrrentDataWeight();
+    return true;
+	}
+  return false;
+}
+
+
+
+
+</script>
+
+
+
+<script>
+
+
+
+var DaysForTest = function(babyBirthdate, date){
+	var birthdateYMD = new Date(dateToYMD(baby.BirthDate[babyBirthdate]));
+	var date = new Date(dateToYMD(date));
+	var days = Math.abs(date - birthdateYMD) / 3600 / 24000
+	return days;
+}
+baby.Data[0].Append({"Date": "01/08/2015",
+	"Weeks" : DaysForTest(0,"01/08/2015") / 7, "Weight" : 6});
+
+baby.Data[0].Append({"Date": "01/08/2015",
+	"Weeks" : DaysForTest(0,"30/08/2015") / 7, "Weight" : 4});
+baby.Data[1].Append({"Date": "10/08/2014", 
+	"Weeks" : DaysForTest(1,"01/08/2015") / 7, "Weight" : 5});
+
+
+//Start plot
+var weiBoy = [];
+var weiGirl = [];
+
+d3.tsv("weianthro.txt", 
+  //This function defines how "data" below will look like 
+  function(d) {
+    return {
+    gender: +d.sex,
+    age: +d.age / 7,   //weeks!
+      l: +d.l,
+      m: +d.m,
+      s: +d.s,
+    };
+  },function(error, data) {    
+      data.forEach(function(d, i) {
+        data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
+        });
+
+      graph = new SimpleGraph("chart1", {
+          "xmax": 250, "xmin": 0,
+          "ymax": 19, "ymin": 2, 
+          "pointsBoy": weiBoy,
+          "pointsGirl": weiGirl,
+          "xlabel": "Weeks",
+          "ylabel": "Weight [Kg]"  
+      });
+    }
+);   
+
+    </script>
+  </body>
+</html>
