@@ -36,23 +36,25 @@
 <button id="editBabyButton">Edit babies</button>
 <div id='custom-alert' class="custom-alert"></div>
 <hr>
-<p>Selections: </p>
-<p>Date <input type="text" style="height:31px; width:80px" id="datep">
-
-  <label for="spinner">Weight </label>
-  <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px" >
-  &nbsp;
-  <button id="AddWeight" style="height:31px" autofocus>Add weight</button> 
-  <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button> 
-</p>
+  <p>Selections: </p>
+  <p>
+    <label for="text">Date </label> 
+    <input type="text" style="height:31px; width:80px" id="datep">    
+    <label for="spinner">Weight </label>
+    <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px">
+    &nbsp;
+    <button id="AddWeight" style="height:31px" disabled>Add weight</button>
+    <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button>   
+  </p>
 <hr>
 
 
 <pre>
 TO DO: 
-  *) dialog: do not allow name as child name, check that gender and birthdate are selected before adding a child
+  *) disable Date, Weight and AddWeight button when no babies
   *) Zoom and panning limit. Lens?
-
+  *) use this before jQuery: jQuery(document).ready(function(){}  
+  
   *) Dialog to include Date, Weight, Add weight?
   *) Layouts? 
   *) Move jQuery code to a different js file?
@@ -124,7 +126,7 @@ jQuery(function() {
         var names = baby.Name.toString().split(",");
         jQuery("#inputfordropdown").autocomplete({
           source: names
-        });
+        }); //testing SVC git
       });
     //Behavior when dropdown changes
     jQuery(document).on("change", "#inputfordropdown", function(e) {
@@ -169,31 +171,50 @@ function removeBaby(name){
     var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
     if (conf){
       emptyDropdown();
+      if (baby.Name.length > 0) {
       populateDropdown(baby.Name);
+      } else {
+        //disable Selections if baby is empty
+        //toggleSelection();
+      }
     }
   }
 }
-function areInputsValid(){
+function areInputsValid(prompt){
   var text = jQuery("#inputfordropdown").val();
   //We will check whether the name in "text" is already present in the baby instance
   var existing = getExistingElements();
+  var message = "";
   if (existing.indexOf(text) > -1) {
-    alert("This name already exists");
-    return false;
+    message = "This name already exists";
   }
   else if (text == "") {
-    alert("The name cannot be empty"); 
+    message = "The name cannot be empty"; 
+  }
+  else if (text == "Name") {
+    message = "Please select a name for your child"; 
+  }
+  //Check if the gender was selected
+  else if (jQuery("#genderinput").val() === null) {
+    message = "Please select a gender for your child";
+  }
+  //Check if the birthdate was selected
+  else if (jQuery("#birthdatep").val() == "Birthdate") {
+    message = "Please select a birthdate for your child";
+  }
+  //Prompt the problem
+  if (message !== "") {
+    if (prompt) {
+      //customAlert(message,3000); //too bad, customAlert is asynchronous and the dialog disappears
+      alert(message);
+    }
     return false;
   }
-  else if (text in existing) {
-    return false;
-  }
-  else {
-    return true;
-  }
+  return true;
 }
+//Add all existing babies to the dropdown 
 function addToDropdown(){
-  if (areInputsValid()){
+  if (areInputsValid(true)){
     var text = jQuery("#inputfordropdown").val();  
     var gender = jQuery("#genderinput").val();
     if (gender == "Female") {
@@ -212,7 +233,9 @@ function addToDropdown(){
     updateDataAndGraph();
     //Update minDate in #datep
     updateMinDate("#datep");
-  }
+    
+    //toggleSelection();///////////////check to do
+  } 
 }
 function getExistingElements(){
   var elem = new Array();
@@ -267,10 +290,6 @@ populateDropdown(baby.Name);
 <script type="text/javascript"> //Scripts about adding and plotting the data
 //Set date picker to today
 if (jQuery("#datep").val() == "") {
-//if (jQuery("#datep").val() == "") {
-  /*var today = new Date();
-  var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + today.getMonth()).slice(-2)+"/"+today.getFullYear()
-  */
   jQuery("#datep").val(todayDMY);
 }
 //Set birthdate picker to yesterday 
@@ -301,7 +320,9 @@ jQuery("#weightSpinner").pcntspinner({
     min: 1,
     suffix:'Kg',
     max: 100,
-    step: .1 });
+    step: .1
+    //disabled: true
+    });
 
 });
 
@@ -339,6 +360,7 @@ function customAlert(meassage,hideTimeout) {
    //set up a timer to hide it, a.k.a a setTimeout()
   setTimeout(function() {
     jQuery("#custom-alert").dialog("close");
+    return true;
   }, hideTimeout)
 }   
 
@@ -359,7 +381,7 @@ jQuery(function() {
           customAlert("This point already exists",1800);
           return;
         }
-  var birthdateYMD = new Date(dateToYMD(getBirthdate()));
+        var birthdateYMD = new Date(dateToYMD(getBirthdate()));
         var date = new Date(dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
         //var index = baby.GetIndex(getName());
@@ -395,6 +417,23 @@ jQuery(function() {
 });
 
 ///Helper functions
+////////////////// to do
+function enableSelection(enable) {
+  console.log("toggleSelection")
+  //Toggle the weight spinner 
+  var spinner = jQuery( "#weightSpinner" ).spinner();
+  var datep = jQuery( "#datep" ).datepicker();
+  if (enable) {
+    spinner.spinner( "enable" );
+    jQuery( "#datep" ).datepicker( "option", "disabled", false);
+    jQuery('#AddWeight').prop('disabled', false);  
+  } else {
+    spinner.spinner( "disable" );
+    jQuery( "#datep" ).datepicker( "option", "disabled", true);
+    jQuery('#AddWeight').prop('disabled', true);
+  }
+  //NB: "#DeleteMeasure" should be all set
+}
  function deselectCircle(nullify) {
     if (graph.selectCircle) {
         document.getElementById(graph.selectCircle.id).setAttribute("r",6);

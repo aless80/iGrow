@@ -520,7 +520,6 @@ SimpleGraph.prototype.setCurrrentDataWeight = function(){
   var index = baby.GetIndex(getName());
   //Plot males when no baby is defined
   if (index == -1) {
-    index = 0;
     this.dataWeight = new Data();
     return;
   }   
