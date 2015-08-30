@@ -11,7 +11,8 @@ git config credential.helper store
 git config --unset credential.helper
 
 git add .
-git commit
+git commit  
+//git push? check status
 git push origin master
 
 git status
