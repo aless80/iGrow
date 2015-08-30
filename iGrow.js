@@ -4,7 +4,18 @@ registerKeyboardHandler = function(callback) {
   d3.select(window).on("keydown", callback);  
 };
 
+/* git
+git config --global core.editor "/usr/bin/vi -w"
 
+git add .
+git commit
+git push origin master
+
+git status
+git branch experimental
+git remote add master https://github.com/aless80/iGrow
+git clone https://github.com/aless80/iGrow
+*/
 //Baby class
 Baby = function(data){  
     this.Name = new Array();
@@ -58,7 +69,7 @@ Data.prototype.Append = function(obj){
 
 SimpleGraph = function(elemid, options) {
   var self = this;
-this.selectCircle = null; //ugly here outside SimpleGraph..
+  this.selectCircle = null;
   
   this.setCurrrentDataWeight();
   
@@ -144,7 +155,7 @@ this.selectCircle = null; //ugly here outside SimpleGraph..
       .attr("width", this.width)
       .attr("height", this.height)
       .attr("viewBox", "0 0 "+this.width+" "+this.height)
-      .attr("class", "svg2");
+      .attr("class", "svg");
 
 this.plotLines();
 
@@ -255,7 +266,7 @@ SimpleGraph.prototype.update = function() {
   this.removePathsInSVG();
   this.plotLines(); //is this really needed? there it recreates all lines.
 
-  var circle = this.vis.select("svg2").selectAll("circle")
+  var circle = this.vis.select("svg").selectAll("circle")
       .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
       .style("stroke","blue");
 
