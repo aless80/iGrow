@@ -4,17 +4,13 @@
   <!--http://bl.ocks.org/stepheneb/1182434-->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     <title>One Graph</title>
-    <!--<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>
-      https://gist.github.com/stepheneb/1182434-->
-  
-
+    <!--<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>-->
 
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script type="text/javascript" src="iGrow.js"></script>
-
     <style type="text/css">
     select {
       width: 120px;
@@ -25,7 +21,7 @@
         list-style-type: none;
         margin: 0.5em 0em 0.5em 0em;
         width: 100%; }
-        ul li {
+      ul li {
           display: table-cell;
           vertical-align: middle;
           margin: 0em;
@@ -37,29 +33,24 @@
         height: 500px; }
       circle, .line {
         fill: none;
-        
-         }
+        stroke-width: 2px; }
       circle {
         fill: white;
         fill-opacity: 0.2;
         cursor: move; }
-        circle.selected {
+      circle.selected {
           fill: #ff7f0e;
           stroke: #ff7f0e; }
-        circle:hover {
+      circle:hover {
           fill: #ff7f0e;
           stroke: #707f0e; }
-        circle.selected:hover {
+      circle.selected:hover {
           fill: #ff7f0e;
           stroke: #ff7f0e; }
     </style>
   </head>
   <body>
     <div id="chart1" class="chart"></div>
-
-
-
-
 
 
 <select id="dropdown" value = ""></select>
@@ -75,7 +66,7 @@
       <input type="text" style="height:31px" id="birthdatep" value="Birthdate" >
 </div>
 <button id="editBabyButton">Edit babies</button>
-
+<div id='custom-alert' class="custom-alert"></div>
 <hr>
 <p>Selections: </p>
 <p>Date <input type="text" style="height:31px; width:80px" id="datep">
@@ -83,12 +74,15 @@
   <label for="spinner">Weight </label>
   <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px" >
   &nbsp;
-  <button id="PlotDataButton" style="height:31px" autofocus>Add weight</button> 
+  <button id="AddWeight" style="height:31px" autofocus>Add weight</button> 
   <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button> 
 </p>
 <hr>
+
+
 <pre>
 TO DO: 
+*) git
 *) bug: make it work without any baby. Check:
     populateDropdown(baby.Name);
     updateMinDate
@@ -128,12 +122,6 @@ jQuery(document).on("change", "#dropdown", function(e) {
 var baby = new Baby();
 baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
 baby.AddBaby({"name":"Nijntje", "gender":1, "birthdate": "01/01/2015"});
-
-baby.Data[0].Append({"Date": "01/08/2015" ,"Weeks" : 200 / 7, "Weight" : 6});
-baby.Data[0].Append({"Date": "01/08/2015" ,"Weeks" : 100 / 7, "Weight" : 4});
-baby.Data[1].Append({"Date": "10/08/2015" ,"Weeks" : 150 / 7, "Weight" : 5});
-
-
 
 //Functions for the dialog
 jQuery(function() {
@@ -348,30 +336,74 @@ jQuery("#weightSpinner").pcntspinner({
     step: .1 });
 
 });
-													//format Date input: height!!
-//PlotDataButton: store and plot data
+
+//Custom alert
 jQuery(function() {
-    jQuery("#PlotDataButton").click(function() {
+    jQuery("#custom-alert").dialog({
+      id: "custom",
+      buttons: {
+        "Close" : {
+        	text : "Close",
+        	id : "dialog_AddBaby",
+        	click : function() {       
+          		jQuery( this ).dialog("close");          
+        	}
+        }
+      },
+          
+          
+      text: "",
+      autoOpen: false,
+      width:'auto',
+      position: { my: 'top', at: 'top+350' },
+      show: { effect: "fade", duration: 600 },
+      hide: { effect: "fade", duration: 1200 }
+    });
+});
+
+function customAlert(meassage,hideTimeout) {
+   jQuery("#custom-alert").text(meassage);
+   jQuery("#custom-alert").dialog("open");
+    /* //display the box
+  var customAlert = document.getElementById("custom-alert-1");
+  customAlert.style.visibility = 'visible';
+  */
+   //set up a timer to hide it, a.k.a a setTimeout()
+  setTimeout(function() {
+    jQuery("#custom-alert").dialog("close");
+  }, hideTimeout)
+}   
+
+								//format Date input: height!!
+//AddWeight: store and plot data
+jQuery(function() {
+    jQuery("#AddWeight").click(function() {
         //First remove circle selection, if any
         deselectCircle(1);
         if (jQuery(weightSpinner).pcntspinner("isValid") == false) {
           alert("Please insert a correct weight");
           return False;
         }
-        var birthdateYMD = new Date(dateToYMD(getBirthdate()));
-        var weight = jQuery(weightSpinner).pcntspinner( "value" );
-      	//Check if data already exists
-        if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && 
-        		(baby.Data[index].Weight.indexOf(weight) > -1)) { 
-        	alert("This point already exists");
-        	return false;
-        }
+        var index = baby.Name.indexOf(getName()); 
+		    var weight = jQuery(weightSpinner).pcntspinner( "value" );
         var dateDMY = jQuery(datep).val();
+        if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && (baby.Data[index].Weight.indexOf(weight) > -1)) {
+          //alert("The point already exists");
+          //disappearing dialog TODO
+          //customAlert(1000);
+          console.log("inside if, jQuery(#custom-alert).dialog(open);")
+
+customAlert("This point already exists",1800);
+
+          return;
+        }
+  var birthdateYMD = new Date(dateToYMD(getBirthdate()));
         var date = new Date(dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
-        var index = baby.GetIndex(getName());
+        //var index = baby.GetIndex(getName());
+        
         var obj = {
-          	"Date" : jQuery(datep).val(),
+          	"Date" : dateDMY,
           	"Weeks" : days / 7,
           	"Weight" : weight
         };
@@ -438,7 +470,8 @@ function getPlottedGender() {
 }
 function deleteWeight(id){
 	var index = id.split("_").pop();
-	var babyindex = baby.GetIndex(getName());
+	//var babyindex = baby.GetIndex();
+  var babyindex = baby.Name.indexOf(getName());
 	var string = "Weight was "+baby.Data[babyindex].Weight[index]+"Kg on "+baby.Data[babyindex].Date[index]
 	var conf = confirm("Do you really want to remove this point from the data?\n"+string);
 	if (conf){
