@@ -9,44 +9,12 @@
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
     <script type="text/javascript" src="iGrow.js"></script>
+   
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> 
+    <link href="stylesheet.css" rel="stylesheet" type="text/css">
     <style type="text/css">
-    select {
-      width: 120px;
-    }
-      body { font: 13px sans-serif; }
-      rect { fill: #fff; }
-      ul {
-        list-style-type: none;
-        margin: 0.5em 0em 0.5em 0em;
-        width: 100%; }
-      ul li {
-          display: table-cell;
-          vertical-align: middle;
-          margin: 0em;
-          padding: 0em 1em; }
-      .axis { font-size: 1.5em; }
-      .chart {
-        background-color: #F7F2C5;
-        width: 960px;
-        height: 500px; }
-      circle, .line {
-        fill: none;
-        stroke-width: 2px; }
-      circle {
-        fill: white;
-        fill-opacity: 0.2;
-        cursor: move; }
-      circle.selected {
-          fill: #ff7f0e;
-          stroke: #ff7f0e; }
-      circle:hover {
-          fill: #ff7f0e;
-          stroke: #707f0e; }
-      circle.selected:hover {
-          fill: #ff7f0e;
-          stroke: #ff7f0e; }
+   
     </style>
   </head>
   <body>
@@ -82,13 +50,8 @@
 
 <pre>
 TO DO: 
-*) bug: make it work without any baby. Check:
-    populateDropdown(baby.Name);
-    updateMinDate
-    getName returns null, ok but getBirthdate looks for baby
-    Found one place after     //Autocomplete for baby name input. put 
-    if (typeof baby == 'undefined') { return false}
-
+*) bug: does not work with no baby. Check in js before:
+  // add Chart Title
 
   *) Zoom and panning limit. Lens?
 
@@ -98,6 +61,8 @@ TO DO:
 </pre>
 
 <script> //Scripts about the "add a baby" dialog
+var today = new Date();
+var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + today.getMonth()).slice(-2)+"/"+today.getFullYear();
 function updateDataAndGraph(){
     var currentName = getName();
     graph.setPoints();
@@ -119,9 +84,9 @@ jQuery(document).on("change", "#dropdown", function(e) {
 });
 //Create a baby instance, for testing purposes
 var baby = new Baby();
-baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
+/*baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
 baby.AddBaby({"name":"Nijntje", "gender":1, "birthdate": "01/01/2015"});
-
+*/
 //Functions for the dialog
 jQuery(function() {
     jQuery("#dialog").dialog({
@@ -193,8 +158,6 @@ function emptyDropdown(){
   jQuery("#dropdown").empty();
 }
 function populateDropdown(array){
-console.log("populateDropdown array")
-  console.log(array)
   //append children
   jQuery.each(array, function(val, text) {
       jQuery('#dropdown').append(jQuery('<option></option>').val(text).html(text).addClass("dropdownBaby") )
@@ -264,11 +227,15 @@ function getExistingElements(){
 //Get the baby's name from the dropdown
 function getName(){
   var value = jQuery("#dropdown").val();
-  return value;
+  if (value == null) {
+    return "Female baby";
+  }
+  return value
 }
 //Get the baby's gender from the dropdown
 function getGender(){
   var name = getName();
+  if (baby.Gender.length == 0) return 0;
   var index = baby.Name.indexOf(name);
   var gender = baby.Gender[index]
   // solved problem: when I add a baby using the dropdown I get Male/Female, not 1/2.
@@ -282,6 +249,9 @@ function getGender(){
 //Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
 function getBirthdate(){
   var name = jQuery("#dropdown").val();
+  if (name == null) {
+    return todayDMY;
+  }
   var index = baby.Name.indexOf(name);
   return baby.BirthDate[index];
 }
@@ -300,8 +270,9 @@ populateDropdown(baby.Name);
 //Set date picker to today
 if (jQuery("#datep").val() == "") {
 //if (jQuery("#datep").val() == "") {
-  var today = new Date();
+  /*var today = new Date();
   var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + today.getMonth()).slice(-2)+"/"+today.getFullYear()
+  */
   jQuery("#datep").val(todayDMY);
 }
 //Set birthdate picker to yesterday 
@@ -387,13 +358,7 @@ jQuery(function() {
 		    var weight = jQuery(weightSpinner).pcntspinner( "value" );
         var dateDMY = jQuery(datep).val();
         if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && (baby.Data[index].Weight.indexOf(weight) > -1)) {
-          //alert("The point already exists");
-          //disappearing dialog TODO
-          //customAlert(1000);
-          console.log("inside if, jQuery(#custom-alert).dialog(open);")
-
-customAlert("This point already exists",1800);
-
+          customAlert("This point already exists",1800);
           return;
         }
   var birthdateYMD = new Date(dateToYMD(getBirthdate()));
@@ -494,7 +459,7 @@ function deleteWeight(id){
 <script>
 
 
-
+/*
 var DaysForTest = function(babyBirthdate, date){
 	var birthdateYMD = new Date(dateToYMD(baby.BirthDate[babyBirthdate]));
 	var date = new Date(dateToYMD(date));
@@ -508,7 +473,7 @@ baby.Data[0].Append({"Date": "01/08/2015",
 	"Weeks" : DaysForTest(0,"30/08/2015") / 7, "Weight" : 4});
 baby.Data[1].Append({"Date": "10/08/2014", 
 	"Weeks" : DaysForTest(1,"01/08/2015") / 7, "Weight" : 5});
-
+*/
 
 //Start plot
 var weiBoy = [];

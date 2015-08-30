@@ -10,10 +10,16 @@ git config --global core.editor "/usr/bin/vi -w"
 git config credential.helper store
 git config --unset credential.helper
 
+//upload to site
 git add .
-git commit  
-//git push? check status
+git commit
 git push origin master
+
+//upload remote
+git add .
+git commit
+check status
+git push
 
 git status
 git branch experimental
@@ -193,7 +199,8 @@ this.plotLines();
         .style("text-anchor","middle")
         .attr("transform","translate(" + -40 + " " + this.height/2+") rotate(-90)");
   }
-
+console.log("this.chart")
+console.log(this.chart)
   d3.select(this.chart)
       .on("mousemove.drag", self.mousemove())
       .on("touchmove.drag", self.mousemove())
@@ -533,22 +540,26 @@ SimpleGraph.prototype.setTitle = function(){
 SimpleGraph.prototype.setPoints = function(){
   var self = this;
   switch (getGender()) {
+  case 0:
+    this.points = this.options.pointsGirl;
+    break;
   case 1:
     this.points =  this.options.pointsBoy;
-      break;
+    break;
   case 2:
     this.points =  this.options.pointsGirl;
-      break;
+    break;
   default:
-      throw "Error: unrecognized child's gender: " + gender;
+    throw "Error: unrecognized child's gender: " + getGender();
   }
 }
 
 SimpleGraph.prototype.mousemove = function() {
+  console.log("SimpleGraph.prototype.mousemove")
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
-        t = d3.event.changedTouches;
+        t = d3.event.changedTouches;        //problems when empty baby
     
     if (self.dragged) {
       self.dragged.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
