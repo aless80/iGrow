@@ -199,8 +199,6 @@ this.plotLines();
         .style("text-anchor","middle")
         .attr("transform","translate(" + -40 + " " + this.height/2+") rotate(-90)");
   }
-console.log("this.chart")
-console.log(this.chart)
   d3.select(this.chart)
       .on("mousemove.drag", self.mousemove())
       .on("touchmove.drag", self.mousemove())
@@ -216,6 +214,8 @@ console.log(this.chart)
 //
 SimpleGraph.prototype.plotNSigmaLine = function(n, gender){
   var self = this;
+  //Choose Female if no babies are defined
+  if (gender == 0) {gender = 2}
   self.line = d3.svg.line()
     .x(function(d, i) { 
       return this.x(this.points[i].age); })
@@ -276,7 +276,6 @@ SimpleGraph.prototype.update = function() {
   //So I remove and replot the lines:
   this.removePathsInSVG();
   this.plotLines(); //is this really needed? there it recreates all lines.
-
   var circle = this.vis.select("svg").selectAll("circle")
       .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
       .style("stroke","blue");
@@ -462,7 +461,6 @@ console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
         .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
         .on("mousedown.drag",  self.xaxis_drag())
         .on("touchstart.drag", self.xaxis_drag());
-
     gx.exit().remove();
 
     
@@ -472,9 +470,6 @@ console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
     	elem.text(elem.text().replace(",",""))
     	});    
 
-    
-    
-    
     // Regenerate y-ticks…
     var gy = self.vis.selectAll("g.y")
         .data(self.y.ticks(10), String)
@@ -513,7 +508,6 @@ console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
     //zoom limit does not work in this version?
     //.yExtent([-1500,1500])
     //.scaleExtent([0.1, 10])
-
     self.update();
   }  
 }
@@ -524,6 +518,12 @@ SimpleGraph.prototype.removePathsInSVG = function() {
 
 SimpleGraph.prototype.setCurrrentDataWeight = function(){
   var index = baby.GetIndex(getName());
+  //Plot males when no baby is defined
+  if (index == -1) {
+    index = 0;
+    this.dataWeight = new Data();
+    return;
+  }   
   this.dataWeight = baby.Data[index];
 }
 
@@ -555,7 +555,6 @@ SimpleGraph.prototype.setPoints = function(){
 }
 
 SimpleGraph.prototype.mousemove = function() {
-  console.log("SimpleGraph.prototype.mousemove")
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
