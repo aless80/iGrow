@@ -557,8 +557,7 @@ SimpleGraph.prototype.mousemove = function() {
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
-        t = d3.event.changedTouches;
-    
+        t = d3.event.changedTouches;    
     if (self.dragged) {
       self.dragged.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
       self.update();
