@@ -139,7 +139,7 @@ SimpleGraph = function(elemid, options) {
       .attr("width",  this.cx)
       .attr("height", this.cy)
       .append("g")
-      .attr("class", "svg1")
+      .attr("class", "g_svg1")
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
 
   this.rect = this.vis.append("rect")
@@ -441,7 +441,7 @@ console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
     gx.select("text")
         .text(fx);
 
-    var gxe = gx.enter().insert("g", ".svg2")   //Inserts a new element with the specified name before the element matching the specified before selector,
+    var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
         .attr("class", "x")
         .attr("transform", tx);
     //Vertical grid
@@ -478,7 +478,7 @@ console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
     gy.select("text")
         .text(fy);
 
-    var gye = gy.enter().insert("g", ".svg2")
+    var gye = gy.enter().insert("g", ".svg")
         .attr("class", "y")
         .attr("transform", ty)
         .attr("background-fill", "#FFEEB6");
@@ -557,7 +557,7 @@ SimpleGraph.prototype.mousemove = function() {
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
-        t = d3.event.changedTouches;        //problems when empty baby
+        t = d3.event.changedTouches;
     
     if (self.dragged) {
       self.dragged.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
