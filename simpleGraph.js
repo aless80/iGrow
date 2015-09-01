@@ -18,18 +18,20 @@ git push origin master
 //upload remote
 git add .
 git commit
-git status
+check status
 git push
 
-//Branch
+//branches
 git status
-git branch zoom
-git remote add zoom https://github.com/aless80/iGrow
-git push origin zoom
-git push origin --delete <branchName>
+git branch experimental
+git remote add master https://github.com/aless80/iGrow
+git push origin --delete <branchToDelete>
+git checkout zoom
 
 //Clone
+git checkout zoom
 git clone https://github.com/aless80/iGrow
+*/
 */
 //Baby class
 Baby = function(data){  
