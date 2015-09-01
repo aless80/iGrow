@@ -1,3 +1,4 @@
+
 ///http://bl.ocks.org/stepheneb/1182434
 registerKeyboardHandler = function(callback) {
   var callback = callback;
@@ -32,7 +33,7 @@ git checkout zoom
 git checkout zoom
 git clone https://github.com/aless80/iGrow
 */
-*/
+
 //Baby class
 Baby = function(data){  
     this.Name = new Array();
