@@ -25,7 +25,7 @@ git push
 //branches
 git status
 git branch zoom
-git remote add master https://github.com/aless80/iGrow
+git remote add zoom https://github.com/aless80/iGrow
 git push origin --delete <branchToDelete>
 git checkout zoom
 
