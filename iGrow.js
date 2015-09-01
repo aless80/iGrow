@@ -1,701 +1,483 @@
-///http://bl.ocks.org/stepheneb/1182434
-registerKeyboardHandler = function(callback) {
-  var callback = callback;
-  d3.select(window).on("keydown", callback);  
-};
-
-/* git
-git config --global user.name "Alessandro"
-git config --global core.editor "/usr/bin/vi -w"
-git config credential.helper store
-git config --unset credential.helper
-
-//upload to site
-git add .
-git commit
-git push origin master
-
-//upload remote
-git add .
-git commit
-check status
-git push
-
-git status
-git branch experimental
-git remote add master https://github.com/aless80/iGrow
-git clone https://github.com/aless80/iGrow
+//Scripts about the "add a baby" dialog
+var today = new Date();
+var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + today.getMonth()).slice(-2)+"/"+today.getFullYear();
+function updateDataAndGraph(){
+    var currentName = getName();
+    graph.setPoints();
+    graph.setCurrrentDataWeight();
+    graph.title = currentName;
+    graph.redraw();
+    graph.update();
+    graph.setTitle();
+}
+//Track baby selected in dropdown
+jQuery(document).on("change", "#dropdown", function(e) {
+    //deselect any possible circle
+    deselectCircle(1);
+    //Update the lines, circles, title
+    var currentName = this.options[e.target.selectedIndex].text;
+    updateDataAndGraph();
+    //Update the minDate in date picker
+    updateMinDate("#datep");
+});
+//Create a baby instance, for testing purposes
+var baby = new Baby();
+/*baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
+baby.AddBaby({"name":"Nijntje", "gender":1, "birthdate": "01/01/2015"});
 */
-//Baby class
-Baby = function(data){  
-    this.Name = new Array();
-    this.BirthDate = new Array();
-    this.Gender = new Array();
-    this.Data = new Array();
-}
-Baby.prototype.AddBaby = function(obj){
-      this.Name.push(obj.name);
-      this.BirthDate.push(obj.birthdate);
-      //This conversion  not needed, but this would prevent bugs
-      var gender = obj.gender;
-      if (gender == "Female") {
-        gender = 2;
-      } else if (gender == "Male") {
-        gender = 1;
-      }
-      this.Gender.push(gender);
-      this.Data.push(new Data);
-};
-Baby.prototype.RemoveBabyByName = function(name){
-      var index = this.Name.indexOf(name);
-      if (index > -1) {
-        this.Name.splice(index, 1);
-        this.BirthDate.splice(index, 1);
-        this.Data.splice(index, 1);
-        this.Gender.splice(index, 1);
-        return true;
-      } else {
-        return false;
-      }
-};
-//From the name, get the index of the current baby in the baby instance 
-Baby.prototype.GetIndex = function(name){
-  return baby.Name.indexOf(name);
-}
-
-//Data class
-Data = function(data){  
-    this.Date = new Array();
-    this.Weeks = new Array();
-    this.Weight = new Array();
-}
-Data.prototype.Append = function(obj){
-      this.Date.push(obj.Date);
-      this.Weeks.push(obj.Weeks);
-      this.Weight.push(obj.Weight);
-};
-
-
-
-SimpleGraph = function(elemid, options) {
-  var self = this;
-  this.selectCircle = null;
-  
-  this.setCurrrentDataWeight();
-  
-
-
-  this.chart = document.getElementById(elemid);
-  this.cx = this.chart.clientWidth;
-  this.cy = this.chart.clientHeight;
-  this.options = options || {};
-
-  this.title = getName();
-
-  this.setPoints();
-
-  var xrange=d3.extent(this.points, function(d) {  return d.age; });
-  var yrange=[d3.min(this.points, function(d) { return Math.floor(d.m - 3 * d.s); }), 
-              d3.max(this.points, function(d) { return Math.ceil(d.m); }) ];
-
-  this.options.xmax = options.xmax || xrange[1];
-  this.options.xmin = options.xmin || xrange[0];
-  this.options.ymax = options.ymax || yrange[1];
-  this.options.ymin = options.ymin || yrange[0];
-
-  this.padding = {
-     "top":    this.title  ? 42 : 20,
-     "right":                 30,
-     "bottom": this.options.xlabel ? 63 : 10,
-     "left":   this.options.ylabel ? 70 : 45
-  };
-
-  this.width = this.cx - this.padding.left - this.padding.right;
-  this.height = this.cy - this.padding.top  - this.padding.bottom;
-
-  // x-scale
-  this.x = d3.scale.linear()
-      .domain([this.options.xmin, this.options.xmax])
-      .range([0, this.width]);
-
-  // drag x-axis logic
-  this.downx = Math.NaN;
-
-  // y-scale (inverted domain)
-  this.y = d3.scale.linear()
-      .domain([this.options.ymax, this.options.ymin])
-      .nice()
-      .range([0, this.height])
-      .nice();
-
-  // drag y-axis logic
-  this.downy = Math.NaN;
-
-  this.dragged = this.selected = null;
-
-
-//this.vis
-  this.vis = d3.select(this.chart).append("svg") 
-      .attr("width",  this.cx)
-      .attr("height", this.cy)
-      .append("g")
-      .attr("class", "g_svg1")
-        .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
-
-  this.rect = this.vis.append("rect")
-      .attr("width", this.width)
-      .attr("height", this.height)
-      .style("fill", "#EEEEEE")
-      .attr("pointer-events", "all")
-      //.on("mousedown.drag", self.plot_drag())
-      //.on("touchstart.drag", self.plot_drag())
-      .on("mousedown", function(d){
-        if (self.selectCircle != null) {
-          //selectCircle.r = 6;  //NB: does not work. use setAttribute for attributes:
-          deselectCircle(1);
-          self.update(); //update so that circles get their normal color. not able to selectAll circle??
+//Functions for the dialog
+jQuery(function() {
+    jQuery("#dialog").dialog({
+      autoOpen: false,
+      show: { effect: "blind", duration: 500 },
+      hide: { effect: "blind", duration: 500 },
+      buttons: {
+        "Add baby" : {
+        	text : "Add baby",
+        	id : "dialog_AddBaby",
+        	click : function() {
+          		addToDropdown();
+              enableSelection();
+          		jQuery( this ).dialog("close");          
+        	}
+        },
+        Cancel: function() {
+            jQuery( this ).dialog("close");
+          },
+        "Delete this baby" : {
+        	text : "Delete this baby",
+        	disabled : true,
+        	id : "dialog_DelBaby",
+        	click : function() {
+          var text = jQuery("#inputfordropdown").val();
+          removeBaby(text);
+          jQuery( this ).dialog("close");
         }
+      }        
+      }
+    });
+    //Fire up the dialog 
+    jQuery("#editBabyButton").click(function() {
+      jQuery("#dialog").dialog("open");
+    });    
+    //Autocomplete for baby name input
+    jQuery(function() {
+        var names = baby.Name.toString().split(",");
+        jQuery("#inputfordropdown").autocomplete({
+          source: names
+        }); //testing SVC git
       });
-      console.log("zoom1")
-  this.rect.call(d3.behavior.zoom().x(this.x).y(this.y).on("zoom", this.redraw()));
-
-  this.svg = this.vis.append("svg")
-      .attr("top", 0)
-      .attr("left", 0)
-      .attr("width", this.width)
-      .attr("height", this.height)
-      .attr("viewBox", "0 0 "+this.width+" "+this.height)
-      .attr("class", "svg");
-
-this.plotLines();
-
-  // add Chart Title
-  if (this.title) {
-    this.vis.append("text")
-        .attr("class", "axis")
-        .attr("id","title")
-        .text(this.title)
-        .attr("x", this.width/2)
-        .attr("dy","-0.8em")
-        .style("text-anchor","middle");
+    //Behavior when dropdown changes
+    jQuery(document).on("change", "#inputfordropdown", function(e) {
+    	var names = baby.Name.toString().split(",");
+    	var text = jQuery("#inputfordropdown").val();
+    	if (names.indexOf(text) > -1) {
+    		//Load the birthdate and gender
+    		var ind = baby.Name.indexOf(text);
+    		jQuery("#birthdatep").val(baby.BirthDate[ind]);
+    		var gender = (baby.Gender[ind] == 1 ? "Male" : "Female");
+    		jQuery("#genderinput").val(gender);
+    		//Disable birthdatep and genderinput
+    		document.getElementById('birthdatep').disabled = true;
+    		document.getElementById('genderinput').disabled = true;    		
+    		//"enable Delete this baby"
+    		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("enable");
+    	} else {
+    		//enable birthdatep 
+    		document.getElementById('birthdatep').disabled = false;
+    		document.getElementById('genderinput').disabled = false;    
+    		//"disable Delete this baby"
+    		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
+    	}
+    });    
+});
+//Helper functions related to the dialog
+function emptyDropdown(){
+  //empty() removes all child nodes
+  jQuery("#dropdown").empty();
+}
+function populateDropdown(array){
+  //append children
+  jQuery.each(array, function(val, text) {
+      jQuery('#dropdown').append(jQuery('<option></option>').val(text).html(text).addClass("dropdownBaby") )
+    });
+}
+function removeBaby(name){
+  var success = baby.RemoveBabyByName(name);
+  if (success == false) {
+    alert(name+" was not found");
+  } else {
+    var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
+    if (conf){
+      emptyDropdown();
+      if (baby.Name.length > 0) {
+        populateDropdown(baby.Name);
+        //enable Selections
+        enableSelection(true);
+      } else {
+        //disable Selections if baby is empty
+        enableSelection(false);
+      }
+    }
   }
-
-  // Add the x-axis label
-  if (this.options.xlabel) {
-    this.vis.append("text")
-        .attr("class", "axis")
-        .text(this.options.xlabel)
-        .attr("x", this.width/2)
-        .attr("y", this.height)
-        .attr("dy","2.4em")
-        .style("text-anchor","middle");
+}
+function areInputsValid(prompt){
+  var text = jQuery("#inputfordropdown").val();
+  //We will check whether the name in "text" is already present in the baby instance
+  var existing = getExistingElements();
+  var message = "";
+  if (existing.indexOf(text) > -1) {
+    message = "This name already exists";
   }
-
-  // add y-axis label
-  if (this.options.ylabel) {
-    this.vis.append("g").append("text")
-        .attr("class", "axis")
-        .text(this.options.ylabel)
-        .style("text-anchor","middle")
-        .attr("transform","translate(" + -40 + " " + this.height/2+") rotate(-90)");
+  else if (text == "") {
+    message = "The name cannot be empty"; 
   }
-  d3.select(this.chart)
-      .on("mousemove.drag", self.mousemove())
-      .on("touchmove.drag", self.mousemove())
-      .on("mouseup.drag",   self.mouseup())
-      .on("touchend.drag",  self.mouseup());
-
-  this.redraw()();
-};
-
-
-//
-// SimpleGraph methods
-//
-SimpleGraph.prototype.plotNSigmaLine = function(n, gender){
-  var self = this;
-  //Choose Female if no babies are defined
-  if (gender == 0) {gender = 2}
-  self.line = d3.svg.line()
-    .x(function(d, i) { 
-      return this.x(this.points[i].age); })
-    .y(function(d, i) { 
-      return this.y(this.points[i].m + n * this.points[i].s); })
-    .interpolate("linear");
-
-  self.area = d3.svg.area()
-    .x(function(d, i) {
-      return this.x(this.points[i].age); })
-    .y1(function(d, i) { 
-      var Y = ((n > 0) ? (this.points[i].m + n * this.points[i].s) : (this.points[i].m));
-      return this.y(Y);})
-    .y0(function(d, i) { 
-      var Y = ((n > 0) ? (this.points[i].m) : (this.points[i].m + n * this.points[i].s));
-      return this.y(Y); })
-
-    var color = {"1":"cyan", "2":"magenta"};
-    var weiGender = {"1":weiBoy, "2":weiGirl};
-
-    self.svg.append("path")
-      .attr("class", "line")
-      .attr("id" , gender+"_"+n+"sigma")
-      //.classed("pathArea", true)
-      .attr("d", this.line(weiGender[gender]))
-      .style("stroke" , color[gender])
-      .style("stroke-width" , (n==0 ? 2 : 1))
-      .style("fill" , "none");
-
-  if (n > -3 && n < 3 && n != 0) {
-    self.svg.append("path")
-    .attr("class", "line")
-    .attr("id" ,"area_"+n)    
-    .attr("d" , this.area(weiGender[gender]))
-    .style("opacity" ,1 - Math.abs(n/3))
-    .style("fill" , color[gender]);
+  else if (text == "Name") {
+    message = "Please select a name for your child"; 
+  }
+  //Check if the gender was selected
+  else if (jQuery("#genderinput").val() === null) {
+    message = "Please select a gender for your child";
+  }
+  //Check if the birthdate was selected
+  else if (jQuery("#birthdatep").val() == "Birthdate") {
+    message = "Please select a birthdate for your child";
+  }
+  //Prompt the problem
+  if (message !== "") {
+    if (prompt) {
+      //customAlert(message,3000); //too bad, customAlert is asynchronous and the dialog disappears
+      alert(message);
+    }
+    return false;
+  }
+  return true;
+}
+//Add all existing babies to the dropdown 
+function addToDropdown(){
+  if (areInputsValid(true)){
+    var text = jQuery("#inputfordropdown").val();  
+    var gender = jQuery("#genderinput").val();
+    if (gender == "Female") {
+      gender = 2;
+    } else if (gender == "Male") {
+      gender = 1;
+    }
+    var birthdate = jQuery("#birthdatep").val();
+    //Add to baby instance
+    baby.AddBaby({"name": text, "birthdate": birthdate, "gender": gender})
+    //Switch dropdown in UI to new baby 
+    emptyDropdown();
+    populateDropdown(baby.Name);
+    jQuery("select option[value='"+text+"']").attr("selected","selected");
+    //Replot
+    updateDataAndGraph();
+    //Update minDate in #datep
+    updateMinDate("#datep");
+    
+    //toggleSelection();///////////////check to do
   } 
 }
-
-SimpleGraph.prototype.plotLines = function() {
-  var self = this;
-  var gender = getGender();
-  this.plotNSigmaLine(0, gender);
-  this.plotNSigmaLine(0.674, gender);
-  this.plotNSigmaLine(-0.674, gender);
-  this.plotNSigmaLine(3, gender);
-  this.plotNSigmaLine(-3, gender);
-  this.plotNSigmaLine(2, gender);
-  this.plotNSigmaLine(-2, gender);  
-}
-
-//Update the lines and the circles
-SimpleGraph.prototype.update = function() {
-  var self = this;
-  //var lines = this.vis.select("path").attr("d", this.line(this.points));
-  //This line with selectAll messes up the area plot because  it puts the line data to this.points for all lines
-  //var lines = this.vis.selectAll("path").attr("d", this.line(this.points));
-  //So I remove and replot the lines:
-  this.removePathsInSVG();
-  this.plotLines(); //is this really needed? there it recreates all lines.
-  var circle = this.vis.select("svg").selectAll("circle")
-      .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
-      .style("stroke","blue");
-
-  //Define tooltips
-  var tooltip = d3.select("body").append("div")   
-    .attr("class", "tooltip")               
-    .style("opacity", 0)
-    .style("position", "absolute");
-
-  circle.enter().append("circle")
-      .attr("id", function(d, i){ return "circle_"+i;})
-      .attr("class", function(d) {
-        return d === self.selected ? "selected" : null; })
-      .attr("cx", function(d) { return self.x(d[0]); })
-      .attr("cy", function(d) { return self.y(d[1]); })
-      .attr("r", 6.0)
-      .style("stroke","blue")
-      .style("cursor", "ns-resize")
-      //.on("mousedown.drag",  self.datapoint_drag())
-      //.on("touchstart.drag", self.datapoint_drag())
-      .on("mousedown", function(d){
-          if (self.selectCircle != null) {
-            //recolor/delect the previous circle
-            self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;"
-            deselectCircle(0)
-          }
-          //set selectCircle and color the circle so that it can be removed        
-          self.selectCircle = this;
-          document.getElementById('DeleteMeasure').disabled = false;
-          d3.select(this)
-              .style("stroke","red")
-              .attr("r",8)
-              .style("fill","orange");
-        })
-      .on("mouseover", function(d){
-          //show tooltip
-          d3.select(this)
-              .style("fill","blue");
-          tooltip.transition()
-              .duration(200) 
-              .style("opacity", .9);
-          tooltip.html(function(){
-              //Show the date
-              var ind = graph.dataWeight.Weeks.indexOf(d[0])
-              var date = graph.dataWeight.Date[ind];
-              var string = "Date: " + date + "<br/>Age: ";
-              //Show the age
-              if (d[0] < 3) {
-            	  string = string.concat(d[0] * 7 + " weeks");
-              } else if (d[0] < 20) {
-	              //var weeks = Math.floor(d[0]);
-	              string = string.concat(Math.floor(d[0]) + " weeks");
-	              //skip days.. var days = (d[0] * 7) - (weeks * 7);	              
-              } else {
-  //          	  var dateD = DMYToDate(date);
-  //          	  var birthdateD = DMYToDate(getBirthdate());
-            	  
-            	  var birthdate = getBirthdate();
-            	  
-            	  var monthsBDate = birthdate .substring(3,5);
-            	  var monthsDate = date.substring(3,5)
-            	  
-            	  var months = monthsDate - monthsBDate
-            	  
-            	  string = string.concat(months + " months");
-            	  //string = string.concat(" and " + weeks + " weeks");
-              }
-              //Show the weight
-              return string.concat("<br/>Weight: "  + d[1] + "Kg");
-          })
-          .style("left", (d3.event.pageX) + "px")     
-          .style("top", (d3.event.pageY - 28) + "px");
-      })
-      .on("mousemove", function(){
-          tooltip.style("top",(d3.event.pageY-10)+"px")
-                  .style("left",(d3.event.pageX+20)+"px");
-          })
-      .on("mouseout", function(d){
-          //reset current object
-          //currentObject = null;
-          //tooltip fades away
-          d3.select(this)
-              .style("fill","none");
-          tooltip.transition()
-              .duration(500)
-              .style("opacity", 0);
-      });
-
-  circle
-      .attr("class", function(d) { return d === self.selected ? "selected" : null; })
-      .attr("cx", function(d) { return self.x(d[0]); })
-      .attr("cy", function(d) { return self.y(d[1]); });
-
-  circle.exit().remove();
-
-
-//var vis = this.vis;
-d3.select("body")
-  .on("keydown", function() {
-    //exit if you have no circle selected
-    if (self.selectCircle == null) {
-      return false;
-    }
-    //Catch keys delete and backspace
-    //console.log("d3.event.keyCode="+d3.event.keyCode)
-    if ((d3.event.keyCode == 46) || (d3.event.keyCode == 8)) { //Delete or Backspace
-      var del = deleteWeight(self.selectCircle.id);
-      if (del) {
-        deselectCircle(1);
-      }
-      self.update();
-      tooltip.transition()
-              .duration(500)
-              .style("opacity", 0);
-    }
+function getExistingElements(){
+  var elem = new Array();
+  jQuery(".dropdownBaby").each(
+    function(index) { 
+      elem.push(jQuery( this ).text());
   });
-
-  if (d3.event && d3.event.keyCode) {
-    //The default action of the event will not be triggered:
-    d3.event.preventDefault();  //cancels
-    //Prevent the event from bubbling up the DOM tree, preventing any parent handlers from being notified of the event
-    d3.event.stopPropagation(); 
+    return elem;
+}
+//Get the baby's name from the dropdown
+function getName(){
+  var value = jQuery("#dropdown").val();
+  if (value == null) {
+    return "Female baby";
   }
+  return value
 }
-
-//Redraws the axes
-SimpleGraph.prototype.redraw = function() {
-  var self = this;
-  return function() {
-  //self.x.domain([Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)]);
-  //self.y.domain([Math.max(self.y.domain()[0], self.options.ymin), Math.min(self.y.domain()[1], self.options.ymax)]);
-    var tx = function(d) { 
-      return "translate(" + self.x(d) + ",0)"; 
-    },
-    ty = function(d) { 
-      return "translate(0," + self.y(d) + ")";
-    },
-    stroke = function(d) { 
-      return d ? "#ccc" : "#666"; 
-    },
-    fx = self.x.tickFormat(10),
-    //fx = self.x.tickFormat(d3.format("f2")),  //does not work
-    fy = self.y.tickFormat(10);
-
-    // Regenerate x-ticks…
-
-/*<g transform="translate(258,0)" class="x">
-  <line y2="395" y1="0" stroke="#ccc"></line>
-  <text style="cursor: ew-resize;" text-anchor="middle" dy="1em" y="395" class="axis">300</text>
-</g>*/
-
-/*d3.select(this.parentNode)
-temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
-
-temp = d3.select("svg2"); temp.select(function() { return this.parentNode; })
-
-    var gx = self.vis.selectAll("g.x")
-    //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
-        .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
-        .attr("transform", tx);
-console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
-    gx.select("text")
-        .text(fx);
-
-    var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
-        .attr("class", "x")
-        .attr("transform", tx);
-    //Vertical grid
-    gxe.append("line")
-        .attr("stroke", stroke)
-        .attr("y1", 0)
-        .attr("y2", self.height);
-
-    gxe.append("text")
-        .attr("class", "axis label")
-        .attr("y", self.height)
-        .attr("dy", "1em")
-        .attr("text-anchor", "middle")
-        .text(fx) 
-        .style("cursor", "ew-resize")
-        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-        .on("mousedown.drag",  self.xaxis_drag())
-        .on("touchstart.drag", self.xaxis_drag());
-    gx.exit().remove();
-
-    
-    //Change comma to dot: but have to change "axis" from title and axis labels
-    jQuery(".axis.label").each(function( index ) { 
-    	var elem = jQuery(this);
-    	elem.text(elem.text().replace(",",""))
-    	});    
-
-    // Regenerate y-ticks…
-    var gy = self.vis.selectAll("g.y")
-        .data(self.y.ticks(10), String)
-        .attr("transform", ty);
-
-    gy.select("text")
-        .text(fy);
-
-    var gye = gy.enter().insert("g", ".svg")
-        .attr("class", "y")
-        .attr("transform", ty)
-        .attr("background-fill", "#FFEEB6");
-
-    gye.append("line")
-        .attr("stroke", stroke)
-        .attr("x1", 0)
-        .attr("x2", self.width);
-
-    gye.append("text")
-        .attr("class", "axis label")
-        .attr("x", -3)
-        .attr("dy", ".35em")
-        .attr("text-anchor", "end")
-        .text(fy)
-        .style("cursor", "ns-resize")
-        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-        .on("mousedown.drag",  self.yaxis_drag())
-        .on("touchstart.drag", self.yaxis_drag());
-
-    gy.exit().remove();
-    //This zoom is call after the plot has loaded
-    self.rect.call(d3.behavior.zoom().x(self.x).y(self.y).on("zoom", self.redraw()));
-        // .scaleExtent([1, 2]) does not work anymore? mean scale between x1 and x2
-//http://bl.ocks.org/shawnbot/6518285
-    //zoom limit does not work in this version?
-    //.yExtent([-1500,1500])
-    //.scaleExtent([0.1, 10])
-    self.update();
-  }  
-}
-
-SimpleGraph.prototype.removePathsInSVG = function() {
-  d3.selectAll(".line").remove(); 
-}
-
-SimpleGraph.prototype.setCurrrentDataWeight = function(){
-  var index = baby.GetIndex(getName());
-  //Plot males when no baby is defined
-  if (index == -1) {
-    this.dataWeight = new Data();
-    return;
-  }   
-  this.dataWeight = baby.Data[index];
-}
-
-SimpleGraph.prototype.setTitle = function(){
-  // write the Chart Title
-  var self = this;
-  if (this.title) {
-    d3.select("#title")
-        .text(this.title);
-   }
-}
-
-//set this.Points containing the data for the lines according to the current gender
-SimpleGraph.prototype.setPoints = function(){
-  var self = this;
-  switch (getGender()) {
-  case 0:
-    this.points = this.options.pointsGirl;
-    break;
-  case 1:
-    this.points =  this.options.pointsBoy;
-    break;
-  case 2:
-    this.points =  this.options.pointsGirl;
-    break;
-  default:
-    throw "Error: unrecognized child's gender: " + getGender();
+//Get the baby's gender from the dropdown
+function getGender(){
+  var name = getName();
+  if (baby.Gender.length == 0) return 0;
+  var index = baby.Name.indexOf(name);
+  var gender = baby.Gender[index]
+  // solved problem: when I add a baby using the dropdown I get Male/Female, not 1/2.
+  if (gender == "Female") {
+    gender = 2;
+  } else if (gender == "Male") {
+    gender = 1
   }
+  return gender;
 }
+//Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
+function getBirthdate(){
+  var name = jQuery("#dropdown").val();
+  if (name == null) {
+    return todayDMY;
+  }
+  var index = baby.Name.indexOf(name);
+  return baby.BirthDate[index];
+}
+//Update minDate for e.g. #datep
+function updateMinDate(selector){
+    var birthdateDMY = getBirthdate().split("/");
+    jQuery(selector).datepicker("option", "minDate", new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0]) );
+}
+//At startup populate the dropdown menu
+populateDropdown(baby.Name);
 
-SimpleGraph.prototype.mousemove = function() {
-  var self = this;
-  return function() {
-    var p = d3.mouse(self.vis[0][0]),
-        t = d3.event.changedTouches;    
-    if (self.dragged) {
-      self.dragged.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
-      self.update();
-    };
-    if (!isNaN(self.downx)) {
-      d3.select('body').style("cursor", "ew-resize");
-      var rupx = self.x.invert(p[0]),
-          xaxis1 = self.x.domain()[0],
-          xaxis2 = self.x.domain()[1],
-          xextent = xaxis2 - xaxis1;
-      if (rupx != 0) {
-        var changex, new_domain;
-        changex = self.downx / rupx;
-        new_domain = [xaxis1, xaxis1 + (xextent * changex)];
-        self.x.domain(new_domain);
-        self.redraw()();
-      }
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    };
-    if (!isNaN(self.downy)) {
-      d3.select('body').style("cursor", "ns-resize");
-      var rupy = self.y.invert(p[1]),
-          yaxis1 = self.y.domain()[1],
-          yaxis2 = self.y.domain()[0],
-          yextent = yaxis2 - yaxis1;
-      if (rupy != 0) {
-        var changey, new_domain;
-        changey = self.downy / rupy;
-        new_domain = [yaxis1 + (yextent * changey), yaxis1];
-        self.y.domain(new_domain);
-        self.redraw()();
-      }
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
+
+
+
+
+//Scripts about adding and plotting the data
+//disable weight spinner, date and add weight button  
+enableSelection();
+//Set date picker to today
+if (jQuery("#datep").val() == "") {
+  jQuery("#datep").val(todayDMY);
+}
+//Set birthdate picker to yesterday 
+if (jQuery("#birthdatep").val() == "") {
+  var yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  var yesterdayDMY = ("00" + yesterday.getDate()).slice(-2)+"/"+("00" + yesterday.getMonth()).slice(-2)+"/"+yesterday.getFullYear()
+  jQuery("#birthdatep").val(yesterdayDMY);
+}
+//Define behaviour of date pickers and spinner
+var birthdateDMY = getBirthdate().split("/");
+jQuery(function() {   
+  jQuery("#datep").datepicker({
+    minDate: (new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0])),
+    maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
+  });
+  jQuery("#birthdatep").datepicker({
+    maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
+  });
+jQuery.widget( "ui.pcntspinner", jQuery.ui.spinner, {
+    _format: function( value ) { 
+        var suffix = this.options.suffix;
+        return value +" "+ suffix; 
+    },    
+    _parse: function(value) { return parseFloat(value); }
+});
+jQuery("#weightSpinner").pcntspinner({ 
+    min: 1,
+    suffix:'Kg',
+    max: 100,
+    step: .1
+    //disabled: true
+    });
+
+});
+
+//Custom alert
+jQuery(function() {
+    jQuery("#custom-alert").dialog({
+      id: "custom",
+      buttons: {
+        "Close" : {
+        	text : "Close",
+        	id : "dialog_AddBaby",
+        	click : function() {       
+          		jQuery( this ).dialog("close");          
+        	}
+        }
+      },
+      text: "",
+      autoOpen: false,
+      width:'auto',
+      position: { my: 'top', at: 'top+350' },
+      show: { effect: "fade", duration: 600 },
+      hide: { effect: "fade", duration: 1200 }
+    });
+});
+function customAlert(meassage,hideTimeout) {
+   jQuery("#custom-alert").text(meassage);
+   jQuery("#custom-alert").dialog("open");
+    /* //display the box
+  var customAlert = document.getElementById("custom-alert-1");
+  customAlert.style.visibility = 'visible';
+  */
+   //set up a timer to hide it, a.k.a a setTimeout()
+  setTimeout(function() {
+    jQuery("#custom-alert").dialog("close");
+    return true;
+  }, hideTimeout)
+}   
+
+								//format Date input: height!!
+//AddWeight: store and plot data
+jQuery(function() {
+    jQuery("#AddWeight").click(function() {
+        //First remove circle selection, if any
+        deselectCircle(1);
+        if (jQuery(weightSpinner).pcntspinner("isValid") == false) {
+          alert("Please insert a correct weight");
+          return False;
+        }
+        var index = baby.Name.indexOf(getName()); 
+		    var weight = jQuery(weightSpinner).pcntspinner( "value" );
+        var dateDMY = jQuery(datep).val();
+        if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && (baby.Data[index].Weight.indexOf(weight) > -1)) {
+          customAlert("This point already exists",1800);
+          return;
+        }
+        var birthdateYMD = new Date(dateToYMD(getBirthdate()));
+        var date = new Date(dateToYMD(dateDMY));
+        var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
+        //var index = baby.GetIndex(getName());
+        
+        var obj = {
+          	"Date" : dateDMY,
+          	"Weeks" : days / 7,
+          	"Weight" : weight
+        };
+        //Append data to baby
+        baby.Data[index].Append(obj);
+        //Remove plotted lines only if user has changed the child's gender      
+        if (getGender() != getPlottedGender()) {
+          graph.removePathsInSVG();
+          graph.plotLines();
+        }
+        graph.update();
+        return true;
+        });    
+      //jQuery("button").button();  format for buttons?
+ });
+//Delete point button
+jQuery(function() {
+    jQuery("#DeleteMeasure").click(function() {
+      	var deleted = deleteWeight(graph.selectCircle.id);
+      	if (deleted) {
+        	deselectCircle(1);
+        	graph.update();
+        	return true;
+      	}
+    return false;
+    })
+});
+
+///Helper functions
+////////////////// to do
+function enableSelection(enable) {
+  if (typeof enable == "undefined") {
+    console.log("enable is undefined");
+    (baby.Name.length > 0) ? enable = true : enable = false;  
+    console.log("enableSelection(" + enable + ")");
+  }
+  
+  //Toggle the weight spinner 
+  var spinner = jQuery( "#weightSpinner" ).spinner();
+  var datep = jQuery( "#datep" ).datepicker();
+  if (enable) {
+    spinner.spinner( "enable" );
+    jQuery( "#datep" ).datepicker( "option", "disabled", false);
+    jQuery('#AddWeight').prop('disabled', false);  
+  } else {
+    spinner.spinner( "disable" );
+    jQuery( "#datep" ).datepicker( "option", "disabled", true);
+    jQuery('#AddWeight').prop('disabled', true);
+  }
+  //NB: "#DeleteMeasure" should be all set
+}
+ function deselectCircle(nullify) {
+    if (graph.selectCircle) {
+        document.getElementById(graph.selectCircle.id).setAttribute("r",6);
+        if (nullify) {
+          graph.selectCircle = null;
+          document.getElementById('DeleteMeasure').disabled = true;
+        }
     }
-  }
-};
+}
+//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+function dateToYMD(dmy) {
+  return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
+ };
+//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+function DMYToDate(dmy) {
+	return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
+  };
 
-SimpleGraph.prototype.mouseup = function() {
-  var self = this;
-  return function() {
-    document.onselectstart = function() { return true; };
-    d3.select('body').style("cursor", "auto");
-    d3.select('body').style("cursor", "auto");
-    if (!isNaN(self.downx)) {
-      self.redraw()();
-      self.downx = Math.NaN;
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    };
-    if (!isNaN(self.downy)) {
-      self.redraw()();
-      self.downy = Math.NaN;
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    }
-    if (self.dragged) { 
-      self.dragged = null 
-    }
+//Clear the graph from lines
+function removePathsInSVG() {
+   //d3.select("svg").selectAll("*").remove(); //all children
+   d3.selectAll(".pathArea").remove(); //
   }
+//Get the currently plotted gender: 1,2,-1 for male/female/unknown
+function getPlottedGender() {
+  var stroke = jQuery('[id*="sigma"]').css("stroke");
+  if (stroke == "rgb(0, 255, 255)") {
+    return 1; 
+  } else if (stroke == "rgb(255, 0, 255)") {
+    return 2;
+  } else {
+    throw "getPlottedGender: cannot determine the plotted gender. color in style>stroke not recognized";
+    return -1;
+  } 
+}
+function deleteWeight(id){
+	var index = id.split("_").pop();
+	//var babyindex = baby.GetIndex();
+  var babyindex = baby.Name.indexOf(getName());
+	var string = "Weight was "+baby.Data[babyindex].Weight[index]+"Kg on "+baby.Data[babyindex].Date[index]
+	var conf = confirm("Do you really want to remove this point from the data?\n"+string);
+	if (conf){
+		baby.Data[babyindex].Date.splice(index, 1);
+		baby.Data[babyindex].Weeks.splice(index, 1);
+		baby.Data[babyindex].Weight.splice(index, 1);
+		//Update the circles and the scatterplot
+		graph.setCurrrentDataWeight();
+    return true;
+	}
+  return false;
 }
 
-SimpleGraph.prototype.xaxis_drag = function() {
-  var self = this;
-  return function(d) {
-    document.onselectstart = function() { return false; };
-    var p = d3.mouse(self.vis[0][0]);
-    self.downx = self.x.invert(p[0]);
-  }
-};
-
-SimpleGraph.prototype.yaxis_drag = function(d) {
-  var self = this;
-  return function(d) {
-    document.onselectstart = function() { return false; };
-    var p = d3.mouse(self.vis[0][0]);
-    self.downy = self.y.invert(p[1]);
-  }
-};
 
 
-
-
-/*SimpleGraph.prototype.datapoint_drag = function() {
-  console.log("datapoint_drag")
-  var self = this;
-  return function(d) {
-    //console.log("datapoint_drag, self.selected="+self.selected);
-    registerKeyboardHandler(self.keydown());
-    document.onselectstart = function() { return false; };
-    self.selected = self.dragged = d;
-    self.update();    
-  }
-};
 
 
 /*
-//remove these at some?
-SimpleGraph.prototype.plot_drag = function() {
-  console.log("plot_drag")
-  var self = this;
-  return function() {
-    registerKeyboardHandler(self.keydown());
-    d3.select('body').style("cursor", "move");
-    if (d3.event.altKey) {
-      var p = d3.mouse(self.vis.node());
-      var newpoint = {};
-      newpoint.x = self.x.invert(Math.max(0, Math.min(self.width,  p[0])));
-      newpoint.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
-      self.points.push(newpoint);
-      self.points.sort(function(a, b) {
-        if (a.x < b.x) { return -1 };
-        if (a.x > b.x) { return  1 };
-        return 0
-      });
-      self.selected = newpoint;
-      self.update();
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    }    
-  }
-};
+var DaysForTest = function(babyBirthdate, date){
+	var birthdateYMD = new Date(dateToYMD(baby.BirthDate[babyBirthdate]));
+	var date = new Date(dateToYMD(date));
+	var days = Math.abs(date - birthdateYMD) / 3600 / 24000
+	return days;
+}
+baby.Data[0].Append({"Date": "01/08/2015",
+	"Weeks" : DaysForTest(0,"01/08/2015") / 7, "Weight" : 6});
 
-SimpleGraph.prototype.keydown = function() {
-  var self = this;
-  return function() {
-    if (!self.selected) return;
-    switch (d3.event.keyCode) {
-      case 8: // backspace
-      case 46: { // delete
-        var i = self.points.indexOf(self.selected);
-        self.points.splice(i, 1);
-        self.selected = self.points.length ? self.points[i > 0 ? i - 1 : 0] : null;
-        self.update();
-        break;
-      }
-    }
-  }
-};
+baby.Data[0].Append({"Date": "01/08/2015",
+	"Weeks" : DaysForTest(0,"30/08/2015") / 7, "Weight" : 4});
+baby.Data[1].Append({"Date": "10/08/2014", 
+	"Weeks" : DaysForTest(1,"01/08/2015") / 7, "Weight" : 5});
 */
+
+//Start plot
+var weiBoy = [];
+var weiGirl = [];
+
+d3.tsv("weianthro.txt", 
+  //This function defines how "data" below will look like 
+  function(d) {
+    return {
+    gender: +d.sex,
+    age: +d.age / 7,   //weeks!
+      l: +d.l,
+      m: +d.m,
+      s: +d.s,
+    };
+  },function(error, data) {    
+      data.forEach(function(d, i) {
+        data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
+        });
+
+      graph = new SimpleGraph("chart1", {
+          "xmax": 250, "xmin": 0,
+          "ymax": 19, "ymin": 2, 
+          "pointsBoy": weiBoy,
+          "pointsGirl": weiGirl,
+          "xlabel": "Weeks",
+          "ylabel": "Weight [Kg]"  
+      });
+    }
+);   
