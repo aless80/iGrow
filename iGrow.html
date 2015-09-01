@@ -99,6 +99,7 @@ jQuery(function() {
         	id : "dialog_AddBaby",
         	click : function() {
           		addToDropdown();
+              enableSelection();
           		jQuery( this ).dialog("close");          
         	}
         },
@@ -172,10 +173,12 @@ function removeBaby(name){
     if (conf){
       emptyDropdown();
       if (baby.Name.length > 0) {
-      populateDropdown(baby.Name);
+        populateDropdown(baby.Name);
+        //enable Selections
+        enableSelection(true);
       } else {
         //disable Selections if baby is empty
-        //toggleSelection();
+        enableSelection(false);
       }
     }
   }
@@ -288,6 +291,8 @@ populateDropdown(baby.Name);
 
 
 <script type="text/javascript"> //Scripts about adding and plotting the data
+//disable weight spinner, date and add weight button  
+enableSelection();
 //Set date picker to today
 if (jQuery("#datep").val() == "") {
   jQuery("#datep").val(todayDMY);
@@ -339,8 +344,6 @@ jQuery(function() {
         	}
         }
       },
-          
-          
       text: "",
       autoOpen: false,
       width:'auto',
@@ -349,7 +352,6 @@ jQuery(function() {
       hide: { effect: "fade", duration: 1200 }
     });
 });
-
 function customAlert(meassage,hideTimeout) {
    jQuery("#custom-alert").text(meassage);
    jQuery("#custom-alert").dialog("open");
@@ -419,7 +421,12 @@ jQuery(function() {
 ///Helper functions
 ////////////////// to do
 function enableSelection(enable) {
-  console.log("toggleSelection")
+  if (typeof enable == "undefined") {
+    console.log("enable is undefined");
+    (baby.Name.length > 0) ? enable = true : enable = false;  
+    console.log("enableSelection(" + enable + ")");
+  }
+  
   //Toggle the weight spinner 
   var spinner = jQuery( "#weightSpinner" ).spinner();
   var datep = jQuery( "#datep" ).datepicker();
