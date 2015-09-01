@@ -13,7 +13,7 @@ git config --unset credential.helper
 
 //upload to site
 git add .
-git commit
+git commit -m date
 git push origin master
 
 //upload remote
