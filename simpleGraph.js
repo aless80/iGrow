@@ -26,6 +26,7 @@ git status
 git branch zoom
 git remote add zoom https://github.com/aless80/iGrow
 git push origin zoom
+git push origin --delete <branchName>
 
 //Clone
 git clone https://github.com/aless80/iGrow
