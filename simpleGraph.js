@@ -170,16 +170,6 @@ SimpleGraph = function(elemid, options) {
           self.update(); //update so that circles get their normal color. not able to selectAll circle??
         }
       });
-  //zoom
-      console.log("zoom1")
-  var zoom = d3.behavior.zoom()
-      .scaleExtent([0.833333, 1.2])
-      .x(self.x)
-      .y(self.y)
-      .on("zoom", function(){
-          self.redraw()
-      });
-  self.rect.call(zoom)
 
   this.svg = this.vis.append("svg")
       .attr("top", 0)
@@ -227,6 +217,20 @@ this.plotLines();
       .on("mouseup.drag",   self.mouseup())
       .on("touchend.drag",  self.mouseup());
 
+  //zoom1
+  //.call(d3.behavior.zoom().on("zoom", redraw)).on("dblclick.zoom", null).on("wheel.zoom", null);
+  self.oldrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
+  
+  var zoom = d3.behavior.zoom()
+      .scaleExtent([0.833333, 1.2])
+      .x(self.x)
+      .y(self.y)
+      .on("zoom", function(){
+        console.log("zoom1")
+          self.redraw()
+      });
+  self.rect.call(zoom)
+
   this.redraw()();
 };
 
@@ -235,12 +239,34 @@ this.plotLines();
 // SimpleGraph methods
 //
 //Redraws the axes
-SimpleGraph.prototype.redraw = function() {
+SimpleGraph.prototype.redraw = function(zoom) {
   var self = this;
   return function() {
-  //self.x.domain([Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)]);
-  //self.y.domain([Math.max(self.y.domain()[0], self.options.ymin), Math.min(self.y.domain()[1], self.options.ymax)]);
+    //Compute if the domain range is changing more than 1% (user is zooming) or not (user is dragging with mouse) 
+    var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]  
+    var zooming = (((newrange[0] - self.oldrange[0])/self.oldrange[0] > 0.1) &&  ((newrange[1] - self.oldrange[1])/self.oldrange[1] > 0.1))  
+    //In case of zooming, bound the domain to self.options.xmin/xmax/ymin/ymax
+    if (zooming){
+      var domainx = [Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)];
+      var domainy = [Math.max(self.y.domain()[1], self.options.ymax), Math.min(self.y.domain()[0], self.options.ymin)];
+    
+      console.log("domainx : max of x.domain()[0] - xmin: "+self.x.domain()[0], self.options.xmin)
+      console.log("domainx : min of x.domain()[1] - xmax: "+self.x.domain()[1], self.options.xmax)
+      console.log("domainy : max of y.domain()[0] - ymin: "+self.y.domain()[1], self.options.ymax)
+      console.log("domainy : min of y.domain()[1] - ymax: "+self.y.domain()[0], self.options.ymin)
+      
+      self.x.domain(domainx);
+      self.y.domain(domainy);
+    }
+    //Not needed, I think:
+    //self.oldrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
+    
+    //g.attr("transform","translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")"); 
+    //console.log("d3.event.translate"), console.log(d3.event.translate)  NO
+    
     var tx = function(d) { 
+      //console.log(d) //d = 0 20 40 .. 240
+      //console.log(self.x(d)) //0 68.8 137.6 .. 825.6
       return "translate(" + self.x(d) + ",0)"; 
     },
     ty = function(d) { 
@@ -260,6 +286,7 @@ temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
     //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
         .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
         .attr("transform", tx);
+//console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
     gx.select("text")
         .text(fx);
 
@@ -324,18 +351,16 @@ temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
 
     gy.exit().remove();
     //This zoom is call after the plot has loaded
-    var zoom = d3.behavior.zoom()
-      .scaleExtent([0.833333, 1.2])
-      .x(self.x)
-      .y(self.y)
-      .on("zoom", function(){
-          self.redraw()
-      });
+    var zoom = d3.behavior.zoom()    
+        .scaleExtent([0.833333, 1.2])
+        .x(self.x)
+        .y(self.y)
+        .on("zoom", self.redraw());     //nb cannot put funtion(){self.redraw()} here
     self.rect.call(zoom)
+
   //http://bl.ocks.org/shawnbot/6518285
     //zoom limit does not work in this version?
     //.yExtent([-1500,1500])
-    //.scaleExtent([0.1, 10])
     self.update();
   }  
 }
@@ -530,6 +555,8 @@ d3.select("body")
   }
 }
 
+
+
 SimpleGraph.prototype.removePathsInSVG = function() {
   d3.selectAll(".line").remove(); 
 }
@@ -572,6 +599,7 @@ SimpleGraph.prototype.setPoints = function(){
 }
 
 SimpleGraph.prototype.mousemove = function() {
+  console.log("mousemove")
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
@@ -640,6 +668,7 @@ SimpleGraph.prototype.mouseup = function() {
 }
 
 SimpleGraph.prototype.xaxis_drag = function() {
+  console.log("xaxis_drag")
   var self = this;
   return function(d) {
     document.onselectstart = function() { return false; };
@@ -649,6 +678,7 @@ SimpleGraph.prototype.xaxis_drag = function() {
 };
 
 SimpleGraph.prototype.yaxis_drag = function(d) {
+  console.log("yaxis_drag")
   var self = this;
   return function(d) {
     document.onselectstart = function() { return false; };

@@ -472,8 +472,8 @@ d3.tsv("weianthro.txt",
         });
 
       graph = new SimpleGraph("chart1", {
-          "xmax": 250, "xmin": 0,
-          "ymax": 19, "ymin": 2, 
+          "xmin": 0, "xmax": 250,
+          "ymin": 2, "ymax": 19, 
           "pointsBoy": weiBoy,
           "pointsGirl": weiGirl,
           "xlabel": "Weeks",
