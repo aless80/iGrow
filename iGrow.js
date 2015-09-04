@@ -361,9 +361,9 @@ jQuery(function() {
 ////////////////// to do
 function enableSelection(enable) {
   if (typeof enable == "undefined") {
-    console.log("enable is undefined");
+    //console.log("enable is undefined");
     (baby.Name.length > 0) ? enable = true : enable = false;  
-    console.log("enableSelection(" + enable + ")");
+    //console.log("enableSelection(" + enable + ")");
   }
   
   //Toggle the weight spinner 

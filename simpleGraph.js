@@ -96,8 +96,6 @@ SimpleGraph = function(elemid, options) {
   this.selectCircle = null;
   
   this.setCurrrentDataWeight();
-  
-
 
   this.chart = document.getElementById(elemid);
   this.cx = this.chart.clientWidth;
@@ -116,7 +114,9 @@ SimpleGraph = function(elemid, options) {
   this.options.xmin = options.xmin || xrange[0];
   this.options.ymax = options.ymax || yrange[1];
   this.options.ymin = options.ymin || yrange[0];
-
+  
+  this.options.maxzoom = 1 / options.maxzoom || 0.2;
+  
   this.padding = {
      "top":    this.title  ? 42 : 20,
      "right":                 30,
@@ -219,7 +219,7 @@ this.plotLines();
 
   //zoom1
   //.call(d3.behavior.zoom().on("zoom", redraw)).on("dblclick.zoom", null).on("wheel.zoom", null);
-  self.oldrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
+  self.origrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
   
   var zoom = d3.behavior.zoom()
       .scaleExtent([0.833333, 1.2])
@@ -242,31 +242,39 @@ this.plotLines();
 SimpleGraph.prototype.redraw = function(zoom) {
   var self = this;
   return function() {
-    //Compute if the domain range is changing more than 1% (user is zooming) or not (user is dragging with mouse) 
-    var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]  
-    var zooming = (((newrange[0] - self.oldrange[0])/self.oldrange[0] > 0.1) &&  ((newrange[1] - self.oldrange[1])/self.oldrange[1] > 0.1))  
-    //In case of zooming, bound the domain to self.options.xmin/xmax/ymin/ymax
-    if (zooming){
-      var domainx = [Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)];
-      var domainy = [Math.max(self.y.domain()[1], self.options.ymax), Math.min(self.y.domain()[0], self.options.ymin)];
-    
-      console.log("domainx : max of x.domain()[0] - xmin: "+self.x.domain()[0], self.options.xmin)
-      console.log("domainx : min of x.domain()[1] - xmax: "+self.x.domain()[1], self.options.xmax)
-      console.log("domainy : max of y.domain()[0] - ymin: "+self.y.domain()[1], self.options.ymax)
-      console.log("domainy : min of y.domain()[1] - ymax: "+self.y.domain()[0], self.options.ymin)
+    //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse) 
+    var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]
+    console.log("self.x.domain()=",self.x.domain())
+    //console.log("self.origrange",self.origrange)
+    //console.log("newrange      ",newrange)  
+    var zooming = ((Math.abs(newrange[0] - self.origrange[0])/self.origrange[0] > 0.1) && 
+                  (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1))
       
-      self.x.domain(domainx);
-      self.y.domain(domainy);
+    if (zooming){
+      console.log(newrange[0]/newrange[1])
+      console.log(self.origrange[0]/self.origrange[1])
+      if (newrange[0] / self.origrange[0] > 1.1) {
+        console.log("zooming out too much. return") 
+        return false;
+        }
+      if ((newrange[0] / self.origrange[0] < self.options.maxzoom)  && (newrange[1] / self.origrange[1] < self.options.maxzoom)) {
+          console.log("zooming in too much. return") 
+          return false;
+      }
+      // var domainx = [Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)],
+      //     domainy = [Math.min(self.y.domain()[0], self.options.ymax), Math.max(self.y.domain()[1], self.options.ymin)];
+      //     console.log("zooming")
+      //     // console.log("domainx : max of x.domain()[0] - xmin: "+self.x.domain()[0], self.options.xmin)
+      //     // console.log("domainx : min of x.domain()[1] - xmax: "+self.x.domain()[1], self.options.xmax)
+      //     // console.log("domainy : min of y.domain()[1] - ymax: "+self.y.domain()[0], self.options.ymax)
+      //     // console.log("domainy : max of y.domain()[0] - ymin: "+self.y.domain()[1], self.options.ymin)        
+      //     self.x.domain(domainx);
+      //     self.y.domain(domainy); //NB inverted axis: [ymax, ymin]
     }
     //Not needed, I think:
-    //self.oldrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
-    
-    //g.attr("transform","translate(" + d3.event.translate + ")" + " scale(" + d3.event.scale + ")"); 
-    //console.log("d3.event.translate"), console.log(d3.event.translate)  NO
+    //self.origrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];    
     
     var tx = function(d) { 
-      //console.log(d) //d = 0 20 40 .. 240
-      //console.log(self.x(d)) //0 68.8 137.6 .. 825.6
       return "translate(" + self.x(d) + ",0)"; 
     },
     ty = function(d) { 
@@ -286,7 +294,6 @@ temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
     //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
         .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
         .attr("transform", tx);
-//console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
     gx.select("text")
         .text(fx);
 
@@ -599,7 +606,6 @@ SimpleGraph.prototype.setPoints = function(){
 }
 
 SimpleGraph.prototype.mousemove = function() {
-  console.log("mousemove")
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
@@ -668,7 +674,6 @@ SimpleGraph.prototype.mouseup = function() {
 }
 
 SimpleGraph.prototype.xaxis_drag = function() {
-  console.log("xaxis_drag")
   var self = this;
   return function(d) {
     document.onselectstart = function() { return false; };
@@ -678,7 +683,6 @@ SimpleGraph.prototype.xaxis_drag = function() {
 };
 
 SimpleGraph.prototype.yaxis_drag = function(d) {
-  console.log("yaxis_drag")
   var self = this;
   return function(d) {
     document.onselectstart = function() { return false; };
