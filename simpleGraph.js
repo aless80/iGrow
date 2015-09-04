@@ -13,16 +13,12 @@ git config credential.helper store
 git config --unset credential.helper
 
 Workspace <-> index <-> local repo <-> remote repo
-//upload to site
-git add .               //w->i
-git commit -m date      //
-git push origin master
 
-//upload remote
-git add .
-git commit
-check status
-git push
+//upload to remote repo
+git add .               #work->ind
+git commit -m date      #ind->lrepo
+git status
+git push origin master  #lrepo->rrepo
 
 //branches
 git status
