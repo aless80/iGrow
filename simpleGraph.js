@@ -170,8 +170,15 @@ SimpleGraph = function(elemid, options) {
           self.update(); //update so that circles get their normal color. not able to selectAll circle??
         }
       });
+  //zoom
       console.log("zoom1")
-  var zoom = d3.behavior.zoom().scaleExtent([0.833333, 1.2]).x(self.x).y(self.y).on("zoom", self.redraw());
+  var zoom = d3.behavior.zoom()
+      .scaleExtent([0.833333, 1.2])
+      .x(self.x)
+      .y(self.y)
+      .on("zoom", function(){
+          self.redraw()
+      });
   self.rect.call(zoom)
 
   this.svg = this.vis.append("svg")
@@ -227,6 +234,112 @@ this.plotLines();
 //
 // SimpleGraph methods
 //
+//Redraws the axes
+SimpleGraph.prototype.redraw = function() {
+  var self = this;
+  return function() {
+  //self.x.domain([Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)]);
+  //self.y.domain([Math.max(self.y.domain()[0], self.options.ymin), Math.min(self.y.domain()[1], self.options.ymax)]);
+    var tx = function(d) { 
+      return "translate(" + self.x(d) + ",0)"; 
+    },
+    ty = function(d) { 
+      return "translate(0," + self.y(d) + ")";
+    },
+    stroke = function(d) { 
+      return d ? "#ccc" : "#666"; 
+    },
+    fx = self.x.tickFormat(10),
+    //fx = self.x.tickFormat(d3.format("f2")),  //does not work
+    fy = self.y.tickFormat(10);
+
+    // Regenerate x-ticks…
+/*d3.select(this.parentNode)
+temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
+    var gx = self.vis.selectAll("g.x")
+    //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
+        .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
+        .attr("transform", tx);
+    gx.select("text")
+        .text(fx);
+
+    var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
+        .attr("class", "x")
+        .attr("transform", tx);
+    //Vertical grid
+    gxe.append("line")
+        .attr("stroke", stroke)
+        .attr("y1", 0)
+        .attr("y2", self.height);
+
+    gxe.append("text")
+        .attr("class", "axis label")
+        .attr("y", self.height)
+        .attr("dy", "1em")
+        .attr("text-anchor", "middle")
+        .text(fx) 
+        .style("cursor", "ew-resize")
+        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
+        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
+        .on("mousedown.drag",  self.xaxis_drag())
+        .on("touchstart.drag", self.xaxis_drag());
+    gx.exit().remove();
+
+    
+    //Change comma to dot: but have to change "axis" from title and axis labels
+    jQuery(".axis.label").each(function( index ) { 
+    	var elem = jQuery(this);
+    	elem.text(elem.text().replace(",",""))
+    	});    
+
+    // Regenerate y-ticks…
+    var gy = self.vis.selectAll("g.y")
+        .data(self.y.ticks(10), String)
+        .attr("transform", ty);
+
+    gy.select("text")
+        .text(fy);
+
+    var gye = gy.enter().insert("g", ".svg")
+        .attr("class", "y")
+        .attr("transform", ty)
+        .attr("background-fill", "#FFEEB6");
+
+    gye.append("line")
+        .attr("stroke", stroke)
+        .attr("x1", 0)
+        .attr("x2", self.width);
+
+    gye.append("text")
+        .attr("class", "axis label")
+        .attr("x", -3)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .text(fy)
+        .style("cursor", "ns-resize")
+        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
+        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
+        .on("mousedown.drag",  self.yaxis_drag())
+        .on("touchstart.drag", self.yaxis_drag());
+
+    gy.exit().remove();
+    //This zoom is call after the plot has loaded
+    var zoom = d3.behavior.zoom()
+      .scaleExtent([0.833333, 1.2])
+      .x(self.x)
+      .y(self.y)
+      .on("zoom", function(){
+          self.redraw()
+      });
+    self.rect.call(zoom)
+  //http://bl.ocks.org/shawnbot/6518285
+    //zoom limit does not work in this version?
+    //.yExtent([-1500,1500])
+    //.scaleExtent([0.1, 10])
+    self.update();
+  }  
+}
+
 SimpleGraph.prototype.plotNSigmaLine = function(n, gender){
   var self = this;
   //Choose Female if no babies are defined
@@ -415,107 +528,6 @@ d3.select("body")
     //Prevent the event from bubbling up the DOM tree, preventing any parent handlers from being notified of the event
     d3.event.stopPropagation(); 
   }
-}
-
-//Redraws the axes
-SimpleGraph.prototype.redraw = function() {
-  var self = this;
-  return function() {
-  //self.x.domain([Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)]);
-  //self.y.domain([Math.max(self.y.domain()[0], self.options.ymin), Math.min(self.y.domain()[1], self.options.ymax)]);
-    var tx = function(d) { 
-      return "translate(" + self.x(d) + ",0)"; 
-    },
-    ty = function(d) { 
-      return "translate(0," + self.y(d) + ")";
-    },
-    stroke = function(d) { 
-      return d ? "#ccc" : "#666"; 
-    },
-    fx = self.x.tickFormat(10),
-    //fx = self.x.tickFormat(d3.format("f2")),  //does not work
-    fy = self.y.tickFormat(10);
-
-    // Regenerate x-ticks…
-/*d3.select(this.parentNode)
-temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
-    var gx = self.vis.selectAll("g.x")
-    //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
-        .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
-        .attr("transform", tx);
-console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
-    gx.select("text")
-        .text(fx);
-
-    var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
-        .attr("class", "x")
-        .attr("transform", tx);
-    //Vertical grid
-    gxe.append("line")
-        .attr("stroke", stroke)
-        .attr("y1", 0)
-        .attr("y2", self.height);
-
-    gxe.append("text")
-        .attr("class", "axis label")
-        .attr("y", self.height)
-        .attr("dy", "1em")
-        .attr("text-anchor", "middle")
-        .text(fx) 
-        .style("cursor", "ew-resize")
-        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-        .on("mousedown.drag",  self.xaxis_drag())
-        .on("touchstart.drag", self.xaxis_drag());
-    gx.exit().remove();
-
-    
-    //Change comma to dot: but have to change "axis" from title and axis labels
-    jQuery(".axis.label").each(function( index ) { 
-    	var elem = jQuery(this);
-    	elem.text(elem.text().replace(",",""))
-    	});    
-
-    // Regenerate y-ticks…
-    var gy = self.vis.selectAll("g.y")
-        .data(self.y.ticks(10), String)
-        .attr("transform", ty);
-
-    gy.select("text")
-        .text(fy);
-
-    var gye = gy.enter().insert("g", ".svg")
-        .attr("class", "y")
-        .attr("transform", ty)
-        .attr("background-fill", "#FFEEB6");
-
-    gye.append("line")
-        .attr("stroke", stroke)
-        .attr("x1", 0)
-        .attr("x2", self.width);
-
-    gye.append("text")
-        .attr("class", "axis label")
-        .attr("x", -3)
-        .attr("dy", ".35em")
-        .attr("text-anchor", "end")
-        .text(fy)
-        .style("cursor", "ns-resize")
-        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-        .on("mousedown.drag",  self.yaxis_drag())
-        .on("touchstart.drag", self.yaxis_drag());
-
-    gy.exit().remove();
-    //This zoom is call after the plot has loaded
-    var zoom = d3.behavior.zoom().scaleExtent([0.833333, 1.2]).x(self.x).y(self.y).on("zoom", self.redraw());
-    self.rect.call(zoom)
-  //http://bl.ocks.org/shawnbot/6518285
-    //zoom limit does not work in this version?
-    //.yExtent([-1500,1500])
-    //.scaleExtent([0.1, 10])
-    self.update();
-  }  
 }
 
 SimpleGraph.prototype.removePathsInSVG = function() {
