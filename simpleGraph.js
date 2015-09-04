@@ -244,20 +244,38 @@ SimpleGraph.prototype.redraw = function(zoom) {
   return function() {
     //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse) 
     var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]
+    console.log("")
     console.log("self.x.domain()=",self.x.domain())
-    //console.log("self.origrange",self.origrange)
-    //console.log("newrange      ",newrange)  
+    console.log("self.origrange",self.origrange)
+    console.log("newrange      ",newrange)
+    //Zooming if the new range is significantly different from 
     var zooming = ((Math.abs(newrange[0] - self.origrange[0])/self.origrange[0] > 0.1) && 
                   (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1))
-      
     if (zooming){
       console.log(newrange[0]/newrange[1])
       console.log(self.origrange[0]/self.origrange[1])
+      //Check if we are attempting to zoom out more than the original range 
       if (newrange[0] / self.origrange[0] > 1.1) {
         console.log("zooming out too much. return") 
         return false;
         }
+      //Check if we are attempting to zoom in more than self.options.maxzoom
       if ((newrange[0] / self.origrange[0] < self.options.maxzoom)  && (newrange[1] / self.origrange[1] < self.options.maxzoom)) {
+          //Problem: zoom in above the max and newrange[1] will be the range over the max zoom. as a consequence, the drag will be blocked    
+          //I should plot with the maximum zoom and do some logic. 
+          //NO Lazy workaround: use the following line to set a (totally wrong!) newrange. NO, change self.x/y.domain?
+          //NO newrange = [ self.options.maxzoom * self.origrange[0] * 1.01, self.options.maxzoom * self.origrange[1] * 1.01]; 
+          //console.log("newrange set to ",newrange)
+          
+          
+          var domainx = [(self.x.domain()[1]+self.x.domain()[0] - self.options.maxzoom * self.origrange[0])/2-1,
+                         (self.x.domain()[1]+self.x.domain()[0] + self.options.maxzoom * self.origrange[0])/2],
+          domainy = [(self.y.domain()[1]+self.y.domain()[0] - self.options.maxzoom * self.origrange[1])/2-1,
+                     (self.y.domain()[1]+self.y.domain()[0] + self.options.maxzoom * self.origrange[1])/2]
+          self.x.domain(domainx);
+          self.y.domain(domainy); //NB inverted axis: [ymax, ymin]
+          console.log("min range allowed is "+self.origrange[0] * self.options.maxzoom)
+          console.log("self.x.domain() becomes ",self.x.domain())
           console.log("zooming in too much. return") 
           return false;
       }

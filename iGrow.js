@@ -477,7 +477,8 @@ d3.tsv("weianthro.txt",
           "pointsBoy": weiBoy,
           "pointsGirl": weiGirl,
           "xlabel": "Weeks",
-          "ylabel": "Weight [Kg]"  
+          "ylabel": "Weight [Kg]",
+          "maxzoom": 3  
       });
     }
 );   
