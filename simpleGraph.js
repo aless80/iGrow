@@ -25,11 +25,19 @@ git status
 git branch zoom
 git remote add zoom https://github.com/aless80/iGrow
 git push origin --delete <branchToDelete>
-git checkout zoom
+git checkout zoom       #lrepo->work
+git checkout -f master  #discard changes
+
+//Pull 
+git branch mybranch
+git pull            //rrepo->work
 
 //Clone
 git checkout zoom
 git clone https://github.com/aless80/iGrow
+
+//Diff
+git diff zoom
 */
 
 //Baby class
