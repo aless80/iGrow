@@ -6,14 +6,16 @@ registerKeyboardHandler = function(callback) {
 };
 
 /* git
+http://stackoverflow.com/questions/2745076/what-are-the-differences-between-git-commit-and-git-push
 git config --global user.name "Alessandro"
 git config --global core.editor "/usr/bin/vi -w"
 git config credential.helper store
 git config --unset credential.helper
 
+Workspace <-> index <-> local repo <-> remote repo
 //upload to site
-git add .
-git commit -m date
+git add .               //w->i
+git commit -m date      //
 git push origin master
 
 //upload remote
@@ -165,7 +167,8 @@ SimpleGraph = function(elemid, options) {
         }
       });
       console.log("zoom1")
-  this.rect.call(d3.behavior.zoom().x(this.x).y(this.y).on("zoom", this.redraw()));
+  var zoom = d3.behavior.zoom().scaleExtent([0.833333, 1.2]).x(self.x).y(self.y).on("zoom", self.redraw());
+  self.rect.call(zoom)
 
   this.svg = this.vis.append("svg")
       .attr("top", 0)
@@ -430,17 +433,8 @@ SimpleGraph.prototype.redraw = function() {
     fy = self.y.tickFormat(10);
 
     // Regenerate x-ticks…
-
-/*<g transform="translate(258,0)" class="x">
-  <line y2="395" y1="0" stroke="#ccc"></line>
-  <text style="cursor: ew-resize;" text-anchor="middle" dy="1em" y="395" class="axis">300</text>
-</g>*/
-
 /*d3.select(this.parentNode)
 temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
-
-temp = d3.select("svg2"); temp.select(function() { return this.parentNode; })
-
     var gx = self.vis.selectAll("g.x")
     //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
         .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
@@ -510,9 +504,9 @@ console.log(self.x.ticks(10).map(self.x.tickFormat(2, ".1")))
 
     gy.exit().remove();
     //This zoom is call after the plot has loaded
-    self.rect.call(d3.behavior.zoom().x(self.x).y(self.y).on("zoom", self.redraw()));
-        // .scaleExtent([1, 2]) does not work anymore? mean scale between x1 and x2
-//http://bl.ocks.org/shawnbot/6518285
+    var zoom = d3.behavior.zoom().scaleExtent([0.833333, 1.2]).x(self.x).y(self.y).on("zoom", self.redraw());
+    self.rect.call(zoom)
+  //http://bl.ocks.org/shawnbot/6518285
     //zoom limit does not work in this version?
     //.yExtent([-1500,1500])
     //.scaleExtent([0.1, 10])
