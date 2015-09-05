@@ -25,6 +25,7 @@ var baby = new Baby();
 /*baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
 baby.AddBaby({"name":"Nijntje", "gender":1, "birthdate": "01/01/2015"});
 */
+var names = []
 //Functions for the dialog
 jQuery(function() {
     jQuery("#dialog").dialog({
@@ -36,7 +37,8 @@ jQuery(function() {
         	text : "Add baby",
         	id : "dialog_AddBaby",
         	click : function() {
-          		addToDropdown();
+          		addToDropdown(); 
+              autocomplete();
               enableSelection();
           		jQuery( this ).dialog("close");          
         	}
@@ -50,7 +52,8 @@ jQuery(function() {
         	id : "dialog_DelBaby",
         	click : function() {
           var text = jQuery("#inputfordropdown").val();
-          removeBaby(text);
+          removeBaby(text); 
+          autocomplete();
           jQuery( this ).dialog("close");
         }
       }        
@@ -59,14 +62,7 @@ jQuery(function() {
     //Fire up the dialog 
     jQuery("#editBabyButton").click(function() {
       jQuery("#dialog").dialog("open");
-    });    
-    //Autocomplete for baby name input
-    jQuery(function() {
-        var names = baby.Name.toString().split(",");
-        jQuery("#inputfordropdown").autocomplete({
-          source: names
-        }); //testing SVC git
-      });
+    });
     //Behavior when dropdown changes
     jQuery(document).on("change", "#inputfordropdown", function(e) {
     	var names = baby.Name.toString().split(",");
@@ -91,6 +87,15 @@ jQuery(function() {
     	}
     });    
 });
+//Autocomplete baby name input
+function autocomplete() {
+    jQuery(function() {
+        var names = baby.Name.toString().split(",");
+        jQuery("#inputfordropdown").autocomplete({
+          source: names
+        }); //testing SVC git
+      });
+     }
 //Helper functions related to the dialog
 function emptyDropdown(){
   //empty() removes all child nodes
@@ -99,6 +104,7 @@ function emptyDropdown(){
 function populateDropdown(array){
   //append children
   jQuery.each(array, function(val, text) {
+
       jQuery('#dropdown').append(jQuery('<option></option>').val(text).html(text).addClass("dropdownBaby") )
     });
 }
@@ -174,8 +180,6 @@ function addToDropdown(){
     updateDataAndGraph();
     //Update minDate in #datep
     updateMinDate("#datep");
-    
-    //toggleSelection();///////////////check to do
   } 
 }
 function getExistingElements(){
@@ -358,7 +362,6 @@ jQuery(function() {
 });
 
 ///Helper functions
-////////////////// to do
 function enableSelection(enable) {
   if (typeof enable == "undefined") {
     //console.log("enable is undefined");
@@ -472,13 +475,13 @@ d3.tsv("weianthro.txt",
         });
 
       graph = new SimpleGraph("chart1", {
-          "xmin": 0, "xmax": 250,
-          "ymin": 2, "ymax": 19, 
+          "xmin": 0, "xmax": 200,
+          "ymin": 0, "ymax": 20, 
           "pointsBoy": weiBoy,
           "pointsGirl": weiGirl,
           "xlabel": "Weeks",
           "ylabel": "Weight [Kg]",
-          "maxzoom": 3  
+          "maxzoom": 2  
       });
     }
 );   

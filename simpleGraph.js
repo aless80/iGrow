@@ -110,10 +110,10 @@ SimpleGraph = function(elemid, options) {
   var yrange=[d3.min(this.points, function(d) { return Math.floor(d.m - 3 * d.s); }), 
               d3.max(this.points, function(d) { return Math.ceil(d.m); }) ];
 
-  this.options.xmax = options.xmax || xrange[1];
-  this.options.xmin = options.xmin || xrange[0];
-  this.options.ymax = options.ymax || yrange[1];
-  this.options.ymin = options.ymin || yrange[0];
+  this.options.xmin = ((typeof options.xmin == "undefined") ? xrange[0] : options.xmin);
+  this.options.xmax = ((typeof options.xmax == "undefined") ? xrange[1] : options.xmax);
+  this.options.ymax = ((typeof options.ymax == "undefined") ? yrange[1] : options.ymax);
+  this.options.ymin = ((typeof options.ymin == "undefined") ? yrange[0] : options.ymin);
   
   this.options.maxzoom = 1 / options.maxzoom || 0.2;
   
@@ -246,14 +246,15 @@ SimpleGraph.prototype.redraw = function(zoom) {
     var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]
     console.log("")
     console.log("self.x.domain()=",self.x.domain())
-    console.log("self.origrange",self.origrange)
+    console.log("self.origrange",self.origrange," allowed is ",
+              [self.origrange[0]*self.options.maxzoom,self.origrange[1]*self.options.maxzoom])
     console.log("newrange      ",newrange)
     //Zooming if the new range is significantly different from 
     var zooming = ((Math.abs(newrange[0] - self.origrange[0])/self.origrange[0] > 0.1) && 
                   (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1))
     if (zooming){
-      console.log(newrange[0]/newrange[1])
-      console.log(self.origrange[0]/self.origrange[1])
+      // console.log(newrange[0]/newrange[1])
+      // console.log(self.origrange[0]/self.origrange[1])
       //Check if we are attempting to zoom out more than the original range 
       if (newrange[0] / self.origrange[0] > 1.1) {
         console.log("zooming out too much. return") 
@@ -266,19 +267,23 @@ SimpleGraph.prototype.redraw = function(zoom) {
           //NO Lazy workaround: use the following line to set a (totally wrong!) newrange. NO, change self.x/y.domain?
           //NO newrange = [ self.options.maxzoom * self.origrange[0] * 1.01, self.options.maxzoom * self.origrange[1] * 1.01]; 
           //console.log("newrange set to ",newrange)
-          
-          
           var domainx = [(self.x.domain()[1]+self.x.domain()[0] - self.options.maxzoom * self.origrange[0])/2-1,
                          (self.x.domain()[1]+self.x.domain()[0] + self.options.maxzoom * self.origrange[0])/2],
-          domainy = [(self.y.domain()[1]+self.y.domain()[0] - self.options.maxzoom * self.origrange[1])/2-1,
-                     (self.y.domain()[1]+self.y.domain()[0] + self.options.maxzoom * self.origrange[1])/2]
+          domainy = [(self.y.domain()[1]+self.y.domain()[0] + self.options.maxzoom * self.origrange[1])/2,
+                     (self.y.domain()[1]+self.y.domain()[0] - self.options.maxzoom * self.origrange[1])/2-1]
+          //test
+          var domainx = [10,111];
+          var domainy = [11,0];
+     //PROBLEM THIS DOES NOT WORK!
           self.x.domain(domainx);
           self.y.domain(domainy); //NB inverted axis: [ymax, ymin]
-          console.log("min range allowed is "+self.origrange[0] * self.options.maxzoom)
+          console.log("min range allowed is ",self.origrange[0] * self.options.maxzoom)
           console.log("self.x.domain() becomes ",self.x.domain())
           console.log("zooming in too much. return") 
           return false;
       }
+ //Problem is that 
+      console.log("self.x.domain() ?is still ",self.x.domain())
       // var domainx = [Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)],
       //     domainy = [Math.min(self.y.domain()[0], self.options.ymax), Math.max(self.y.domain()[1], self.options.ymin)];
       //     console.log("zooming")
