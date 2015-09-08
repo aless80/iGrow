@@ -11,6 +11,7 @@ git config --global user.name "Alessandro"
 git config --global core.editor "/usr/bin/vi -w"
 git config credential.helper store
 git config --unset credential.helper
+git config credential.helper store    #store my info (username/password)
 
 Workspace <-> index <-> local repo <-> remote repo
 
