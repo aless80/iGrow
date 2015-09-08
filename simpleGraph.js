@@ -23,14 +23,14 @@ git push origin master  #lrepo->rrepo
 //branches
 git status
 git branch zoom     # create a new local branch
-git checkout zoom   #if zoom does not exist locally, create it and switch to it
 git remote add zoom https://github.com/aless80/iGrow  #add files remotely
 git checkout zoom       #lrepo->work
 git checkout -f master  #discard changes
 
 //Clone
 git clone https://github.com/aless80/iGrow
-git branch -r   #see remote branches
+git branch -r     #see remote branches
+git checkout zoom   #if zoom does not exist locally, create it and switch to it
 
 //Pull 
 git branch mybranch
