@@ -28,10 +28,14 @@ git remote add zoom https://github.com/aless80/iGrow  #add files remotely
 git checkout zoom       #lrepo->work
 git checkout -f master  #discard changes
 
+//delete branch
+git branch -d lbranch      #delete a local branch
+git push origin :rbranch    #delete remote branch. watch out
+
 //Clone
 git clone https://github.com/aless80/iGrow
 git branch -r     #see remote branches
-git checkout zoom   #if zoom does not exist locally, create it and switch to it
+git checkout lbranch   #if lbranch does not exist locally, create it and switch to it
 
 //Pull 
 git branch mybranch
@@ -42,7 +46,7 @@ git checkout zoom
 git clone https://github.com/aless80/iGrow
 
 //Diff
-git diff zoom
+git diff zoom 
 */
 
 //Baby class
