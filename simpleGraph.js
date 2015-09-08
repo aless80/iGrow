@@ -22,9 +22,9 @@ git push origin master  #lrepo->rrepo
 
 //branches
 git status
-git branch zoom
-git remote add zoom https://github.com/aless80/iGrow
-git push origin --delete <branchToDelete>
+git branch zoom     # create a new local branch
+git checkout zoom   #if zoom does not exist locally, create it and switch to it
+git remote add zoom https://github.com/aless80/iGrow  #add files remotely
 git checkout zoom       #lrepo->work
 git checkout -f master  #discard changes
 
@@ -147,8 +147,6 @@ SimpleGraph = function(elemid, options) {
 
   this.dragged = this.selected = null;
 
-
-//this.vis
   this.vis = d3.select(this.chart).append("svg") 
       .attr("width",  this.cx)
       .attr("height", this.cy)
@@ -307,12 +305,9 @@ SimpleGraph.prototype.redraw = function(zoom) {
       return d ? "#ccc" : "#666"; 
     },
     fx = self.x.tickFormat(10),
-    //fx = self.x.tickFormat(d3.format("f2")),  //does not work
     fy = self.y.tickFormat(10);
 
     // Regenerate x-ticks…
-/*d3.select(this.parentNode)
-temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
     var gx = self.vis.selectAll("g.x")
     //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
         .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
@@ -387,10 +382,8 @@ temp = d3.select("svg"); temp.select(function() { return this.parentNode; })*/
         .y(self.y)
         .on("zoom", self.redraw());     //nb cannot put funtion(){self.redraw()} here
     self.rect.call(zoom)
-
   //http://bl.ocks.org/shawnbot/6518285
-    //zoom limit does not work in this version?
-    //.yExtent([-1500,1500])
+
     self.update();
   }  
 }
