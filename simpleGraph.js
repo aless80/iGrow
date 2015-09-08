@@ -127,10 +127,10 @@ SimpleGraph = function(elemid, options) {
   this.options.maxzoom = 1 / options.maxzoom || 0.2;
   
   this.padding = {
-     "top":    this.title  ? 42 : 20,
-     "right":                 30,
-     "bottom": this.options.xlabel ? 63 : 10,
-     "left":   this.options.ylabel ? 70 : 45
+     "top":    42,
+     "right":  30,
+     "bottom": 63,
+     "left":   70
   };
 
   this.width = this.cx - this.padding.left - this.padding.right;
