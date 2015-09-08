@@ -41,6 +41,11 @@ git checkout lbranch   #if lbranch does not exist locally, create it and switch 
 git branch mybranch
 git pull            //rrepo->work
 
+//force pull
+git fetch --all
+git reset --hard origin/master        //delete local master or:
+git reset --hard origin/your_branch   //delete local branch
+
 //Clone
 git checkout zoom
 git clone https://github.com/aless80/iGrow
