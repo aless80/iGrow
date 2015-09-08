@@ -28,6 +28,10 @@ git remote add zoom https://github.com/aless80/iGrow  #add files remotely
 git checkout zoom       #lrepo->work
 git checkout -f master  #discard changes
 
+//Clone
+git clone https://github.com/aless80/iGrow
+git branch -r   #see remote branches
+
 //Pull 
 git branch mybranch
 git pull            //rrepo->work
