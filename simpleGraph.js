@@ -163,6 +163,9 @@ SimpleGraph = function(elemid, options) {
       .attr("class", "g_svg1")
         .attr("transform", "translate(" + this.padding.left + "," + this.padding.top + ")");
 
+  //I need this to test the zoom
+  this.g = d3.select("g_svg1");
+  
   this.rect = this.vis.append("rect")
       .attr("width", this.width)
       .attr("height", this.height)
