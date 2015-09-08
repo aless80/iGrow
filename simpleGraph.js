@@ -27,6 +27,7 @@ git branch zoom     # create a new local branch
 git remote add zoom https://github.com/aless80/iGrow  #add files remotely
 git checkout zoom       #lrepo->work
 git checkout -f master  #discard changes
+git checkout -b zoom2 origin/zoom2  #switch to zoom2 branch and download it
 
 //delete branch
 git branch -d lbranch      #delete a local branch
