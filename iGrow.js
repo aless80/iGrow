@@ -382,8 +382,6 @@ function enableSelection(enable) {
     (baby.Name.length > 0) ? enable = true : enable = false;  
     //console.log("enableSelection(" + enable + ")");
   }
-  
-  
   //Toggle the weight spinner 
   var spinner = jQuery( "#weightSpinner" ).spinner();
   var datep = jQuery( "#datep" ).datepicker();
