@@ -532,7 +532,7 @@ SimpleGraph.prototype.update = function() {
             	  
             	  var monthsBDate = birthdate .substring(3,5);
             	  var monthsDate = date.substring(3,5)
-            	  
+ console.log("monthsDate,monthsBDate,months",monthsDate,monthsBDate,months)
             	  var months = monthsDate - monthsBDate
             	  
             	  string = string.concat(months + " months");

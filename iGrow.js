@@ -234,6 +234,7 @@ function getBirthdate(){
 function updateMinDate(selector){
     var birthdateDMY = getBirthdate().split("/");
     jQuery(selector).datepicker("option", "minDate", new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0]) );
+    jQuery(selector).datepicker("option", "maxDate", 0 );
 }
 //At startup populate the dropdown menu
 populateDropdown(baby.Name);
@@ -260,10 +261,13 @@ if (jQuery("#birthdatep").val() == "") {
 }
 //Define behaviour of date pickers and spinner
 var birthdateDMY = getBirthdate().split("/");
-jQuery(function() {   
+jQuery(function() { 
+  console.log("bug maxdate today")  
   jQuery("#datep").datepicker({
     minDate: (new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0])),
-    maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
+    maxDate: 0, 
+    numberOfMonths: 2, 
+    dateFormat: "dd/mm/yy"
   });
   jQuery("#birthdatep").datepicker({
     maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
