@@ -542,8 +542,7 @@ SimpleGraph.prototype.update = function() {
                   string = string.concat(months + " month");
                   if (months>1) string = string.concat("s");            
                 } 
-              }
-              
+              }              
               //Show the weight
               return string.concat("<br/>Weight: "  + d[1] + "Kg");
           })
@@ -748,7 +747,7 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
 
 
 /*
-//remove these at some?
+//remove these at some point?
 SimpleGraph.prototype.plot_drag = function() {
   console.log("plot_drag")
   var self = this;
