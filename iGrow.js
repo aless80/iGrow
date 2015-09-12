@@ -1,6 +1,6 @@
 //Scripts about the "add a baby" dialog
 var today = new Date();
-var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + today.getMonth()).slice(-2)+"/"+today.getFullYear();
+var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + (today.getMonth()+1)).slice(-2)+"/"+today.getFullYear();
 function updateDataAndGraph(){
     var currentName = getName();
     graph.setPoints();
@@ -247,7 +247,7 @@ populateDropdown(baby.Name);
 //disable weight spinner, date and add weight button  
 jQuery(document).ready(function(){
   enableSelection()
-  });
+  
 //Set date picker to today
 if (jQuery("#datep").val() == "") {
   jQuery("#datep").val(todayDMY);
@@ -287,7 +287,7 @@ jQuery("#weightSpinner").pcntspinner({
     });
 
 });
-
+});
 //Custom alert
 jQuery(function() {
     jQuery("#custom-alert").dialog({
@@ -335,7 +335,7 @@ jQuery(function() {
         }
         var index = baby.Name.indexOf(getName()); 
 		    var weight = jQuery(weightSpinner).pcntspinner( "value" );
-        var dateDMY = jQuery(datep).val();
+        var dateDMY = MDYToDMY(jQuery(datep).val());
         if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && (baby.Data[index].Weight.indexOf(weight) > -1)) {
           customAlert("This point already exists",1800);
           return;
@@ -344,7 +344,7 @@ jQuery(function() {
         var date = new Date(dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
         //var index = baby.GetIndex(getName());
-        
+   console.log("days=",days)
         var obj = {
           	"Date" : dateDMY,
           	"Weeks" : days / 7,
@@ -417,6 +417,10 @@ function enableSelection(enable) {
 function dateToYMD(dmy) {
   return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
  };
+function MDYToDMY(mdy) {
+  return mdy.substring(3,5) + "/" + mdy.substring(0,2) + "/" + mdy.substring(6,10)
+ };
+
 //Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
 function DMYToDate(dmy) {
 	return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	

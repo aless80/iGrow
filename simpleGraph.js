@@ -515,29 +515,35 @@ SimpleGraph.prototype.update = function() {
           tooltip.html(function(){
               //Show the date
               var ind = graph.dataWeight.Weeks.indexOf(d[0])
-              var date = graph.dataWeight.Date[ind];
+              var dateMDY = graph.dataWeight.Date[ind].split("/");
+              var date = dateMDY[0] + "/" + dateMDY[1] + "/" + dateMDY[2];              
               var string = "Date: " + date + "<br/>Age: ";
               //Show the age
               if (d[0] < 3) {
-            	  string = string.concat(d[0] * 7 + " weeks");
+            	  string = string.concat(d[0] * 7 + " day");
+                if (d[0]/7 > 1) string = string.concat("s");
               } else if (d[0] < 20) {
-	              //var weeks = Math.floor(d[0]);
 	              string = string.concat(Math.floor(d[0]) + " weeks");
-              } else {
-  //          	  var dateD = DMYToDate(date);
-  //          	  var birthdateD = DMYToDate(getBirthdate());
-            	  
-            	  var birthdate = getBirthdate();
-       console.log("bug:")
-       console.log("birthdate,date",birthdate,date)     	  
-            	  var monthsBDate = birthdate .substring(3,5);
-            	  var monthsDate = date.substring(3,5)
- console.log("monthsDate,monthsBDate,months",monthsDate,monthsBDate,months)
-            	  var months = monthsDate - monthsBDate
-            	  
-            	  string = string.concat(months + " months");
-            	  //string = string.concat(" and " + weeks + " weeks");
+              } else {                
+                  var birthdate = getBirthdate(); 
+                  var yearsBDate = birthdate.substring(6,10);   
+                  var yearsDate = date.substring(6,10);
+                  var monthsBDate = birthdate .substring(3,5);   
+                  var monthsDate = date.substring(3,5);
+                  var months = monthsDate - monthsBDate + (yearsDate - yearsBDate) * 12;   //can be -1! must count year change
+                  var years = Math.floor(months / 12);
+                  var months = months % 12;
+                if (d[0] * 7  > 364) {
+                  string = string.concat(years + " year");
+                  if (years>1) string = string.concat("s");
+                }
+                if (months > 0) {
+                  if (years > 0) string = string.concat(" and ");
+                  string = string.concat(months + " month");
+                  if (months>1) string = string.concat("s");            
+                } 
               }
+              
               //Show the weight
               return string.concat("<br/>Weight: "  + d[1] + "Kg");
           })
