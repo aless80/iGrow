@@ -24,10 +24,10 @@
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
       <div id="dialog" title="Add a baby">
-        <table id="babygroup" class="group" border="0" >
+        <table class="group"  >
           <thead>
             <!--Instructions-->
-            <tr style="height:100%" cellpadding="0";>
+            <tr cellpadding="0";>
               <th style="text-align:left" id="LayoutTableCell_D1">
                   <p>Please add a baby's name, gender and birthdate</p>
               </th>              
@@ -37,7 +37,7 @@
             <!--Name-->
             <tr>
               <td id="LayoutTableCell_D2">
-                <div id="datediv">
+                <div id="inputfordropdowndiv">
                   <input id="inputfordropdown" type="text" name="dropdown" value="Name">
                 </div>
               </td>
@@ -45,7 +45,7 @@
             <!--Gender-->
             <tr>
               <td id="LayoutTableCell_D3">
-                <div id="datediv">
+                <div id="genderinputdiv">
                     <select name="genderinput" id="genderinput">
                         <option selected disabled>Gender</option>
                         <option>Female</option>
@@ -71,8 +71,8 @@
 <!--Plot-->
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
-      <div id="seldiv">
-        <table id="babygroup" class="group" border="0" cellspacing="10" cellpadding="2">
+      <div>
+        <table class="group"  cellspacing="10" cellpadding="2">
           <tbody>            
             <tr>
               <td id="LayoutTableCell_111">
@@ -87,67 +87,65 @@
   <!--Edit Baby-->
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
-      <div id="seldiv">
-        <table id="babygroup" class="group" border="0" cellspacing="10" cellpadding="2">
+      <div>
+        <table class="group"  cellspacing="10" cellpadding="2">
           <tbody>             
             <tr>
-              <td id="LayoutTableCell_21">
-                <div id="dropdowndiv">
-                  <select id="dropdown" value = ""></select>
-                </div>
-              </td>
               <td id="LayoutTableCell_22">
                 <div id="editbabydiv">
                   <button id="editBabyButton">Edit babies</button>
                   <div id='custom-alert' class="custom-alert"></div>                  
                 </div>
               </td>
+              <td id="LayoutTableCell_21">
+                <div id="dropdowndiv">
+                  <select id="dropdown" value = "" style="min-width: 97px; width: auto;"></select>
+                </div>
+              </td>
             </tr>
           </tbody>
         </table>
       </div>
     </td>
   </tr>
-  <!--Labels-->
+  <!--Labels and Selection-->
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
-      <div id="seldiv">
-        <table id="babygroup" class="group" border="0" cellspacing="10" cellpadding="0"> <!--  margin= "0px 10px" -->
+      <div>
+        <table class="group" cellspacing="12" cellpadding="0"> <!--  margin= "0px 10px" -->
           <tbody>
-            <tr style="height:100%" cellpadding="0" id = "trlabels">
+            <tr cellpadding="0">
               <td id="LayoutTableCell_L1">
-                <div id="dropdowndiv">
+                <div id="datelabeldiv">
                   <label for="text">Date </label>
                 </div>
               </td>
               <td id="LayoutTableCell_L2">
-                <div id="editbabydiv">
+                <div id="spinnerlabeldiv">
                   <label for="spinner">Weight </label>                  
                 </div>
               </td>
             </tr>
             
-            <!--Selection-->
             <tr>
               <td id="LayoutTableCell_31">
-                <div id="datediv">             
-                  <input type="text" id="datep" class="textinput" name="datep" style="height:19px; width:80px">
+                <div id="datepdiv">             
+                  <input type="text" id="datep" value="Today" class="textinput" name="datep" style="height: 40px; width:89px;">
                 </div>
               </td>            
               <td id="LayoutTableCell_32">
-                <div class="spinnerdiv" id="spinnerdiv"">
-                  
-                  <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px">
+                <div class="spinnerdiv" id="weightspinnerdiv"">                  
+                  <input id="weightSpinner" name="value" value="3.0Kg" style="height:40px; width:66px"> 
                 </div>
               </td>              
               <td id="LayoutTableCell_33">
-                <div class="weightdiv" id="weightdiv">
-                  <button id="AddWeight" style="height:31px" disabled>Add weight</button>
+                <div id="addweightdiv">
+                  <button id="AddWeight" disabled>Add weight</button>
                 </div>
               </td>
               <td id="LayoutTableCell_34">
-                <div class="weightdiv" id="weightdiv">
-                  <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button>   
+                <div id="deletemeasurediv">
+                  <button id="DeleteMeasure" disabled >Delete point</button>   
                 </div>
               </td>            
             </tr>
@@ -156,21 +154,6 @@
       </div>
     </td>
   </tr>
-<!--
-  <p>Selections: </p>
-  <p>
-    <label for="text">Date </label> 
-    <input type="text" id="datep" style="height:31px; width:80px">    
-    <label for="spinner">Weight </label>
-    <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px">
-    &nbsp;
-    <button id="AddWeight" style="height:31px" disabled>Add weight</button>
-    <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button>   
-  </p>
-  -->
-  
-  
-  
   
 <!--
   disable Addweight when Date is not set (it is set to today). Or set date to today

@@ -7,10 +7,21 @@ body {
 rect { fill: #fff; }
 tr {
 	height: 100%;
-	cellpadding=0;
+	cellpadding: 0;
 }
 td {
 		
+}
+.group {
+	border: 0; 
+}
+button {
+	height: 51px;
+	width: 97px;
+}
+select {
+	height:51px; 
+	width:97px;	
 }
 .grayout {
     opacity: 0.6; /* Real browsers */
