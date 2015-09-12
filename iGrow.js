@@ -22,8 +22,9 @@ jQuery(document).on("change", "#dropdown", function(e) {
 });
 //Create a baby instance, for testing purposes
 var baby = new Baby();
-/*baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
-baby.AddBaby({"name":"Nijntje", "gender":1, "birthdate": "01/01/2015"});
+/*tests:
+  baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
+  baby.AddBaby({"name":"Jack", "gender":1, "birthdate": "01/01/2015"});
 */
 var names = []
 //Functions for the dialog
@@ -37,10 +38,10 @@ jQuery(function() {
         	text : "Add baby",
         	id : "dialog_AddBaby",
         	click : function() {
-          		addToDropdown(); 
+          		var ok = addToDropdown(); 
               autocomplete();
               enableSelection();
-          		jQuery( this ).dialog("close");          
+          		if (ok) jQuery( this ).dialog("close");           
         	}
         },
         Cancel: function() {
@@ -61,6 +62,11 @@ jQuery(function() {
     });
     //Fire up the dialog 
     jQuery("#editBabyButton").click(function() {
+      //Reset the inputs
+      //<input id="inputfordropdown" type="text" name="dropdown" value="Name">
+      jQuery("#inputfordropdown").val("Name");
+      jQuery("#genderinput").val("Gender");
+      jQuery("#birthdatep").val("Birthdate");
       jQuery("#dialog").dialog("open");
     });
     //Behavior when dropdown changes
@@ -180,7 +186,10 @@ function addToDropdown(){
     updateDataAndGraph();
     //Update minDate in #datep
     updateMinDate("#datep");
-  } 
+    return true
+  } else {
+    return false;
+  }
 }
 function getExistingElements(){
   var elem = new Array();
@@ -448,7 +457,7 @@ function deleteWeight(id){
 
 
 
-/*
+/*tests
 var DaysForTest = function(babyBirthdate, date){
 	var birthdateYMD = new Date(dateToYMD(baby.BirthDate[babyBirthdate]));
 	var date = new Date(dateToYMD(date));
