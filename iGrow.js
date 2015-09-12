@@ -235,7 +235,9 @@ populateDropdown(baby.Name);
 
 //Scripts about adding and plotting the data
 //disable weight spinner, date and add weight button  
-enableSelection();
+jQuery(document).ready(function(){
+  enableSelection()
+  });
 //Set date picker to today
 if (jQuery("#datep").val() == "") {
   jQuery("#datep").val(todayDMY);
@@ -369,14 +371,21 @@ function enableSelection(enable) {
     //console.log("enableSelection(" + enable + ")");
   }
   
+  
   //Toggle the weight spinner 
   var spinner = jQuery( "#weightSpinner" ).spinner();
   var datep = jQuery( "#datep" ).datepicker();
   if (enable) {
+    jQuery("#trlabels").removeClass("grayout");
+    jQuery("#dropdown").removeClass("grayout");
+    jQuery("#dropdown").prop("disabled", false); 
     spinner.spinner( "enable" );
     jQuery( "#datep" ).datepicker( "option", "disabled", false);
     jQuery('#AddWeight').prop('disabled', false);  
   } else {
+    jQuery("#trlabels").addClass("grayout");
+    jQuery("#dropdown").addClass("grayout");
+    jQuery("#dropdown").prop("disabled", true);
     spinner.spinner( "disable" );
     jQuery( "#datep" ).datepicker( "option", "disabled", true);
     jQuery('#AddWeight').prop('disabled', true);

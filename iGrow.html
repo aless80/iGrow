@@ -1,11 +1,9 @@
 <!DOCTYPE html>
 <html>
   <head>
-  <!--http://bl.ocks.org/stepheneb/1182434-->
+  <!--http://edosil.net/igrow/-->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <title>Master</title>
-    <!--<script type="text/javascript" src="http://mbostock.github.com/d3/d3.v2.js"></script>-->
-
+    <title>iGrow</title>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
@@ -19,44 +17,169 @@
     </style>
   </head>
   <body>
-    <div id="chart1" class="chart"></div>
+    
 
 
-<select id="dropdown" value = ""></select>
+<!--Dialog-->
+  <tr style="vertical-align:top;">
+    <td style="padding-bottom:8px;">
+      <div id="dialog" title="Add a baby">
+        <table id="babygroup" class="group" border="0" >
+          <thead>
+            <!--Instructions-->
+            <tr style="height:100%" cellpadding="0";>
+              <th style="text-align:left" id="LayoutTableCell_D1">
+                  <p>Please add a baby's name, gender and birthdate</p>
+              </th>              
+            </tr>        
+          </thead>
+          <tbody>    
+            <!--Name-->
+            <tr>
+              <td id="LayoutTableCell_D2">
+                <div id="datediv">
+                  <input id="inputfordropdown" type="text" name="dropdown" value="Name">
+                </div>
+              </td>
+            </tr>
+            <!--Gender-->
+            <tr>
+              <td id="LayoutTableCell_D3">
+                <div id="datediv">
+                    <select name="genderinput" id="genderinput">
+                        <option selected disabled>Gender</option>
+                        <option>Female</option>
+                        <option>Male</option>
+                    </select>    
+                </div>
+              </td>
+            </tr>
+            <!--Birthdate-->
+            <tr>              
+              <td id="LayoutTableCell_D4">
+                <div class="spinnerdiv" id="spinnerdiv"">                  
+                  <input type="text" style="height:31px" id="birthdatep" value="Birthdate" >
+                </div>
+              </td>            
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
 
-<div id="dialog" title="Add a baby">
-  <p>Please add a baby's name, gender and birthdate</p>
-  <input id="inputfordropdown" type="text" name="dropdown" value="Name">
-      <select name="genderinput" id="genderinput">
-          <option selected disabled>Gender</option>
-          <option>Female</option>
-          <option>Male</option>
-      </select>
-      <input type="text" style="height:31px" id="birthdatep" value="Birthdate" >
-</div>
-<button id="editBabyButton">Edit babies</button>
-<div id='custom-alert' class="custom-alert"></div>
-<hr>
+<!--Plot-->
+  <tr style="vertical-align:top;">
+    <td style="padding-bottom:8px;">
+      <div id="seldiv">
+        <table id="babygroup" class="group" border="0" cellspacing="10" cellpadding="2">
+          <tbody>            
+            <tr>
+              <td id="LayoutTableCell_111">
+                <div id="chart1" class="chart"></div>
+              </td>
+            </tr>         
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
+  <!--Edit Baby-->
+  <tr style="vertical-align:top;">
+    <td style="padding-bottom:8px;">
+      <div id="seldiv">
+        <table id="babygroup" class="group" border="0" cellspacing="10" cellpadding="2">
+          <tbody>             
+            <tr>
+              <td id="LayoutTableCell_21">
+                <div id="dropdowndiv">
+                  <select id="dropdown" value = ""></select>
+                </div>
+              </td>
+              <td id="LayoutTableCell_22">
+                <div id="editbabydiv">
+                  <button id="editBabyButton">Edit babies</button>
+                  <div id='custom-alert' class="custom-alert"></div>                  
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
+  <!--Labels-->
+  <tr style="vertical-align:top;">
+    <td style="padding-bottom:8px;">
+      <div id="seldiv">
+        <table id="babygroup" class="group" border="0" cellspacing="10" cellpadding="0"> <!--  margin= "0px 10px" -->
+          <tbody>
+            <tr style="height:100%" cellpadding="0" id = "trlabels">
+              <td id="LayoutTableCell_L1">
+                <div id="dropdowndiv">
+                  <label for="text">Date </label>
+                </div>
+              </td>
+              <td id="LayoutTableCell_L2">
+                <div id="editbabydiv">
+                  <label for="spinner">Weight </label>                  
+                </div>
+              </td>
+            </tr>
+            
+            <!--Selection-->
+            <tr>
+              <td id="LayoutTableCell_31">
+                <div id="datediv">             
+                  <input type="text" id="datep" class="textinput" name="datep" style="height:19px; width:80px">
+                </div>
+              </td>            
+              <td id="LayoutTableCell_32">
+                <div class="spinnerdiv" id="spinnerdiv"">
+                  
+                  <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px">
+                </div>
+              </td>              
+              <td id="LayoutTableCell_33">
+                <div class="weightdiv" id="weightdiv">
+                  <button id="AddWeight" style="height:31px" disabled>Add weight</button>
+                </div>
+              </td>
+              <td id="LayoutTableCell_34">
+                <div class="weightdiv" id="weightdiv">
+                  <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button>   
+                </div>
+              </td>            
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
+<!--
   <p>Selections: </p>
   <p>
     <label for="text">Date </label> 
-    <input type="text" style="height:31px; width:80px" id="datep">    
+    <input type="text" id="datep" style="height:31px; width:80px">    
     <label for="spinner">Weight </label>
     <input id="weightSpinner" name="value" value="3.0Kg" style="width:62px">
     &nbsp;
     <button id="AddWeight" style="height:31px" disabled>Add weight</button>
     <button id="DeleteMeasure" style="height:31px" disabled >Delete point</button>   
   </p>
-<hr>
-
-
-<pre>
+  -->
+  
+  
+  
+  
+<!--
+  disable Addweight when Date is not set (it is set to today). Or set date to today
 TO DO: 
   *) Zoom and panning limit. Drag does not work at maximum zooming
   *) wrap jQuery code with: jQuery(document).ready(function(){} ?  
   *) Dialog to include Date, Weight, Add weight?
   *) Layouts? 
-</pre>
+-->
 
 
   </body>
