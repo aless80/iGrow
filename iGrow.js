@@ -261,8 +261,7 @@ if (jQuery("#birthdatep").val() == "") {
 }
 //Define behaviour of date pickers and spinner
 var birthdateDMY = getBirthdate().split("/");
-jQuery(function() { 
-  console.log("bug maxdate today")  
+jQuery(function() {   
   jQuery("#datep").datepicker({
     minDate: (new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0])),
     maxDate: 0, 

@@ -523,13 +523,13 @@ SimpleGraph.prototype.update = function() {
               } else if (d[0] < 20) {
 	              //var weeks = Math.floor(d[0]);
 	              string = string.concat(Math.floor(d[0]) + " weeks");
-	              //skip days.. var days = (d[0] * 7) - (weeks * 7);	              
               } else {
   //          	  var dateD = DMYToDate(date);
   //          	  var birthdateD = DMYToDate(getBirthdate());
             	  
             	  var birthdate = getBirthdate();
-            	  
+       console.log("bug:")
+       console.log("birthdate,date",birthdate,date)     	  
             	  var monthsBDate = birthdate .substring(3,5);
             	  var monthsDate = date.substring(3,5)
  console.log("monthsDate,monthsBDate,months",monthsDate,monthsBDate,months)
