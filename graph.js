@@ -52,7 +52,7 @@ git checkout zoom
 git clone https://github.com/aless80/iGrow
 
 //Diff
-git diff zoom 
+git diff zoom
 */
 
 //Baby class
@@ -237,20 +237,150 @@ this.plotLines();
   //.call(d3.behavior.zoom().on("zoom", redraw)).on("dblclick.zoom", null).on("wheel.zoom", null);
   self.origrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
   
-  var zoom = d3.behavior.zoom()
-      .scaleExtent([0.833333, 1.2])
-      .x(self.x)
-      .y(self.y)
+  this.scale=1;  
+  this.zoom = d3.behavior.zoom()
+      .scaleExtent([1, 3])
+      //.x(self.x)
+      //.y(self.y)
       .on("zoom", function(){
-        //console.log("zoom1")
-          self.redraw()
+        console.log("zoom1")
+          //self.redraw()   //problem: it does not work in redraw because I have to call zoom again, and that messes up the axis
+          self.zoomHandler()
       });
-  self.rect.call(zoom)
+  self.rect.call(this.zoom)
 
   this.redraw()();
 };
 
 
+Graph.prototype.zoomHandler = function() {
+  self = this;
+    var rangex = (this.options.xmax-this.options.xmin);    
+    var halfdiffrangex = (rangex - (rangex / d3.event.scale))/2
+    //If scale/range changes do not translate much. if range does not change translate
+    var xdomain;
+    if (self.scale==d3.event.scale) { //translate
+    console.log(self.x.domain())
+    xdomain = [( this.options.xmin+halfdiffrangex-d3.event.translate[0]/4.5),
+               ( this.options.xmax-halfdiffrangex-d3.event.translate[0]/4.5) ];           
+   } else { //scale
+    xdomain = [this.options.xmin+halfdiffrangex, 
+               this.options.xmax-halfdiffrangex];
+    self.scale=d3.event.scale;
+    
+    self.zoom.translate([0,0]);
+    console.log("after reset: d3.event.translate=",d3.event.translate)
+    console.log("after reset: d3.event.scale=",d3.event.scale)
+    
+    
+   }
+   console.log("xdomain=",xdomain)
+   self.x = d3.scale.linear()
+      .domain(xdomain)
+      .range([0, this.width]);
+      
+   
+      
+    var rangey = (this.options.ymax-this.options.ymin);
+    var halfdiffrangey = (rangey - (rangey / d3.event.scale))/2
+    //console.log("rangey,halfdiffrangey=",rangey,halfdiffrangey,"\n")
+    //console.log(this.options.ymax,this.options.ymax-halfdiffrangey, this.options.ymin,this.options.ymin+halfdiffrangey)
+    this.y = d3.scale.linear()
+      .domain([this.options.ymax-halfdiffrangey,//+d3.event.translate[1]/3, 
+               this.options.ymin+halfdiffrangey]) //+d3.event.translate[1]/3
+               //this.options.ymin+halfdiffrangey+d3.event.translate[1]/3])
+      .nice()
+      .range([0, this.height])
+      .nice();
+
+ //vis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")")
+ 
+    //console.log("self.x.domain()[0],self.x.domain()[1]=",self.x.domain()[0],",",self.x.domain()[1])
+ 
+  
+   var tx = function(d) { 
+      return "translate(" + self.x(d)  + ",0)"; //* d3.event.scale 
+    },
+    ty = function(d) { 
+      return "translate(0," + self.y(d)  + ")"; //* d3.event.scale
+    };
+    var stroke = function(d) { 
+      return d ? "#ccc" : "#666"; 
+    };
+    var fx = self.x.tickFormat(10),
+    fy = self.y.tickFormat(10);    
+    
+    // Regenerate x-ticks…
+    var gx = self.vis.selectAll("g.x")
+    //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
+        .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
+        .attr("transform", tx);
+    gx.select("text")
+        .text(fx);
+
+    var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
+        .attr("class", "x")
+        .attr("transform", tx);
+    //Vertical grid
+    gxe.append("line")
+        .attr("stroke", stroke)
+        .attr("y1", 0)
+        .attr("y2", self.height);
+
+    gxe.append("text")
+        .attr("class", "axis label")
+        .attr("y", self.height)
+        .attr("dy", "1em")
+        .attr("text-anchor", "middle")
+        .text(fx) 
+        .style("cursor", "ew-resize")
+        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
+        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
+        .on("mousedown.drag",  self.xaxis_drag())
+        .on("touchstart.drag", self.xaxis_drag());
+    gx.exit().remove();
+
+    
+    //Change comma to dot: but have to change "axis" from title and axis labels
+    jQuery(".axis.label").each(function( index ) { 
+    	var elem = jQuery(this);
+    	elem.text(elem.text().replace(",",""))
+    	});    
+
+    // Regenerate y-ticks…
+    var gy = self.vis.selectAll("g.y")
+        .data(self.y.ticks(10), String)
+        .attr("transform", ty);
+
+    gy.select("text")
+        .text(fy);
+
+    var gye = gy.enter().insert("g", ".svg")
+        .attr("class", "y")
+        .attr("transform", ty)
+        .attr("background-fill", "#FFEEB6");
+
+    gye.append("line")
+        .attr("stroke", stroke)
+        .attr("x1", 0)
+        .attr("x2", self.width);
+
+    gye.append("text")
+        .attr("class", "axis label")
+        .attr("x", -3)
+        .attr("dy", ".35em")
+        .attr("text-anchor", "end")
+        .text(fy)
+        .style("cursor", "ns-resize")
+        .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
+        .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
+        .on("mousedown.drag",  self.yaxis_drag())
+        .on("touchstart.drag", self.yaxis_drag());
+
+    gy.exit().remove();
+        
+    self.update();  
+}
 //
 // Graph methods
 //
@@ -362,12 +492,14 @@ Graph.prototype.redraw = function(zoom) {
 
     gy.exit().remove();
     //This zoom is call after the plot has loaded
-    var zoom = d3.behavior.zoom()    
-        .scaleExtent([0.833333, 1.2])
-        .x(self.x)
-        .y(self.y)
-        .on("zoom", self.redraw());     //nb cannot put funtion(){self.redraw()} here
-    self.rect.call(zoom)
+  /*  self.zoom = d3.behavior.zoom()    
+        .scaleExtent([1, 2])
+        //.x(self.x)
+        //.y(self.y)
+        .on("zoom", self.redraw());     //nb cannot put funtion(){self.redraw()} here"));     //nb cannot put funtion(){self.redraw()} here
+        //.on("zoom",self.zoomHandler());
+    self.rect.call(self.zoom)
+*/
   //http://bl.ocks.org/shawnbot/6518285
 
     self.update();
