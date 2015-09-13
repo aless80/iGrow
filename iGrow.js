@@ -344,7 +344,7 @@ jQuery(function() {
         }
         var index = baby.Name.indexOf(getName()); 
 		    var weight = jQuery(weightSpinner).pcntspinner( "value" );
-        var dateDMY = MDYToDMY(jQuery(datep).val());
+        var dateDMY = jQuery(datep).val();
         if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && (baby.Data[index].Weight.indexOf(weight) > -1)) {
           customAlert("This point already exists",1800);
           return;
@@ -513,7 +513,7 @@ d3.tsv("weianthro.txt",
           "ymin": 0, "ymax": 20, 
           "pointsBoy": weiBoy,
           "pointsGirl": weiGirl,
-          "xlabel": "Weeks",
+          "xlabel": "Age [Weeks]",
           "ylabel": "Weight [Kg]",
           "maxzoom": 2  
       });
