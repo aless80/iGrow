@@ -86,13 +86,13 @@
             <tr>
               <td id="LayoutTableCell_22">
                 <div id="editbabydiv">
-                  <button id="editBabyButton">Edit babies</button>
+                  <button id="editBabyButton" title="Add, delete or edit a baby">Edit babies</button>
                   <div id='custom-alert' class="custom-alert"></div>                  
                 </div>
               </td>
               <td id="LayoutTableCell_21">
                 <div id="dropdowndiv">
-                  <select id="dropdown" value = "" style="min-width: 97px; width: auto;"></select>
+                  <select id="dropdown" value = "" title="List of babies" style="min-width: 97px; width: auto;"></select>
                 </div>
               </td>
             </tr>
@@ -123,22 +123,22 @@
             <tr>
               <td id="LayoutTableCell_31">
                 <div id="datepdiv">             
-                  <input type="text" id="datep" value="Today" class="textinput" name="datep" style="height: 40px; width:89px;">
+                  <input type="text" id="datep" value="Today" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
                 </div>
               </td>            
               <td id="LayoutTableCell_32">
-                <div class="spinnerdiv" id="weightspinnerdiv"">                  
+                <div class="spinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
                   <input id="weightSpinner" name="value" value="3.0Kg" style="height:40px; width:66px"> 
                 </div>
               </td>              
               <td id="LayoutTableCell_33">
                 <div id="addweightdiv">
-                  <button id="AddWeight" disabled>Add weight</button>
+                  <button id="AddWeight" title="Add a point to the graph with the baby's weight'" disabled>Add weight</button>
                 </div>
               </td>
               <td id="LayoutTableCell_34">
                 <div id="deletemeasurediv">
-                  <button id="DeleteMeasure" disabled >Delete point</button>   
+                  <button id="DeleteMeasure" title="Delete the seleted point on the graph" disabled >Delete point</button>   
                 </div>
               </td>            
             </tr>
@@ -147,7 +147,7 @@
       </div>
     </td>
   </tr>
-  
+  <button title="you little scallywag">My First Heading</button>
 <!--
   BUGS:
   because of .ready around enableSelection I loose Kg suffix in weight
