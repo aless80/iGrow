@@ -242,7 +242,7 @@ this.plotLines();
       .x(self.x)
       .y(self.y)
       .on("zoom", function(){
-        console.log("zoom1")
+        //console.log("zoom1")
           self.redraw()
       });
   self.rect.call(zoom)
@@ -258,13 +258,8 @@ this.plotLines();
 Graph.prototype.redraw = function(zoom) {
   var self = this;
   return function() {
-    //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse) 
     var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]
-    console.log("")
-    console.log("self.x.domain()=",self.x.domain())
-    console.log("self.origrange",self.origrange," allowed is ",
-              [self.origrange[0]*self.options.maxzoom,self.origrange[1]*self.options.maxzoom])
-    console.log("newrange      ",newrange)
+    //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse) 
     //Zooming if the new range is significantly different from 
     var zooming = ((Math.abs(newrange[0] - self.origrange[0])/self.origrange[0] > 0.1) && 
                   (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1))
@@ -278,40 +273,13 @@ Graph.prototype.redraw = function(zoom) {
         }
       //Check if we are attempting to zoom in more than self.options.maxzoom
       if ((newrange[0] / self.origrange[0] < self.options.maxzoom)  && (newrange[1] / self.origrange[1] < self.options.maxzoom)) {
-          //Problem: zoom in above the max and newrange[1] will be the range over the max zoom. as a consequence, the drag will be blocked    
-          //I should plot with the maximum zoom and do some logic. 
-          //NO Lazy workaround: use the following line to set a (totally wrong!) newrange. NO, change self.x/y.domain?
-          //NO newrange = [ self.options.maxzoom * self.origrange[0] * 1.01, self.options.maxzoom * self.origrange[1] * 1.01]; 
-          //console.log("newrange set to ",newrange)
           var domainx = [(self.x.domain()[1]+self.x.domain()[0] - self.options.maxzoom * self.origrange[0])/2-1,
                          (self.x.domain()[1]+self.x.domain()[0] + self.options.maxzoom * self.origrange[0])/2],
           domainy = [(self.y.domain()[1]+self.y.domain()[0] + self.options.maxzoom * self.origrange[1])/2,
                      (self.y.domain()[1]+self.y.domain()[0] - self.options.maxzoom * self.origrange[1])/2-1]
-          //test
-          var domainx = [10,111];
-          var domainy = [11,0];
-     //PROBLEM THIS DOES NOT WORK!
-          self.x.domain(domainx);
-          self.y.domain(domainy); //NB inverted axis: [ymax, ymin]
-          console.log("min range allowed is ",self.origrange[0] * self.options.maxzoom)
-          console.log("self.x.domain() becomes ",self.x.domain())
-          console.log("zooming in too much. return") 
           return false;
       }
- //Problem is that 
-      console.log("self.x.domain() ?is still ",self.x.domain())
-      // var domainx = [Math.max(self.x.domain()[0], self.options.xmin), Math.min(self.x.domain()[1], self.options.xmax)],
-      //     domainy = [Math.min(self.y.domain()[0], self.options.ymax), Math.max(self.y.domain()[1], self.options.ymin)];
-      //     console.log("zooming")
-      //     // console.log("domainx : max of x.domain()[0] - xmin: "+self.x.domain()[0], self.options.xmin)
-      //     // console.log("domainx : min of x.domain()[1] - xmax: "+self.x.domain()[1], self.options.xmax)
-      //     // console.log("domainy : min of y.domain()[1] - ymax: "+self.y.domain()[0], self.options.ymax)
-      //     // console.log("domainy : max of y.domain()[0] - ymin: "+self.y.domain()[1], self.options.ymin)        
-      //     self.x.domain(domainx);
-      //     self.y.domain(domainy); //NB inverted axis: [ymax, ymin]
     }
-    //Not needed, I think:
-    //self.origrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];    
     
     var tx = function(d) { 
       return "translate(" + self.x(d) + ",0)"; 
@@ -584,7 +552,6 @@ d3.select("body")
       return false;
     }
     //Catch keys delete and backspace
-    //console.log("d3.event.keyCode="+d3.event.keyCode)
     if ((d3.event.keyCode == 46) || (d3.event.keyCode == 8)) { //Delete or Backspace
       var del = deleteWeight(self.selectCircle.id);
       if (del) {
@@ -733,64 +700,3 @@ Graph.prototype.yaxis_drag = function(d) {
     self.downy = self.y.invert(p[1]);
   }
 };
-
-
-
-
-/*Graph.prototype.datapoint_drag = function() {
-  console.log("datapoint_drag")
-  var self = this;
-  return function(d) {
-    //console.log("datapoint_drag, self.selected="+self.selected);
-    registerKeyboardHandler(self.keydown());
-    document.onselectstart = function() { return false; };
-    self.selected = self.dragged = d;
-    self.update();    
-  }
-};
-
-
-/*
-//remove these at some point?
-Graph.prototype.plot_drag = function() {
-  console.log("plot_drag")
-  var self = this;
-  return function() {
-    registerKeyboardHandler(self.keydown());
-    d3.select('body').style("cursor", "move");
-    if (d3.event.altKey) {
-      var p = d3.mouse(self.vis.node());
-      var newpoint = {};
-      newpoint.x = self.x.invert(Math.max(0, Math.min(self.width,  p[0])));
-      newpoint.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
-      self.points.push(newpoint);
-      self.points.sort(function(a, b) {
-        if (a.x < b.x) { return -1 };
-        if (a.x > b.x) { return  1 };
-        return 0
-      });
-      self.selected = newpoint;
-      self.update();
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    }    
-  }
-};
-
-Graph.prototype.keydown = function() {
-  var self = this;
-  return function() {
-    if (!self.selected) return;
-    switch (d3.event.keyCode) {
-      case 8: // backspace
-      case 46: { // delete
-        var i = self.points.indexOf(self.selected);
-        self.points.splice(i, 1);
-        self.selected = self.points.length ? self.points[i > 0 ? i - 1 : 0] : null;
-        self.update();
-        break;
-      }
-    }
-  }
-};
-*/

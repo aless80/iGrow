@@ -353,7 +353,6 @@ jQuery(function() {
         var date = new Date(dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
         //var index = baby.GetIndex(getName());
-   console.log("days=",days)
         var obj = {
           	"Date" : dateDMY,
           	"Weeks" : days / 7,
