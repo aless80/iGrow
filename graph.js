@@ -106,7 +106,7 @@ Data.prototype.Append = function(obj){
 
 
 
-SimpleGraph = function(elemid, options) {
+Graph = function(elemid, options) {
   var self = this;
   this.selectCircle = null;
   
@@ -252,10 +252,10 @@ this.plotLines();
 
 
 //
-// SimpleGraph methods
+// Graph methods
 //
 //Redraws the axes
-SimpleGraph.prototype.redraw = function(zoom) {
+Graph.prototype.redraw = function(zoom) {
   var self = this;
   return function() {
     //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse) 
@@ -406,7 +406,7 @@ SimpleGraph.prototype.redraw = function(zoom) {
   }  
 }
 
-SimpleGraph.prototype.plotNSigmaLine = function(n, gender){
+Graph.prototype.plotNSigmaLine = function(n, gender){
   var self = this;
   //Choose Female if no babies are defined
   if (gender == 0) {gender = 2}
@@ -449,7 +449,7 @@ SimpleGraph.prototype.plotNSigmaLine = function(n, gender){
   } 
 }
 
-SimpleGraph.prototype.plotLines = function() {
+Graph.prototype.plotLines = function() {
   var self = this;
   var gender = getGender();
   this.plotNSigmaLine(0, gender);
@@ -462,7 +462,7 @@ SimpleGraph.prototype.plotLines = function() {
 }
 
 //Update the lines and the circles
-SimpleGraph.prototype.update = function() {
+Graph.prototype.update = function() {
   var self = this;
   //var lines = this.vis.select("path").attr("d", this.line(this.points));
   //This line with selectAll messes up the area plot because  it puts the line data to this.points for all lines
@@ -603,11 +603,11 @@ d3.select("body")
 
 
 
-SimpleGraph.prototype.removePathsInSVG = function() {
+Graph.prototype.removePathsInSVG = function() {
   d3.selectAll(".line").remove(); 
 }
 
-SimpleGraph.prototype.setCurrrentDataWeight = function(){
+Graph.prototype.setCurrrentDataWeight = function(){
   var index = baby.GetIndex(getName());
   //Plot males when no baby is defined
   if (index == -1) {
@@ -617,7 +617,7 @@ SimpleGraph.prototype.setCurrrentDataWeight = function(){
   this.dataWeight = baby.Data[index];
 }
 
-SimpleGraph.prototype.setTitle = function(){
+Graph.prototype.setTitle = function(){
   // write the Chart Title
   var self = this;
   if (this.title) {
@@ -627,7 +627,7 @@ SimpleGraph.prototype.setTitle = function(){
 }
 
 //set this.Points containing the data for the lines according to the current gender
-SimpleGraph.prototype.setPoints = function(){
+Graph.prototype.setPoints = function(){
   var self = this;
   switch (getGender()) {
   case 0:
@@ -644,7 +644,7 @@ SimpleGraph.prototype.setPoints = function(){
   }
 }
 
-SimpleGraph.prototype.mousemove = function() {
+Graph.prototype.mousemove = function() {
   var self = this;
   return function() {
     var p = d3.mouse(self.vis[0][0]),
@@ -688,7 +688,7 @@ SimpleGraph.prototype.mousemove = function() {
   }
 };
 
-SimpleGraph.prototype.mouseup = function() {
+Graph.prototype.mouseup = function() {
   var self = this;
   return function() {
     document.onselectstart = function() { return true; };
@@ -712,7 +712,7 @@ SimpleGraph.prototype.mouseup = function() {
   }
 }
 
-SimpleGraph.prototype.xaxis_drag = function() {
+Graph.prototype.xaxis_drag = function() {
   var self = this;
   return function(d) {
     document.onselectstart = function() { return false; };
@@ -721,7 +721,7 @@ SimpleGraph.prototype.xaxis_drag = function() {
   }
 };
 
-SimpleGraph.prototype.yaxis_drag = function(d) {
+Graph.prototype.yaxis_drag = function(d) {
   var self = this;
   return function(d) {
     document.onselectstart = function() { return false; };
@@ -733,7 +733,7 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
 
 
 
-/*SimpleGraph.prototype.datapoint_drag = function() {
+/*Graph.prototype.datapoint_drag = function() {
   console.log("datapoint_drag")
   var self = this;
   return function(d) {
@@ -748,7 +748,7 @@ SimpleGraph.prototype.yaxis_drag = function(d) {
 
 /*
 //remove these at some point?
-SimpleGraph.prototype.plot_drag = function() {
+Graph.prototype.plot_drag = function() {
   console.log("plot_drag")
   var self = this;
   return function() {
@@ -773,7 +773,7 @@ SimpleGraph.prototype.plot_drag = function() {
   }
 };
 
-SimpleGraph.prototype.keydown = function() {
+Graph.prototype.keydown = function() {
   var self = this;
   return function() {
     if (!self.selected) return;

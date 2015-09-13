@@ -52,14 +52,27 @@ jQuery(function() {
         	disabled : true,
         	id : "dialog_DelBaby",
         	click : function() {
-          var text = jQuery("#inputfordropdown").val();
-          removeBaby(text); 
-          autocomplete();
-          jQuery( this ).dialog("close");
+            var text = jQuery("#inputfordropdown").val();
+            removeBaby(text); 
+            autocomplete();
+            jQuery( this ).dialog("close");
+          }
         }
-      }        
       }
     });
+    //Fire up the help dialog 
+    //jQuery(function() {
+    jQuery( "#helpdialog" ).dialog({
+      autoOpen: false,
+      show: { effect: "blind", duration: 500 },
+      hide: { effect: "blind", duration: 500 }
+    }); 
+    jQuery( "#helpbutton" ).click(function() {
+      jQuery( "#helpdialog" ).dialog( "open" );
+    });
+    //});
+  
+  
     //Fire up the dialog 
     jQuery("#editBabyButton").click(function() {
       //Reset the inputs
@@ -509,7 +522,7 @@ d3.tsv("weianthro.txt",
         data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
         });
 
-      graph = new SimpleGraph("chart1", {
+      graph = new Graph("chart1", {
           "xmin": 0, "xmax": 200,
           "ymin": 0, "ymax": 20, 
           "pointsBoy": weiBoy,
