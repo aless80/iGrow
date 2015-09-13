@@ -245,8 +245,8 @@ populateDropdown(baby.Name);
 
 //Scripts about adding and plotting the data
 //disable weight spinner, date and add weight button  
-jQuery(document).ready(function(){
-  enableSelection()
+//jQuery(document).ready(function(){           //bug because of this Kg in weight are lost!
+  //enableSelection()
   
 //Set date picker to today
 if (jQuery("#datep").val() == "") {
@@ -285,9 +285,8 @@ jQuery("#weightSpinner").pcntspinner({
     step: .1
     //disabled: true
     });
-
-});
-});
+  });
+                                                                                  //});
 //Custom alert
 jQuery(function() {
     jQuery("#custom-alert").dialog({
@@ -376,8 +375,19 @@ jQuery(function() {
 });
 
 ///Helper functions
+
+/*
+<body onload="script();">
+
+or
+
+document.onload = function ...
+
+or even
+
+window.onload = function*/
 function enableSelection(enable) {
-  if (typeof enable == "undefined") {
+  if (typeof enable === "undefined") {
     //console.log("enable is undefined");
     (baby.Name.length > 0) ? enable = true : enable = false;  
     //console.log("enableSelection(" + enable + ")");
@@ -458,6 +468,8 @@ function deleteWeight(id){
   return false;
 }
 
+//////////////////////////try to put it here almost in the end . TODO
+enableSelection();  //not good
 
 
 

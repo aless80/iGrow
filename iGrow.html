@@ -3,17 +3,10 @@
   <head>
   <!--http://edosil.net/igrow/-->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <title>iGrow</title>
-    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
-    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
-    <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
-    <script type="text/javascript" src="simpleGraph.js"></script>
-    <script type="text/javascript" src="iGrow.js"></script>
-    
+    <title>iGrow</title>    
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> 
     <link href="stylesheet.css" rel="stylesheet" type="text/css">
-    <style type="text/css">
-   
+    <style type="text/css">   
     </style>
   </head>
   <body>
@@ -157,7 +150,7 @@
   
 <!--
   BUGS:
-  wrong months in tooltip because datep is american. change datep
+  because of .ready around enableSelection I loose Kg suffix in weight
 TO DO: 
   *) Zoom and panning limit. Drag does not work at maximum zooming
   *) wrap jQuery code with: jQuery(document).ready(function(){} ?  
@@ -165,6 +158,11 @@ TO DO:
   *) Layouts? 
 -->
 
+    <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
+    <script type="text/javascript" src="simpleGraph.js"></script>
+    <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
+    <script type="text/javascript" src="iGrow.js"></script>
 
   </body>
 </html>
