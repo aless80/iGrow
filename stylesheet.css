@@ -9,8 +9,11 @@ tr {
 	height: 100%;
 	cellpadding: 0;
 }
-td {
-		
+#helpdialog {
+  display: none;
+}
+#dialog {
+  display: none;
 }
 .group {
 	border: 0; 

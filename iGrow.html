@@ -75,12 +75,12 @@
             <tr>
               <td id="LayoutTableCell_31">
                 <div id="datepdiv">             
-                  <input type="text" id="datep" value="Today" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
+                  <input type="text" id="datep" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
                 </div>
               </td>            
               <td id="LayoutTableCell_32">
                 <div class="spinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
-                  <input id="weightSpinner" name="value" value="3.0Kg" style="height:40px; width:66px"> 
+                  <input id="weightSpinner" name="value" style="height:40px; width:66px"> 
                 </div>
               </td>              
               <td id="LayoutTableCell_33">
@@ -95,7 +95,7 @@
               </td>            
               <td id="LayoutTableCell_35">
                 <div id="helpdiv">
-                  <button id="helpbutton" title="">Help (TO DO!)</button>   
+                  <button id="helpbutton" title="">Help</button>   
                 </div>
               </td>
               
@@ -153,11 +153,16 @@
       </div>
     </td>
   </tr>
- 
+<!--Help-->
+<div id="helpdialog" title="Help dialog">
+  <p>The graph shows the average weight in Kg of a baby between 0 and 200 weeks of age. The data was downloaded from the dataset of the World Health Organization.</p>
+  <p>To plot a baby's weight on top of the graph, start by clicking on the "Edit babies" button. Add a baby by indicating in the pop up dialog his or her Name, 
+    Gender and Birthdate and by clicking on "Add baby".</p> 
+  <p>On the main page, indicate the baby's weight on a certain weight and click on "Add weight". The data will be plotted on the graph.</p>
+  <p>You can zoom in the graph or click on the data to delete it, or hover over it to see its information.</p>
+</div> 
 <!--
-  BUGS:
-  because of .ready around enableSelection I loose Kg suffix in weight
-TO DO: 
+  TO DO: 
   *) Zoom and panning limit. Drag does not work at maximum zooming
   *) wrap jQuery code with: jQuery(document).ready(function(){} ?  
   *) Dialog to include Date, Weight, Add weight?
@@ -169,10 +174,7 @@ TO DO:
     <script type="text/javascript" src="graph.js"></script>
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script type="text/javascript" src="iGrow.js"></script>
-<!--Help-->
-<div id="helpdialog" title="Help dialog">
-  <p>This is the default dialog which is useful for displaying information. The dialog window can be moved, resized and closed with the 'x' icon.</p>
-</div>
+
 
   </body>
 </html>

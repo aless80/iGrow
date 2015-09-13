@@ -40,6 +40,7 @@ jQuery(function() {
         	click : function() {
           		var ok = addToDropdown(); 
               autocomplete();
+              jQuery("#datep").val(todayDMY);
               enableSelection();
           		if (ok) jQuery( this ).dialog("close");           
         	}
@@ -216,7 +217,7 @@ function getExistingElements(){
 function getName(){
   var value = jQuery("#dropdown").val();
   if (value == null) {
-    return "Female baby";
+    return "  ";
   }
   return value
 }
@@ -261,10 +262,6 @@ populateDropdown(baby.Name);
 //jQuery(document).ready(function(){           //bug because of this Kg in weight are lost!
   //enableSelection()
   
-//Set date picker to today
-if (jQuery("#datep").val() == "") {
-  jQuery("#datep").val(todayDMY);
-}
 //Set birthdate picker to yesterday 
 if (jQuery("#birthdatep").val() == "") {
   var yesterday = new Date();
@@ -294,12 +291,12 @@ jQuery.widget( "ui.pcntspinner", jQuery.ui.spinner, {
 jQuery("#weightSpinner").pcntspinner({ 
     min: 1,
     suffix:'Kg',
+    //start: 3.0,
     max: 100,
     step: .1
-    //disabled: true
     });
+  
   });
-                                                                                  //});
 //Custom alert
 jQuery(function() {
     jQuery("#custom-alert").dialog({
@@ -416,6 +413,9 @@ function enableSelection(enable) {
 window.addEventListener("load", pageFullyLoaded, false);
 function pageFullyLoaded(e) {
   enableSelection();
+  //Set date picker to today and weight spinner to 3.0 Kg
+  jQuery("#datep").val(todayDMY);
+  jQuery("#weightSpinner").spinner( "value", "3.0 Kg");                                                                                //});
 }
 function deselectCircle(nullify) {
     if (graph.selectCircle) {
