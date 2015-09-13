@@ -13,54 +13,6 @@
     
 
 
-<!--Dialog-->
-  <tr style="vertical-align:top;">
-    <td style="padding-bottom:8px;">
-      <div id="dialog" title="Add a baby">
-        <table class="group"  >
-          <thead>
-            <!--Instructions-->
-            <tr cellpadding="0";>
-              <th style="text-align:left" id="LayoutTableCell_D1">
-                  <p>Please add a baby's name, gender and birthdate</p>
-              </th>              
-            </tr>        
-          </thead>
-          <tbody>    
-            <!--Name-->
-            <tr>
-              <td id="LayoutTableCell_D2">
-                <div id="inputfordropdowndiv">
-                  <input id="inputfordropdown" type="text" name="dropdown" value="Name">
-                </div>
-              </td>
-            </tr>
-            <!--Gender-->
-            <tr>
-              <td id="LayoutTableCell_D3">
-                <div id="genderinputdiv">
-                    <select name="genderinput" id="genderinput">
-                        <option selected disabled>Gender</option>
-                        <option>Female</option>
-                        <option>Male</option>
-                    </select>    
-                </div>
-              </td>
-            </tr>
-            <!--Birthdate-->
-            <tr>              
-              <td id="LayoutTableCell_D4">
-                <div class="spinnerdiv" id="spinnerdiv"">                  
-                  <input type="text" id="birthdatep" style="height:31px" value="Birthdate" >
-                </div>
-              </td>            
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </td>
-  </tr>
-
 <!--Plot-->
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
@@ -141,12 +93,67 @@
                   <button id="DeleteMeasure" title="Delete the seleted point on the graph" disabled >Delete point</button>   
                 </div>
               </td>            
+              <td id="LayoutTableCell_35">
+                <div id="helpdiv">
+                  <button id="Help" title="">Help (TO DO!)</button>   
+                </div>
+              </td>
+              
             </tr>
           </tbody>
         </table>
       </div>
     </td>
   </tr>
+  
+<!--Dialog-->
+  <tr style="vertical-align:top;">
+    <td style="padding-bottom:8px;">
+      <div id="dialog" title="Add a baby">
+        <table class="group"  >
+          <thead>
+            <!--Instructions-->
+            <tr cellpadding="0";>
+              <th style="text-align:left" id="LayoutTableCell_D1">
+                  <p>Please add a baby's name, gender and birthdate</p>
+              </th>              
+            </tr>        
+          </thead>
+          <tbody>    
+            <!--Name-->
+            <tr>
+              <td id="LayoutTableCell_D2">
+                <div id="inputfordropdowndiv">
+                  <input id="inputfordropdown" type="text" name="dropdown" value="Name">
+                </div>
+              </td>
+            </tr>
+            <!--Gender-->
+            <tr>
+              <td id="LayoutTableCell_D3">
+                <div id="genderinputdiv">
+                    <select name="genderinput" id="genderinput">
+                        <option selected disabled>Gender</option>
+                        <option>Female</option>
+                        <option>Male</option>
+                    </select>    
+                </div>
+              </td>
+            </tr>
+            <!--Birthdate-->
+            <tr>              
+              <td id="LayoutTableCell_D4">
+                <div class="spinnerdiv" id="spinnerdiv"">                  
+                  <input type="text" id="birthdatep" style="height:31px" value="Birthdate" >
+                </div>
+              </td>            
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </td>
+  </tr>
+
  
 <!--
   BUGS:
