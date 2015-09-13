@@ -387,45 +387,37 @@ jQuery(function() {
     })
 });
 
-///Helper functions
 
-/*
-<body onload="script();">
-
-or
-
-document.onload = function ...
-
-or even
-
-window.onload = function*/
 function enableSelection(enable) {
-  if (typeof enable === "undefined") {
-    //console.log("enable is undefined");
-    (baby.Name.length > 0) ? enable = true : enable = false;  
-    //console.log("enableSelection(" + enable + ")");
-  }
-  //Toggle the weight spinner 
-  var spinner = jQuery( "#weightSpinner" ).spinner();
-  var datep = jQuery( "#datep" ).datepicker();
-  if (enable) {
-    jQuery("#trlabels").removeClass("grayout");
-    jQuery("#dropdown").removeClass("grayout");
-    jQuery("#dropdown").prop("disabled", false); 
-    spinner.spinner( "enable" );
-    jQuery( "#datep" ).datepicker( "option", "disabled", false);
-    jQuery('#AddWeight').prop('disabled', false);  
-  } else {
-    jQuery("#trlabels").addClass("grayout");
-    jQuery("#dropdown").addClass("grayout");
-    jQuery("#dropdown").prop("disabled", true);
-    spinner.spinner( "disable" );
-    jQuery( "#datep" ).datepicker( "option", "disabled", true);
-    jQuery('#AddWeight').prop('disabled', true);
-  }
-  //NB: "#DeleteMeasure" should be all set
+    if (typeof enable === "undefined") {
+      (baby.Name.length > 0) ? enable = true : enable = false;  
+    }
+    //Toggle the weight spinner 
+    var spinner = jQuery( "#weightSpinner" ).spinner();
+    var datep = jQuery( "#datep" ).datepicker();
+    if (enable) {
+      jQuery("#trlabels").removeClass("grayout");
+      jQuery("#dropdown").removeClass("grayout");
+      jQuery("#dropdown").prop("disabled", false); 
+      spinner.spinner( "enable" );
+      jQuery( "#datep" ).datepicker( "option", "disabled", false);
+      jQuery('#AddWeight').prop('disabled', false);  
+    } else {
+      jQuery("#trlabels").addClass("grayout");
+      jQuery("#dropdown").addClass("grayout");
+      jQuery("#dropdown").prop("disabled", true);
+      spinner.spinner( "disable" );
+      jQuery( "#datep" ).datepicker( "option", "disabled", true);
+      jQuery('#AddWeight').prop('disabled', true);
+    }
+    //NB: "#DeleteMeasure" should be all set
 }
- function deselectCircle(nullify) {
+//Disable selection div after the page has loaded
+window.addEventListener("load", pageFullyLoaded, false);
+function pageFullyLoaded(e) {
+  enableSelection();
+}
+function deselectCircle(nullify) {
     if (graph.selectCircle) {
         document.getElementById(graph.selectCircle.id).setAttribute("r",6);
         if (nullify) {
@@ -480,12 +472,6 @@ function deleteWeight(id){
 	}
   return false;
 }
-
-//////////////////////////try to put it here almost in the end . TODO
-enableSelection();  //not good
-
-
-
 
 /*tests
 var DaysForTest = function(babyBirthdate, date){
