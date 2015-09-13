@@ -1,5 +1,4 @@
 
-///http://bl.ocks.org/stepheneb/1182434
 registerKeyboardHandler = function(callback) {
   var callback = callback;
   d3.select(window).on("keydown", callback);  
@@ -233,17 +232,15 @@ this.plotLines();
       .on("mouseup.drag",   self.mouseup())
       .on("touchend.drag",  self.mouseup());
 
-  //zoom1
-  //.call(d3.behavior.zoom().on("zoom", redraw)).on("dblclick.zoom", null).on("wheel.zoom", null);
+  
   self.origrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
   
   this.scale=1;  
   this.zoom = d3.behavior.zoom()
       .scaleExtent([1, 3])
-      //.x(self.x)
+      //.x(self.x)  //cannot use .scaleExtent with this 
       //.y(self.y)
       .on("zoom", function(){
-        console.log("zoom1")
           //self.redraw()   //problem: it does not work in redraw because I have to call zoom again, and that messes up the axis
           self.zoomHandler()
       });
@@ -257,52 +254,36 @@ Graph.prototype.zoomHandler = function() {
   self = this;
     var rangex = (this.options.xmax-this.options.xmin);    
     var halfdiffrangex = (rangex - (rangex / d3.event.scale))/2
-    //If scale/range changes do not translate much. if range does not change translate
-    var xdomain;
-    if (self.scale==d3.event.scale) { //translate
-    console.log(self.x.domain())
-    xdomain = [( this.options.xmin+halfdiffrangex-d3.event.translate[0]/4.5),
-               ( this.options.xmax-halfdiffrangex-d3.event.translate[0]/4.5) ];           
-   } else { //scale
-    xdomain = [this.options.xmin+halfdiffrangex, 
-               this.options.xmax-halfdiffrangex];
-    self.scale=d3.event.scale;
-    
-    self.zoom.translate([0,0]);
-    console.log("after reset: d3.event.translate=",d3.event.translate)
-    console.log("after reset: d3.event.scale=",d3.event.scale)
-    
-    
-   }
-   console.log("xdomain=",xdomain)
-   self.x = d3.scale.linear()
-      .domain(xdomain)
-      .range([0, this.width]);
-      
-   
-      
     var rangey = (this.options.ymax-this.options.ymin);
     var halfdiffrangey = (rangey - (rangey / d3.event.scale))/2
-    //console.log("rangey,halfdiffrangey=",rangey,halfdiffrangey,"\n")
-    //console.log(this.options.ymax,this.options.ymax-halfdiffrangey, this.options.ymin,this.options.ymin+halfdiffrangey)
-    this.y = d3.scale.linear()
-      .domain([this.options.ymax-halfdiffrangey,//+d3.event.translate[1]/3, 
-               this.options.ymin+halfdiffrangey]) //+d3.event.translate[1]/3
-               //this.options.ymin+halfdiffrangey+d3.event.translate[1]/3])
-      .nice()
-      .range([0, this.height])
-      .nice();
-
- //vis.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")")
- 
-    //console.log("self.x.domain()[0],self.x.domain()[1]=",self.x.domain()[0],",",self.x.domain()[1])
- 
+    //If scale/range changes do not translate much. if range does not change translate
+    var xdomain, ydomain;
+    if (self.scale==d3.event.scale) { //translate
+    xdomain = [this.options.xmin+halfdiffrangex-d3.event.translate[0]/6,
+               this.options.xmax-halfdiffrangex-d3.event.translate[0]/6 ];
+    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/6,
+               this.options.ymin+halfdiffrangey+d3.event.translate[1]/6];      
+    } else { //scale
+    xdomain = [this.options.xmin+halfdiffrangex, 
+               this.options.xmax-halfdiffrangex];
+    ydomain = [this.options.ymax-halfdiffrangey,
+               this.options.ymin+halfdiffrangey];
+    self.scale=d3.event.scale;    
+    self.zoom.translate([0,0]);
+    }
+    self.x = d3.scale.linear()
+      .domain(xdomain)
+      .range([0, this.width]);
+    self.y = d3.scale.linear()
+      .domain(ydomain)
+      //.nice()
+      .range([0, this.height]);
   
-   var tx = function(d) { 
-      return "translate(" + self.x(d)  + ",0)"; //* d3.event.scale 
+    var tx = function(d) { 
+      return "translate(" + self.x(d)  + ",0)"; 
     },
     ty = function(d) { 
-      return "translate(0," + self.y(d)  + ")"; //* d3.event.scale
+      return "translate(0," + self.y(d)  + ")";
     };
     var stroke = function(d) { 
       return d ? "#ccc" : "#666"; 
@@ -394,8 +375,6 @@ Graph.prototype.redraw = function(zoom) {
     var zooming = ((Math.abs(newrange[0] - self.origrange[0])/self.origrange[0] > 0.1) && 
                   (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1))
     if (zooming){
-      // console.log(newrange[0]/newrange[1])
-      // console.log(self.origrange[0]/self.origrange[1])
       //Check if we are attempting to zoom out more than the original range 
       if (newrange[0] / self.origrange[0] > 1.1) {
         console.log("zooming out too much. return") 
@@ -491,16 +470,6 @@ Graph.prototype.redraw = function(zoom) {
         .on("touchstart.drag", self.yaxis_drag());
 
     gy.exit().remove();
-    //This zoom is call after the plot has loaded
-  /*  self.zoom = d3.behavior.zoom()    
-        .scaleExtent([1, 2])
-        //.x(self.x)
-        //.y(self.y)
-        .on("zoom", self.redraw());     //nb cannot put funtion(){self.redraw()} here"));     //nb cannot put funtion(){self.redraw()} here
-        //.on("zoom",self.zoomHandler());
-    self.rect.call(self.zoom)
-*/
-  //http://bl.ocks.org/shawnbot/6518285
 
     self.update();
   }  
