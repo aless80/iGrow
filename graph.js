@@ -249,7 +249,9 @@ this.plotLines();
   this.redraw()();
 };
 
-
+//
+// Graph methods
+//
 Graph.prototype.zoomHandler = function() {
   self = this;
     var rangex = (this.options.xmax-this.options.xmin);    
@@ -362,9 +364,7 @@ Graph.prototype.zoomHandler = function() {
         
     self.update();  
 }
-//
-// Graph methods
-//
+
 //Redraws the axes
 Graph.prototype.redraw = function(zoom) {
   var self = this;
@@ -533,7 +533,6 @@ Graph.prototype.plotLines = function() {
 //Update the lines and the circles
 Graph.prototype.update = function() {
   var self = this;
-  //var lines = this.vis.select("path").attr("d", this.line(this.points));
   //This line with selectAll messes up the area plot because  it puts the line data to this.points for all lines
   //var lines = this.vis.selectAll("path").attr("d", this.line(this.points));
   //So I remove and replot the lines:
