@@ -564,7 +564,7 @@ Graph.prototype.update = function() {
               //Show the weight
               string = string.concat("<br/>Weight: "  + d[1] + " Kg");
               //Show the data from WHO
-              var obj = self.points[Math.round(d[0] * 7) + (self.points.length - 1) * 0.5 * (getGender() - 1)];
+              var obj = self.points[Math.round(d[0] * 7)];
               string = string.concat("<br/>Average from WHO is " + Math.round(obj.m*100)/100 + " &plusmn;" + Math.round(obj.s*100)/100);
               return  string;
           })
