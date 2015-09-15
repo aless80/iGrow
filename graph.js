@@ -4,56 +4,6 @@ registerKeyboardHandler = function(callback) {
   d3.select(window).on("keydown", callback);  
 };
 
-/* git
-http://stackoverflow.com/questions/2745076/what-are-the-differences-between-git-commit-and-git-push
-git config --global user.name "Alessandro"
-git config --global core.editor "/usr/bin/vi -w"
-git config credential.helper store
-git config --unset credential.helper
-git config credential.helper store    #store my info (username/password)
-
-Workspace <-> index <-> local repo <-> remote repo
-
-//upload to remote repo
-git add .               #work->ind
-git commit -m date      #ind->lrepo
-git status
-git push origin master  #lrepo->rrepo
-
-//branches
-git status
-git branch zoom     # create a new local branch
-git remote add zoom https://github.com/aless80/iGrow  #add files remotely
-git checkout zoom       #lrepo->work
-git checkout -f master  #discard changes
-git checkout -b zoom2 origin/zoom2  #switch to zoom2 branch and download it
-
-//delete branch
-git branch -d lbranch      #delete a local branch
-git push origin :rbranch    #delete remote branch. watch out
-
-//Clone
-git clone https://github.com/aless80/iGrow
-git branch -r     #see remote branches
-git checkout lbranch   #if lbranch does not exist locally, create it and switch to it
-
-//Pull 
-git branch mybranch
-git pull            //rrepo->work
-
-//force pull
-git fetch --all
-git reset --hard origin/master        //delete local master or:
-git reset --hard origin/your_branch   //delete local branch
-
-//Clone
-git checkout zoom
-git clone https://github.com/aless80/iGrow
-
-//Diff
-git diff zoom
-*/
-
 //Baby class
 Baby = function(data){  
     this.Name = new Array();
