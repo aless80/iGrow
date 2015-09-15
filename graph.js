@@ -213,8 +213,8 @@ Graph.prototype.zoomHandler = function() {
     if (self.scale==d3.event.scale) { //translate
     xdomain = [this.options.xmin+halfdiffrangex-d3.event.translate[0]/6,
                this.options.xmax-halfdiffrangex-d3.event.translate[0]/6 ];
-    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/6,
-               this.options.ymin+halfdiffrangey+d3.event.translate[1]/6];      
+    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/45,
+               this.options.ymin+halfdiffrangey+d3.event.translate[1]/45];
     } else { //scale
     xdomain = [this.options.xmin+halfdiffrangex, 
                this.options.xmax-halfdiffrangex];
