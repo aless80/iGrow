@@ -5,7 +5,7 @@ registerKeyboardHandler = function(callback) {
 };
 
 //Baby class
-Baby = function(data){  
+Baby = function(){  
     this.Name = new Array();
     this.BirthDate = new Array();
     this.Gender = new Array();
@@ -42,7 +42,7 @@ Baby.prototype.GetIndex = function(name){
 }
 
 //Data class
-Data = function(data){  
+Data = function(){  
     this.Date = new Array();
     this.Weeks = new Array();
     this.Weight = new Array();
