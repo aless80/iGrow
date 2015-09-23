@@ -5,6 +5,9 @@ body {
 	font: 13px sans-serif; 
 	}
 rect { fill: #fff; }
+.selected {
+    background-color: #D1F0FF;
+}
 tr {
 	height: 100%;
 	cellpadding: 0;
@@ -12,7 +15,7 @@ tr {
 #helpdialog {
   display: none;
 }
-#dialog {
+#babydialog, #dialog{
   display: none;
 }
 .group {

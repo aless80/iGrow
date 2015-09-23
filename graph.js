@@ -4,69 +4,91 @@ registerKeyboardHandler = function(callback) {
   d3.select(window).on("keydown", callback);  
 };
 
+/* git
+http://stackoverflow.com/questions/2745076/what-are-the-differences-between-git-commit-and-git-push
+git config --global user.name "Alessandro"
+git config --global core.editor "/usr/bin/vi -w"
+git config credential.helper store
+git config --unset credential.helper
+git config credential.helper store    #store my info (username/password)
+
+Workspace <-> index <-> local repo <-> remote repo
+
+//upload to remote repo
+git add .               #work->ind
+git commit -m date      #ind->lrepo
+git status
+git push origin master  #lrepo->rrepo
+
+//branches
+git status
+git branch zoom     # create a new local branch
+git remote add zoom https://github.com/aless80/iGrow  #add files remotely
+git checkout zoom       #lrepo->work
+git checkout -f master  #discard changes
+git checkout -b zoom2 origin/zoom2  #switch to zoom2 branch and download it
+
+//delete branch
+git branch -d lbranch      #delete a local branch
+git push origin :rbranch    #delete remote branch. watch out
+
+//Clone
+git clone https://github.com/aless80/iGrow
+git branch -r     #see remote branches
+git checkout lbranch   #if lbranch does not exist locally, create it and switch to it
+
+//Pull 
+git branch mybranch
+git pull            //rrepo->work
+
+//force pull
+git fetch --all
+git reset --hard origin/master        //delete local master or:
+git reset --hard origin/your_branch   //delete local branch
+
+//Clone
+git checkout zoom
+git clone https://github.com/aless80/iGrow
+
+//Diff
+git diff zoom
+*/
+
 //Baby class
-Baby = function(){  
-    this.Name = new Array();
-    this.BirthDate = new Array();
-    this.Gender = new Array();
-    this.Data = new Array();
-}
-Baby.prototype.AddBaby = function(obj){
-      this.Name.push(obj.name);
-      this.BirthDate.push(obj.birthdate);
-      //This conversion  not needed, but this would prevent bugs
-      var gender = obj.gender;
+Baby = function(name, birthdate, gender){
+      this.Name = name;
+      this.BirthDate = birthdate;
+      //This conversion  not needed, but this could prevent bugs
       if (gender == "Female") {
         gender = 2;
       } else if (gender == "Male") {
         gender = 1;
       }
-      this.Gender.push(gender);
-      this.Data.push(new Data);
+      this.Gender = gender;
+      this.Data = new Array();
 };
-Baby.prototype.RemoveBabyByName = function(name){
-      var index = this.Name.indexOf(name);
-      if (index > -1) {
-        this.Name.splice(index, 1);
-        this.BirthDate.splice(index, 1);
-        this.Data.splice(index, 1);
-        this.Gender.splice(index, 1);
-        return true;
-      } else {
-        return false;
-      }
-};
-//From the name, get the index of the current baby in the baby instance 
-Baby.prototype.GetIndex = function(name){
-  return baby.Name.indexOf(name);
-}
 
 //Data class
-Data = function(){  
-    this.Date = new Array();
-    this.Weeks = new Array();
-    this.Weight = new Array();
+Datum = function(date, weeks, weight, comment){
+    this.Date = date;
+    this.Weeks = weeks;
+    this.Weight = weight;
+    //this.Comment = comment;
+    this.Comment=(typeof comment === "undefined")?"":comment;
 }
-Data.prototype.Append = function(obj){
-      this.Date.push(obj.Date);
-      this.Weeks.push(obj.Weeks);
-      this.Weight.push(obj.Weight);
-};
-
-
 
 Graph = function(elemid, options) {
   var self = this;
   this.selectCircle = null;
+  this.selectCircleData=null;
   
   this.setCurrrentDataWeight();
-
   this.chart = document.getElementById(elemid);
   this.cx = this.chart.clientWidth;
   this.cy = this.chart.clientHeight;
   this.options = options || {};
 
-  this.title = getName();
+  this.title = getCurrName();
 
   this.setPoints();
 
@@ -144,7 +166,7 @@ Graph = function(elemid, options) {
       .attr("viewBox", "0 0 "+this.width+" "+this.height)
       .attr("class", "svg");
 
-this.plotLines();
+  this.plotLines();
 
   // add Chart Title
   if (this.title) {
@@ -213,8 +235,8 @@ Graph.prototype.zoomHandler = function() {
     if (self.scale==d3.event.scale) { //translate
     xdomain = [this.options.xmin+halfdiffrangex-d3.event.translate[0]/6,
                this.options.xmax-halfdiffrangex-d3.event.translate[0]/6 ];
-    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/45,
-               this.options.ymin+halfdiffrangey+d3.event.translate[1]/45];
+    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/6,
+               this.options.ymin+halfdiffrangey+d3.event.translate[1]/6];      
     } else { //scale
     xdomain = [this.options.xmin+halfdiffrangex, 
                this.options.xmax-halfdiffrangex];
@@ -512,12 +534,16 @@ Graph.prototype.update = function() {
       .on("mousedown", function(d){
           if (self.selectCircle != null) {
             //recolor/delect the previous circle
-            self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;"
+  //self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;" moved to iGrow.js
             deselectCircle(0)
           }
-          //set selectCircle and color the circle so that it can be removed        
+          //Store the selected circle. it will be needed for the table in the dialog        
           self.selectCircle = this;
-          document.getElementById('DeleteMeasure').disabled = false;
+          self.selectCircleData={
+            Baby: getCurrName(),
+            Weeks:d[0],
+            Weight:d[1]
+          };
           d3.select(this)
               .style("stroke","red")
               .attr("r",8)
@@ -564,8 +590,16 @@ Graph.prototype.update = function() {
               //Show the weight
               string = string.concat("<br/>Weight: "  + d[1] + " Kg");
               //Show the data from WHO
-              var obj = self.points[Math.round(d[0] * 7)];
-              string = string.concat("<br/>Average from WHO is " + Math.round(obj.m*100)/100 + " &plusmn;" + Math.round(obj.s*100)/100);
+              var obj = self.points[Math.round(d[0] * 7)];              
+              string = string.concat("<br/>Average weight from WHO: " + Math.round(obj.m*100)/100);
+              var quantile=""+Math.round(cdf(d[1],obj.m,obj.s)*100);
+              var ordinal = new String(2);
+              if ((quantile[1]=="1") && (quantile!="11")) ordinal="st";
+              else if ((quantile[1]=="2") && (quantile!="12")) ordinal="nd";
+              else ordinal="th";
+              string = string.concat("<br/>The weight is in the " + quantile + ordinal  + " quantile")
+              
+              
               return  string;
           })
           .style("left", (d3.event.pageX) + "px")     
@@ -622,20 +656,33 @@ d3.select("body")
   }
 }
 
-
-
+//Remove lines
 Graph.prototype.removePathsInSVG = function() {
   d3.selectAll(".line").remove(); 
 }
 
 Graph.prototype.setCurrrentDataWeight = function(){
-  var index = baby.GetIndex(getName());
+  var index = getCurrIndex();
   //Plot males when no baby is defined
-  if (index == -1) {
-    this.dataWeight = new Data();
-    return;
-  }   
-  this.dataWeight = baby.Data[index];
+  var dataWeight;
+  if (index == null) {
+    dataWeight = new Array();
+    dataWeight.Weeks=new Array();
+    dataWeight.Date=new Array();
+    dataWeight.Weight=new Array();
+  } else {
+ 
+    dataWeight = babies[index].Data;
+    dataWeight.Weeks=new Array();
+    dataWeight.Date=new Array();
+    dataWeight.Weight=new Array();
+    for (var i=0;i<dataWeight.length;i++){
+      dataWeight.Weeks.push( babies[index].Data[i]["Weeks"]);
+      dataWeight.Date.push(  babies[index].Data[i]["Date"]);
+      dataWeight.Weight.push(babies[index].Data[i]["Weight"]);
+    }
+  }
+  this.dataWeight=dataWeight;
 }
 
 Graph.prototype.setTitle = function(){
@@ -750,3 +797,26 @@ Graph.prototype.yaxis_drag = function(d) {
     self.downy = self.y.invert(p[1]);
   }
 };
+
+function cdf(x, mean, variance) {
+  return 0.5 * (1 + erf((x - mean) / (Math.sqrt(2 * variance))));
+}
+
+function erf(x) {
+  // save the sign of x
+  var sign = (x >= 0) ? 1 : -1;
+  x = Math.abs(x);
+
+  // constants
+  var a1 =  0.254829592;
+  var a2 = -0.284496736;
+  var a3 =  1.421413741;
+  var a4 = -1.453152027;
+  var a5 =  1.061405429;
+  var p  =  0.3275911;
+
+  // A&S formula 7.1.26
+  var t = 1.0/(1.0 + p*x);
+  var y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return sign * y; // erf(-x) = -erf(x);
+}

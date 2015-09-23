@@ -1,10 +1,19 @@
+//Create a baby instance, for testing purposes
+var babies = new Array();
+//tests:
+var obj = new Baby("Alice", "01/07/2015", "Female");
+babies.push(obj);
+babies.push(new Baby("Jack", "01/01/2015", "Male"));
+
+
 //Scripts about the "add a baby" dialog
 var today = new Date();
 var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + (today.getMonth()+1)).slice(-2)+"/"+today.getFullYear();
+//update the data and graph
 function updateDataAndGraph(){
-    var currentName = getName();
     graph.setPoints();
     graph.setCurrrentDataWeight();
+    var currentName = getCurrName();
     graph.title = currentName;
     graph.redraw();
     graph.update();
@@ -20,16 +29,11 @@ jQuery(document).on("change", "#dropdown", function(e) {
     //Update the minDate in date picker
     updateMinDate("#datep");
 });
-//Create a baby instance, for testing purposes
-var baby = new Baby();
-/*tests:
-  baby.AddBaby({"name":"Alice", "gender":2, "birthdate": "01/07/2015"});
-  baby.AddBaby({"name":"Jack", "gender":1, "birthdate": "01/01/2015"});
-*/
+
 var names = []
-//Functions for the dialog
+//Functions for the babydialog
 jQuery(function() {
-    jQuery("#dialog").dialog({
+    jQuery("#babydialog").dialog({
       autoOpen: false,
       show: { effect: "blind", duration: 500 },
       hide: { effect: "blind", duration: 500 },
@@ -42,11 +46,17 @@ jQuery(function() {
               autocomplete();
               jQuery("#datep").val(todayDMY);
               enableSelection();
-          		if (ok) jQuery( this ).dialog("close");           
+          		if (ok) jQuery( this ).dialog("close");
+              jQuery("#dropdown").removeAttr("disabled");
+              jQuery("#editbabybutton").removeAttr("disabled");
+              jQuery("#dialogbutton").removeAttr("disabled");           
         	}
         },
         Cancel: function() {
             jQuery( this ).dialog("close");
+            jQuery("#dropdown").removeAttr("disabled");
+            jQuery("#editbabybutton").removeAttr("disabled");
+            jQuery("#dialogbutton").removeAttr("disabled");
           },
         "Delete this baby" : {
         	text : "Delete this baby",
@@ -54,44 +64,59 @@ jQuery(function() {
         	id : "dialog_DelBaby",
         	click : function() {
             var text = jQuery("#inputfordropdown").val();
-            removeBaby(text); 
+            removeBaby(text);  
             autocomplete();
             jQuery( this ).dialog("close");
           }
         }
       }
     });
-    //Fire up the help dialog 
-    //jQuery(function() {
-    jQuery( "#helpdialog" ).dialog({
+    
+    //Fire up the help dialog of the main page
+    jQuery("#helpmainpage").dialog({
       autoOpen: false,
       show: { effect: "blind", duration: 500 },
       hide: { effect: "blind", duration: 500 }
     }); 
     jQuery( "#helpbutton" ).click(function() {
-      jQuery( "#helpdialog" ).dialog( "open" );
+      jQuery("#helpmainpage").dialog("open");
+    });  
+  
+    //Fire up the help dialog of the table 
+    jQuery("#helpdialog").dialog({
+      autoOpen: false,
+      show: { effect: "blind", duration: 500 },
+      hide: { effect: "blind", duration: 500 }
+    }); 
+    jQuery("#helpdialogbutton").click(function() {
+      jQuery("#helpdialog").dialog("open");
     });
-    //});
-  
-  
-    //Fire up the dialog 
-    jQuery("#editBabyButton").click(function() {
+    
+    //Fire up the babydialog 
+    jQuery("#editbabybutton").click(function() {
       //Reset the inputs
-      //<input id="inputfordropdown" type="text" name="dropdown" value="Name">
       jQuery("#inputfordropdown").val("Name");
       jQuery("#genderinput").val("Gender");
       jQuery("#birthdatep").val("Birthdate");
-      jQuery("#dialog").dialog("open");
+      jQuery("#babydialog").dialog("open");
+      //disable all buttons on main page 
+      jQuery("#dropdown").attr("disabled","true")
+      jQuery("#editbabybutton").attr("disabled","true")
+      jQuery("#dialogbutton").attr("disabled","true")
     });
     //Behavior when dropdown changes
     jQuery(document).on("change", "#inputfordropdown", function(e) {
-    	var names = baby.Name.toString().split(",");
-    	var text = jQuery("#inputfordropdown").val();
-    	if (names.indexOf(text) > -1) {
+      var index=getCurrIndex();
+      //Get all names
+      var names=new Array(babies.length);
+      for (var key in babies) {
+        names[key]=babies[key]["Name"];
+      }    
+      var text = jQuery("#inputfordropdown").val();
+      if (names.indexOf(text) > -1) {  //text is existing name
     		//Load the birthdate and gender
-    		var ind = baby.Name.indexOf(text);
-    		jQuery("#birthdatep").val(baby.BirthDate[ind]);
-    		var gender = (baby.Gender[ind] == 1 ? "Male" : "Female");
+        jQuery("#birthdatep").val(babies[index]["BirthDate"]);
+    		var gender = (babies[index]["Gender"] == 1 ? "Male" : "Female");
     		jQuery("#genderinput").val(gender);
     		//Disable birthdatep and genderinput
     		document.getElementById('birthdatep').disabled = true;
@@ -110,10 +135,14 @@ jQuery(function() {
 //Autocomplete baby name input
 function autocomplete() {
     jQuery(function() {
-        var names = baby.Name.toString().split(",");
+        var index=getCurrIndex();
+        var names = new Array();
+        babies.forEach(function(element) {
+          names.push(element.Name);
+        }, this);
         jQuery("#inputfordropdown").autocomplete({
           source: names
-        }); //testing SVC git
+        });
       });
      }
 //Helper functions related to the dialog
@@ -123,21 +152,24 @@ function emptyDropdown(){
 }
 function populateDropdown(array){
   //append children
-  jQuery.each(array, function(val, text) {
-
-      jQuery('#dropdown').append(jQuery('<option></option>').val(text).html(text).addClass("dropdownBaby") )
+  jQuery.each(array, function(index, value) {//val, text
+  jQuery('#dropdown').append(jQuery('<option></option>').val(value["Name"]).html(value["Name"]).addClass("dropdownBaby") )
     });
 }
 function removeBaby(name){
-  var success = baby.RemoveBabyByName(name);
-  if (success == false) {
+  var index=getIndexFromName(name);
+  if (index == -1) {
     alert(name+" was not found");
   } else {
     var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
     if (conf){
+      var redrawLater=(getCurrIndex()==index)?1:0 
+      babies.splice(index, 1);
       emptyDropdown();
-      if (baby.Name.length > 0) {
-        populateDropdown(baby.Name);
+      if (babies.length > 0) {
+        populateDropdown(babies);
+        //Update only if current baby was removed
+        if (redrawLater) updateDataAndGraph();
         //enable Selections
         enableSelection(true);
       } else {
@@ -179,7 +211,7 @@ function areInputsValid(prompt){
   }
   return true;
 }
-//Add all existing babies to the dropdown 
+// Add all existing babies to the dropdown 
 function addToDropdown(){
   if (areInputsValid(true)){
     var text = jQuery("#inputfordropdown").val();  
@@ -191,10 +223,10 @@ function addToDropdown(){
     }
     var birthdate = jQuery("#birthdatep").val();
     //Add to baby instance
-    baby.AddBaby({"name": text, "birthdate": birthdate, "gender": gender})
+    babies.push(new Baby(text, birthdate, gender));
     //Switch dropdown in UI to new baby 
     emptyDropdown();
-    populateDropdown(baby.Name);
+    populateDropdown(babies);
     jQuery("select option[value='"+text+"']").attr("selected","selected");
     //Replot
     updateDataAndGraph();
@@ -214,19 +246,35 @@ function getExistingElements(){
     return elem;
 }
 //Get the baby's name from the dropdown
-function getName(){
+function getCurrName(){
   var value = jQuery("#dropdown").val();
   if (value == null) {
     return "  ";
   }
   return value
 }
+//Get the baby's index from the dropdown
+function getCurrIndex(){
+  if (babies.length==0) return null;
+  var name = jQuery("#dropdown").val();
+  return getIndexFromName(name);
+}
+//Get the index in the babies array from a baby's name
+function getIndexFromName(name){
+  for (var ind = 0; ind < babies.length; ind++) {
+      if (babies[ind]["Name"]==name){
+        return ind;
+      }
+  }
+  return null
+}
 //Get the baby's gender from the dropdown
 function getGender(){
-  var name = getName();
-  if (baby.Gender.length == 0) return 0;
-  var index = baby.Name.indexOf(name);
-  var gender = baby.Gender[index]
+  var name = getCurrName();
+  var index=getCurrIndex();
+  if (babies.length == 0) return 0;
+    //var index = babies[index].Name.indexOf(name);
+    var gender = babies[index].Gender
   // solved problem: when I add a baby using the dropdown I get Male/Female, not 1/2.
   if (gender == "Female") {
     gender = 2;
@@ -241,8 +289,8 @@ function getBirthdate(){
   if (name == null) {
     return todayDMY;
   }
-  var index = baby.Name.indexOf(name);
-  return baby.BirthDate[index];
+  var index = getCurrIndex();
+  return babies[index].BirthDate;
 }
 //Update minDate for e.g. #datep
 function updateMinDate(selector){
@@ -251,7 +299,7 @@ function updateMinDate(selector){
     jQuery(selector).datepicker("option", "maxDate", 0 );
 }
 //At startup populate the dropdown menu
-populateDropdown(baby.Name);
+populateDropdown(babies);
 
 
 
@@ -259,7 +307,7 @@ populateDropdown(baby.Name);
 
 //Scripts about adding and plotting the data
 //disable weight spinner, date and add weight button  
-//jQuery(document).ready(function(){           //bug because of this Kg in weight are lost!
+// jQuery(document).ready(function(){           //bug because of this Kg in weight are lost!
   //enableSelection()
   
 //Set birthdate picker to yesterday 
@@ -306,7 +354,11 @@ jQuery(function() {
         	text : "Close",
         	id : "dialog_AddBaby",
         	click : function() {       
-          		jQuery( this ).dialog("close");          
+            jQuery( this ).dialog("close"); 
+            //enable all buttons on main page
+            jQuery("#dropdown").removeAttr("disabled");
+            jQuery("#editbabybutton").removeAttr("disabled");
+            jQuery("#dialogbutton").removeAttr("disabled");          
         	}
         }
       },
@@ -332,61 +384,85 @@ function customAlert(meassage,hideTimeout) {
   }, hideTimeout)
 }   
 
-								//format Date input: height!!
-//AddWeight: store and plot data
+//compare function to sort babies[].Data on Weeks
+function comparebabiesData(a,b) {
+  if (a.Weeks < b.Weeks)
+  return -1;
+  if (a.Weeks > b.Weeks)
+    return 1;
+    return 0;
+}
+
+//addedittable: add or edit data to table
 jQuery(function() {
-    jQuery("#AddWeight").click(function() {
-        //First remove circle selection, if any
-        deselectCircle(1);
-        if (jQuery(weightSpinner).pcntspinner("isValid") == false) {
-          alert("Please insert a correct weight");
-          return False;
-        }
-        var index = baby.Name.indexOf(getName()); 
-		    var weight = jQuery(weightSpinner).pcntspinner( "value" );
-        var dateDMY = jQuery(datep).val();
-        if ((baby.Data[index].Date.indexOf(dateDMY) > -1) && (baby.Data[index].Weight.indexOf(weight) > -1)) {
+    jQuery("#addedittable").click(function() {      
+      var textButton=jQuery("#addedittable").text().substring(0,4);
+      //First remove circle selection, if any
+      deselectCircle(1);
+      if (jQuery("#weightSpinner").pcntspinner("isValid") == false) {
+        alert("Please insert a correct weight");
+        return False;
+      }
+      //Get the data inserted by the user 
+      var index=getCurrIndex();
+      var weight = jQuery("#weightSpinner").pcntspinner("value");
+      var dateDMY = jQuery("#datep").val();     
+      for (var ind=0; ind<babies[index].Data.length;ind++) {
+        if ((babies[index].Data[ind]["Date"]==dateDMY) && (babies[index].Data[ind]["Weight"]==weight)) {
           customAlert("This point already exists",1800);
           return;
         }
-        var birthdateYMD = new Date(dateToYMD(getBirthdate()));
-        var date = new Date(dateToYMD(dateDMY));
-        var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
-        //var index = baby.GetIndex(getName());
+      }
+      var birthdateYMD = new Date(dateToYMD(getBirthdate()));
+      var date = new Date(dateToYMD(dateDMY));
+      var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
+      var comment = jQuery("#commentarea").val();
+      if (textButton=="Inse"){
+        //Append data to the babies' data
         var obj = {
-          	"Date" : dateDMY,
-          	"Weeks" : days / 7,
-          	"Weight" : weight
+          "Date" : dateDMY,
+          "Weeks" : days / 7,
+          "Weight" : weight.toFixed(1),
+          "Comment": comment
         };
-        //Append data to baby
-        baby.Data[index].Append(obj);
-        //Remove plotted lines only if user has changed the child's gender      
-        if (getGender() != getPlottedGender()) {
-          graph.removePathsInSVG();
-          graph.plotLines();
-        }
-        graph.update();
-        return true;
-        });    
-      //jQuery("button").button();  format for buttons?
+        appendToTable(obj);
+        jQuery("#addmeasure").removeAttr("disabled");
+      } else if (textButton=="Edit"){
+      //Edit data in tables     
+        var sel=getSelectedFromTable();
+        jQuery("table #"+sel.line + " :nth-child(1)").text(dateDMY)
+        jQuery("table #"+sel.line + " :nth-child(2)").text(days)
+        jQuery("table #"+sel.line + " :nth-child(3)").text(weight)
+        jQuery("table #"+sel.line + " :nth-child(4)").text(comment)
+      }
+      //hide accordion, reveal dialog buttons
+      hideAccordion();
+      return true;       
+    });
  });
 //Delete point button
 jQuery(function() {
-    jQuery("#DeleteMeasure").click(function() {
-      	var deleted = deleteWeight(graph.selectCircle.id);
-      	if (deleted) {
-        	deselectCircle(1);
-        	graph.update();
-        	return true;
-      	}
-    return false;
+    jQuery("#deletemeasure").click(function() {
+      var conf = confirm("Do you really want to remove this point from the table?\n");
+      if (conf){
+        var sel=getSelectedFromTable();
+        jQuery("#"+sel.line).remove();
+      } else {
+        //Deselect line from table
+        jQuery("table .selected").removeClass("selected");
+        //Disable/enable buttons
+        jQuery("#deletemeasure").attr("disabled","true");
+        jQuery("#editmeasure").attr("disabled","true");
+        jQuery("#addmeasure").removeAttr("disabled");
+      }
     })
 });
 
-
+//Enable a bunch of elements
 function enableSelection(enable) {
     if (typeof enable === "undefined") {
-      (baby.Name.length > 0) ? enable = true : enable = false;  
+      var index=getCurrIndex();
+      ((babies.length)&&(babies[index].Name.length > 0)) ? enable = true : enable = false;  
     }
     //Toggle the weight spinner 
     var spinner = jQuery( "#weightSpinner" ).spinner();
@@ -397,16 +473,16 @@ function enableSelection(enable) {
       jQuery("#dropdown").prop("disabled", false); 
       spinner.spinner( "enable" );
       jQuery( "#datep" ).datepicker( "option", "disabled", false);
-      jQuery('#AddWeight').prop('disabled', false);  
+      jQuery('#addedittable').prop('disabled', false);  
     } else {
       jQuery("#trlabels").addClass("grayout");
       jQuery("#dropdown").addClass("grayout");
       jQuery("#dropdown").prop("disabled", true);
       spinner.spinner( "disable" );
       jQuery( "#datep" ).datepicker( "option", "disabled", true);
-      jQuery('#AddWeight').prop('disabled', true);
+      jQuery('#addedittable').prop('disabled', true);
     }
-    //NB: "#DeleteMeasure" should be all set
+    //NB: "#deletemeasure" should be all set
 }
 //Disable selection div after the page has loaded
 window.addEventListener("load", pageFullyLoaded, false);
@@ -414,14 +490,21 @@ function pageFullyLoaded(e) {
   enableSelection();
   //Set date picker to today and weight spinner to 3.0 Kg
   jQuery("#datep").val(todayDMY);
-  jQuery("#weightSpinner").spinner( "value", "3.0 Kg");                                                                                //});
+  jQuery("#weightSpinner").spinner( "value", "3.0 Kg");
 }
+//Deselect circles: nullify is set circle to null (delete?)
 function deselectCircle(nullify) {
     if (graph.selectCircle) {
+      console.log("deselectCircle document.getElementById(elemid)")
         document.getElementById(graph.selectCircle.id).setAttribute("r",6);
+        
+      console.log("deselectCircle document.getElementById(elemid) after")
+        document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
+        //document.getElementById(graph.selectCircle.id).style("cursor: ns-resize; fill: none;");
         if (nullify) {
           graph.selectCircle = null;
-          document.getElementById('DeleteMeasure').disabled = true;
+          graph.selectCircleData=null;
+          document.getElementById('deletemeasure').disabled = true;
         }
     }
 }
@@ -456,15 +539,13 @@ function getPlottedGender() {
   } 
 }
 function deleteWeight(id){
-	var index = id.split("_").pop();
-	//var babyindex = baby.GetIndex();
-  var babyindex = baby.Name.indexOf(getName());
-	var string = "Weight was "+baby.Data[babyindex].Weight[index]+"Kg on "+baby.Data[babyindex].Date[index]
-	var conf = confirm("Do you really want to remove this point from the data?\n"+string);
-	if (conf){
-		baby.Data[babyindex].Date.splice(index, 1);
-		baby.Data[babyindex].Weeks.splice(index, 1);
-		baby.Data[babyindex].Weight.splice(index, 1);
+  console.log("deleteWeight: id=",id)
+	var indCircle = id.split("_").pop();
+  var index = getCurrIndex();
+	var string = "Weight was "+babies[index].Data["Weight"][indCircle]+"Kg on "+babies[index].Data["Date"][indCircle]
+	var conf = confirm("Do you really want to remove this point from the data?\nThis action cannot be undone\n"+string);
+  if (conf){
+		babies[index].Data.splice(indCircle, 1);
 		//Update the circles and the scatterplot
 		graph.setCurrrentDataWeight();
     return true;
@@ -472,25 +553,283 @@ function deleteWeight(id){
   return false;
 }
 
-/*tests
-var DaysForTest = function(babyBirthdate, date){
-	var birthdateYMD = new Date(dateToYMD(baby.BirthDate[babyBirthdate]));
-	var date = new Date(dateToYMD(date));
+
+
+
+
+//Functions for the dialog
+jQuery(function() {
+  jQuery("#dialog").dialog({
+      autoOpen: false,
+      minHeight: 400,
+      minWidth: 600,
+      show: { effect: "blind", duration: 500 },
+      hide: { effect: "blind", duration: 500 }
+    });
+    //Fire up the dialog 
+  jQuery("#dialogbutton").click(function() {
+      createTable();
+      //deselect the graph.selectedCircle
+      deselectCircle();      
+      var str = "Please edit the table for " + getCurrName() + ", born on "+ babies[getCurrIndex()]["BirthDate"];  
+      jQuery("#tabletitle").text(str);
+      jQuery("#textarea").value="";
+      jQuery("#dialog").dialog("open");
+      //disable delete and edit measure buttons
+      jQuery("#deletemeasure").attr("disabled","true");
+      jQuery("#editmeasure").attr("disabled","true");
+      //disable all buttons on main page
+      jQuery("#dropdown").attr("disabled","true");
+      jQuery("#editbabybutton").attr("disabled","true");
+      jQuery("#dialogbutton").attr("disabled","true");
+    });
+  //editmeasure populates and opens the accordion
+  jQuery("#editmeasure").click(function(){
+    fillAccordion();
+    //Change text of addedittable button 
+    jQuery("#addedittable").text("Edit in table");
+    //show accordion
+    showAccordion();
+  })
+  //addmeasure opens the accordion
+  jQuery("#addmeasure").click(function(){
+    jQuery("#addedittable").text("Insert in table");
+    showAccordion();
+  })
+  //cancelweightdiv closes the accordion
+  jQuery("#cancelweight").click(function(){
+    jQuery("#accordion").attr("hidden","true");
+    jQuery("#dialogButtons").removeAttr("hidden");
+    jQuery("#editmeasure").removeAttr("disabled");
+    jQuery("#addmeasure").removeAttr("disabled");
+    jQuery("#editmeasure").attr("disabled","true");
+    jQuery("#deletemeasure").attr("disabled","true");
+    jQuery("#export").removeAttr("disabled");
+    //Deselect line from table
+    jQuery("table .selected").removeClass("selected");
+  })
+  //Dialog buttons
+  jQuery("#savedialogbutton").click(function() {
+      //Save to Data object
+      //var conf = confirm("Do you really want edit the data and close this dialog?\nThis action cannot be undone\n");
+      //replot
+      updateDataAndGraph();
+      jQuery("#dialog").dialog("close");
+      //enable all buttons on main page
+      jQuery("#dropdown").removeAttr("disabled","true")
+      jQuery("#editbabybutton").removeAttr("disabled","true")
+      jQuery("#dialogbutton").removeAttr("disabled","true")
+    });
+  jQuery("#canceldialogbutton").click(function() {
+      //var conf = confirm("Do you really want discard the data and close this dialog?\nThis action cannot be undone\n");
+      //enable all buttons on main page
+      jQuery("#dropdown").removeAttr("disabled","true")
+      jQuery("#editbabybutton").removeAttr("disabled","true")
+      jQuery("#dialogbutton").removeAttr("disabled","true")
+      //Close dialog
+      jQuery("#dialog").dialog("close");
+    });
+});
+
+function showAccordion() {
+      jQuery("#accordion").removeAttr("hidden");
+      jQuery("#dialogButtons").attr("hidden","true");
+      jQuery("#editmeasure").attr("disabled","true");
+      jQuery("#deletemeasure").attr("disabled","true");
+      jQuery("#export").attr("disabled","true");
+    }
+function hideAccordion() {
+      jQuery("table .selected").removeClass("selected");
+      jQuery("#accordion").attr("hidden","true");
+      jQuery("#dialogButtons").removeAttr("hidden");
+      jQuery("#editmeasure").attr("disabled","true");
+      jQuery("#deletemeasure").attr("disabled","true");
+      jQuery("#export").removeAttr("disabled");
+      jQuery("#addmeasure").removeAttr("disabled");
+}
+
+//Delete from tablebody all lines/tr elements having td elements (eg not the headers th)  
+function tableEmpty() {
+  jQuery("#tablebody tr").filter(":has(td)").remove();
+}
+
+function createTable() {
+    //First empty the table
+    tableEmpty();
+    var index = getCurrIndex();
+    var tbl = document.getElementById('table')
+    tbl.setAttribute('cellspacing','1');
+    tbl.setAttribute('cellpadding','5');
+    var tbdy = document.getElementById('tablebody');
+    //Table elements
+    for (var ind=0; ind<babies[index].Data.length; ind++) { //ind=measurement index  
+      appendToTable(babies[index].Data[ind]);
+    }
+}
+
+//Append a line to the table
+function appendToTable(obj){
+    var tbdy = document.getElementById('tablebody');
+    //Create a tr line element
+    var tr = document.createElement('tr');
+    //Append td elements to the tr
+    for (var key in obj) {
+      var td = document.createElement('td');
+      if (key=="Weeks") 
+        var t = document.createTextNode(obj[key]*7); //days
+      else if (key=="Weight") 
+        var t = document.createTextNode(obj[key].toFixed(1));
+      else 
+        var t = document.createTextNode(obj[key]);        
+      td.appendChild(t);
+      tr.appendChild(td);    
+    }
+    //Append line
+    var ind=jQuery('#tablebody tr:last-child')[0].id.split("tr")[1]
+    tr.setAttribute('id','tr'+(Number(ind)+1));
+    tr.setAttribute('align','center');
+    tbdy.appendChild(tr);
+}
+
+
+//Select the whole row when clicking, populate and open accordion
+jQuery("#table").on("click", "tr", function(event) {
+  event.preventDefault();
+  if (jQuery(this).hasClass('selected')) {
+    jQuery(this).removeClass('selected');
+console.log("deletemeasure disabled true")
+    jQuery("#deletemeasure").attr("disabled","true");
+    jQuery("#addmeasure").removeAttr("disabled");
+    jQuery("#editmeasure").attr("disabled","true");
+  } else {
+    jQuery(this).addClass('selected')
+        .siblings().removeClass('selected');    
+    //populate and open accordion    
+    fillAccordion();    
+    jQuery("#editmeasure").removeAttr("disabled");
+    jQuery("#addmeasure").attr("disabled","true");
+    
+    //enable deletemeasure button
+    jQuery("#deletemeasure").removeAttr("disabled");
+  }
+});
+
+//Get the line and data from the selected row on the table
+function getSelectedFromTable(){
+  var line=jQuery("table .selected")[0].getAttribute("id");
+  var date=jQuery("table .selected td:first-child").text();
+  var weight=new Number(jQuery("table .selected td:nth-child(3)").text()).toFixed(1);
+  var comment=jQuery("table .selected td:nth-child(4)").text();
+  return {date:date, weight:weight, comment:comment, line:line} //to do
+}
+
+function fillAccordion() {
+  var cells=getSelectedFromTable();  
+  //console.log("weight,comment=",weight,comment)
+  jQuery("#datep").val(cells.date);  
+  jQuery("#weightspinnerdiv").val();
+  jQuery("#weightSpinner").spinner( "value", cells.weight+" Kg");
+  jQuery("#commentarea").val(cells.comment);
+}
+
+//Table2JSON button
+jQuery(document).ready(function(){
+    jQuery('#Table2JSON').click(function(){
+        data=table2JSON();  
+    });
+});
+function table2JSON() {
+  data = jQuery('#table tr:has(td)').map(
+    function(ind, val) {
+      var td =  jQuery('td', this);
+      return {
+        Date:    td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
+        Weeks:   Number(td.eq(1).text()/7),
+        Weight:  Number(td.eq(2).text()),
+        Comment: td.eq(3).text()
+      }
+    }).get();
+    //jQuery("#textarea").val("JSON.stringify( data ) = \n"+JSON.stringify(data));
+return data;
+}
+
+//Save table in babies[].Data
+function saveTable2BabiesData(){
+  var data=table2JSON();
+  var index=getCurrIndex();
+  babies[index].Data=data;
+}
+
+//Export
+jQuery(document).ready(function(){
+    jQuery('#export').click(function(){
+        var data = jQuery('#txt').val();
+        if(data == '')
+            return;
+        table2JSON();
+        JSONToCSVConvertor();
+    });
+});
+function JSONToCSVConvertor(){
+    out = '';
+     //1st loop is to extract each row
+    for (var i = 0; i < data.length; i++) {
+        var row = "";        
+        //2nd loop will extract each column and convert it in string comma-seprated
+        for (var index in data[i]) 
+            row += '' + data[i][index] + ', ';
+        row.slice(0, row.length - 1);
+        //add a line break after each row
+        out += row + '\r\n';
+    }
+     //Download as file
+    var uri = 'data:text/csv;charset=utf-8,' + escape(out);
+     // window.open(uri);  //will not work in some browsers or bad file extension
+     //this trick generates a temp <a /> tag
+        var link = document.createElement("a");    
+        link.href = uri;
+        link.style = "visibility:hidden";
+        link.download = "output.csv";    
+     //this part will append the anchor tag and remove it after automatic click
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+}
+
+//testing: click on 
+// jQuery(document).ready(function(){
+//     jQuery('#dialogbutton').trigger('click');
+//   }
+// )
+
+document.getElementById("dialogbutton").focus();
+
+
+
+
+
+//Load the data from weianthro
+jQuery(document).ready(function(){
+//tests
+var DaysForTest = function(index, date){
+  //console.log("DaysForTest")
+  var birthdateYMD = new Date(dateToYMD(babies[index].BirthDate));
+	//console.log("birthdateYMD=",birthdateYMD)
+  var date = new Date(dateToYMD(date));
 	var days = Math.abs(date - birthdateYMD) / 3600 / 24000
 	return days;
+	//console.log("days=",days)
 }
-baby.Data[0].Append({"Date": "01/08/2015",
-	"Weeks" : DaysForTest(0,"01/08/2015") / 7, "Weight" : 6});
+var datum = new Datum("01/08/2015", DaysForTest(0,"01/08/2015") / 7, 4,"Just born!");
+babies[0].Data.push(datum);
+babies[0].Data.push(new Datum("30/08/2015", DaysForTest(0,"30/08/2015") / 7, 5.4));
+babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6));
+autocomplete();
 
-baby.Data[0].Append({"Date": "01/08/2015",
-	"Weeks" : DaysForTest(0,"30/08/2015") / 7, "Weight" : 4});
-baby.Data[1].Append({"Date": "10/08/2014", 
-	"Weeks" : DaysForTest(1,"01/08/2015") / 7, "Weight" : 5});
-*/
 
 //Start plot
-var weiBoy = [];
-var weiGirl = [];
+weiBoy = [];
+weiGirl = [];
 //http://www.who.int/childgrowth/en/
 d3.tsv("weianthro.txt", 
   //This function defines how "data" below will look like 
@@ -518,3 +857,4 @@ d3.tsv("weianthro.txt",
       });
     }
 );   
+})

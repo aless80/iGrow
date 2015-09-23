@@ -3,7 +3,7 @@
   <head>
   <!--http://edosil.net/igrow/-->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <title>iGrow</title>    
+    <title>Master</title>    
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> 
     <link href="stylesheet.css" rel="stylesheet" type="text/css">
     <style type="text/css">   
@@ -33,72 +33,31 @@
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
       <div>
-        <table class="group"  cellspacing="10" cellpadding="2">
+        <table class="group" cellspacing="10" cellpadding="2">
           <tbody>             
             <tr>
+              <td id="LayoutTableCell_21">
+                <div id="dropdowndiv">
+                  <select id="dropdown" style="text-align:center" value = "" title="List of babies" style="min-width: 97px; width: auto;"></select>
+                </div>
+              </td>
               <td id="LayoutTableCell_22">
                 <div id="editbabydiv">
-                  <button id="editBabyButton" title="Add, delete or edit a baby">Edit babies</button>
+                  <button id="editbabybutton" title="Add, delete or edit a baby">Edit babies</button>
                   <div id='custom-alert' class="custom-alert"></div>                  
                 </div>
               </td>
-              <td id="LayoutTableCell_21">
-                <div id="dropdowndiv">
-                  <select id="dropdown" value = "" title="List of babies" style="min-width: 97px; width: auto;"></select>
+              <!--Add measure dialog-->
+              <td id="LayoutTableCell_23">
+                <div id="dialogdiv">
+                  <button id="dialogbutton" title="">Edit Measures</button>   
                 </div>
               </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </td>
-  </tr>
-  <!--Labels and Selection-->
-  <tr style="vertical-align:top;">
-    <td style="padding-bottom:8px;">
-      <div>
-        <table class="group" cellspacing="12" cellpadding="0">
-          <tbody>
-            <tr cellpadding="0">
-              <td id="LayoutTableCell_L1">
-                <div id="datelabeldiv">
-                  <label for="text">Date </label>
-                </div>
-              </td>
-              <td id="LayoutTableCell_L2">
-                <div id="spinnerlabeldiv">
-                  <label for="spinner">Weight </label>                  
-                </div>
-              </td>
-            </tr>
-            
-            <tr>
-              <td id="LayoutTableCell_31">
-                <div id="datepdiv">             
-                  <input type="text" id="datep" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
-                </div>
-              </td>            
-              <td id="LayoutTableCell_32">
-                <div class="spinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
-                  <input id="weightSpinner" name="value" style="height:40px; width:66px"> 
-                </div>
-              </td>              
-              <td id="LayoutTableCell_33">
-                <div id="addweightdiv">
-                  <button id="AddWeight" title="Add a point to the graph with the baby's weight'" disabled>Add weight</button>
-                </div>
-              </td>
-              <td id="LayoutTableCell_34">
-                <div id="deletemeasurediv">
-                  <button id="DeleteMeasure" title="Delete the seleted point on the graph" disabled >Delete point</button>   
-                </div>
-              </td>            
-              <td id="LayoutTableCell_35">
+              <td id="LayoutTableCell_24">
                 <div id="helpdiv">
                   <button id="helpbutton" title="">Help</button>   
                 </div>
               </td>
-              
             </tr>
           </tbody>
         </table>
@@ -106,11 +65,29 @@
     </td>
   </tr>
 
-<!--Dialog-->
+<!--Help-->
+<div id="helpmainpage" title="Help dialog">
+  <p>The graph shows the average weight in Kg of a baby between 0 and 200 weeks of age. The data was downloaded 
+    from the World Health Organization database.</p>
+  <p>Step 1 Add a baby: click on Edit babies. In the pop up dialog fill in the Name, Gender and Birthdate.</p>
+  <p>Step 2 Add, Edit or Remove a weight measurement: click on the "Edit measures" button. </p>    
+  <p>You can zoom in the graph or click on the data to delete it, or hover over it to see more information.</p>
+</div> 
+
+<div id="helpdialog" title="Help dialog">
+  <p>To add a measurement on the table, click on "Add a measure".</p> 
+  <p>To edit or remove a line on the table, select the line and click on "Edit measure" or "Delete measure".<p>
+  <p>On the section appearing on the botton indicate the baby's weight on a certain date and optionally a comment, then 
+    confirm or cancel your edits</p>  
+  <p>Click on "Save & Close" or "Cancel"" to apply or ignore the edits. The data will be plotted on the graph. </p>
+  <p>You can export the data for each individual baby by clicking on "Export to file" 
+</div>
+
+<!--Add baby dialog-->
   <tr style="vertical-align:top;">
     <td style="padding-bottom:8px;">
-      <div id="dialog" title="Add a baby">
-        <table class="group"  >
+      <div id="babydialog" title="Add a baby">
+        <table class="group">
           <thead>
             <!--Instructions-->
             <tr cellpadding="0";>
@@ -122,7 +99,7 @@
           <tbody>    
             <!--Name-->
             <tr>
-              <td id="LayoutTableCell_D2">
+              <td>
                 <div id="inputfordropdowndiv">
                   <input id="inputfordropdown" type="text" name="dropdown" value="Name">
                 </div>
@@ -130,7 +107,7 @@
             </tr>
             <!--Gender-->
             <tr>
-              <td id="LayoutTableCell_D3">
+              <td>
                 <div id="genderinputdiv">
                     <select name="genderinput" id="genderinput">
                         <option selected disabled>Gender</option>
@@ -142,7 +119,7 @@
             </tr>
             <!--Birthdate-->
             <tr>              
-              <td id="LayoutTableCell_D4">
+              <td>
                 <div class="spinnerdiv" id="spinnerdiv"">                  
                   <input type="text" id="birthdatep" style="height:31px" value="Birthdate" >
                 </div>
@@ -153,21 +130,159 @@
       </div>
     </td>
   </tr>
-<!--Help-->
-<div id="helpdialog" title="Help dialog">
-  <p>The graph shows the average weight in Kg of a baby between 0 and 200 weeks of age. The data was downloaded from the dataset of the World Health Organization.</p>
-  <p>To plot a baby's weight on top of the graph, start by clicking on the "Edit babies" button. Add a baby by indicating in the pop up dialog his or her Name, 
-    Gender and Birthdate and by clicking on "Add baby".</p> 
-  <p>On the main page, indicate the baby's weight on a certain weight and click on "Add weight". The data will be plotted on the graph.</p>
-  <p>You can zoom in the graph or click on the data to delete it, or hover over it to see its information.</p>
-</div> 
-<!--
-  TO DO: 
-  *) Zoom and panning limit. Drag does not work at maximum zooming
-  *) wrap jQuery code with: jQuery(document).ready(function(){} ?  
-  *) Dialog to include Date, Weight, Add weight?
-  *) Layouts? 
--->
+
+  <tr style="vertical-align:top;">
+    <td style="padding-bottom:8px;">
+      <div id="dialog">
+        <div>
+          <table class="group">
+            <thead>
+              <!--Instructions-->
+              <tr cellpadding="0";>
+                <th style="text-align:left" id="LayoutTableCell_D1">
+                    <p id="tabletitle">Please edit the table</p>
+                </th>              
+              </tr>        
+            </thead>
+            <tbody>    
+              <!--Table-->
+              <tr>
+                <td>
+                  <div id="tablediv">
+                    <table id="table" border="1" cellspacing="1" cellpadding="5">
+                      <tbody id="tablebody">                      
+                        <tr id="tr0">
+                        <th style="width:100px">Date</th>
+                        <th style="width:50px">Days</th>
+                        <th style="width:50px">Weight</th>
+                        <th style="width:152px">Comment</th>
+                        </tr>                      
+                      </tbody>
+                    </table>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+<br>
+          <!--buttons export, addmeasure, delete measure, help             to do improve padding or so-->
+          <table class="group">
+            <tbody>
+              <tr>
+                <td>
+                  <div id="addmeasurediv">
+                    <button id="addmeasure" title="Add a measurement to the table">Add a measure</button>
+                  </div>
+                </td>
+                <td>
+                  <div id="editmeasurediv">
+                    <button id="editmeasure" title="Select a line on the table and click on this button to edit it">Edit measure</button>
+                  </div>
+                </td>
+                <td id="LayoutTableCell_34">
+                  <div id="deletemeasurediv">
+                    <button id="deletemeasure" title="Delete the seleted point from the table" disabled >Delete measure</button>   
+                  </div>
+                </td>
+                <td>
+                  <div id="exportdiv">
+                    <button id='export'>Export to file</button>
+                  </div>
+                </td>
+              </tr>                              
+            </tbody>
+          </table>
+        </div>
+
+         <!--Labels and Measure-->
+        <div id="accordion" hidden="true">
+          <table class="selected" cellspacing="1" cellpadding="5">
+            <tbody>
+              <tr cellpadding="0">
+                <td>
+                  <div id="datelabeldiv">
+                    <label for="text">Date</label>
+                  </div>
+                </td>
+                <td>
+                  <div id="spinnerlabeldiv">
+                    <label for="spinner">Weight</label>
+                  </div>
+                </td>
+                <td>
+                  <div id="spinnerlabeldiv">
+                    <label>Comment</label>                  
+                  </div>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <div id="datepdiv">             
+                    <input type="text" id="datep" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
+                  </div>
+                </td>            
+                <td>
+                  <div class="spinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
+                    <input id="weightSpinner" name="value" style="height:40px; width:66px"> 
+                  </div>
+                </td>              
+                <td colspan="2">
+                  <div id="">
+                    <textarea id="commentarea" value="" rows="2" cols="17"></textarea>
+                  </div>
+                </td>
+              </tr>
+              
+              <tr>
+                <td>
+                  <div id="addWeightdiv">
+                    <button id="addedittable" title="Add a point to the graph with the baby's weight'" 
+                        disabled>Insert in table</button>
+                  </div>
+                </td>
+                <td>
+                  <div id="cancelweightdiv">
+                    <button id="cancelweight" title="Cancel adding a weight">Cancel</button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+<br>
+
+        <div id="dialogButtons">
+        <table class="group">
+          <tbody>
+            <tr>
+              <!--<td>
+                <div>
+                  <button id="applydialogbutton">Apply</button>
+                </div>
+              </td>
+              -->
+              <td>
+                <div>
+                  <button id="savedialogbutton" title="Save and plot the data in the table">Save & Close</button>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <button id="canceldialogbutton" title="Discard the changes and close this dialog">Cancel</button>
+                </div>
+              </td>
+              <td>
+                <div>
+                  <button id="helpdialogbutton" title="">Help</button>   
+                </div>
+              </td>
+            </tr>            
+          </tbody>
+        </table>
+        </div>
+      </div>
+    </td>
+  </tr>
 
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>
@@ -175,6 +290,7 @@
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script type="text/javascript" src="iGrow.js"></script>
 
-
   </body>
 </html>
+
+
