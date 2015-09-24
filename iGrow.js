@@ -752,6 +752,8 @@ function saveTable2BabiesData(){
   var data=table2JSON();
   var index=getCurrIndex();
   babies[index].Data=data;
+  //Sort data objects in babies
+  babies[index].Data.sort(comparebabiesData);
 }
 
 //Table2JSON
