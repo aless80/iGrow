@@ -494,19 +494,16 @@ function pageFullyLoaded(e) {
 }
 //Deselect circles: nullify is set circle to null (delete?)
 function deselectCircle(nullify) {
-    if (graph.selectCircle) {
-      console.log("deselectCircle document.getElementById(elemid)")
-        document.getElementById(graph.selectCircle.id).setAttribute("r",6);
-        
-      console.log("deselectCircle document.getElementById(elemid) after")
-        document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
-        //document.getElementById(graph.selectCircle.id).style("cursor: ns-resize; fill: none;");
-        if (nullify) {
-          graph.selectCircle = null;
-          graph.selectCircleData=null;
-          document.getElementById('deletemeasure').disabled = true;
-        }
+  if (graph.selectCircle) {
+    document.getElementById(graph.selectCircle.id).setAttribute("r",6);
+    document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
+    //document.getElementById(graph.selectCircle.id).style("cursor: ns-resize; fill: none;");
+    if (nullify) {
+      graph.selectCircle = null;
+      graph.selectCircleData=null;
+      document.getElementById('deletemeasure').disabled = true;
     }
+  }
 }
 //Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
 function dateToYMD(dmy) {
@@ -678,10 +675,8 @@ function appendToTable(obj){
       var td = document.createElement('td');
       if (key=="Weeks") 
         var t = document.createTextNode(obj[key]*7); //days
-      else if (key=="Weight") {
-      console.log(obj[key])
-        var t = document.createTextNode(obj[key])//.toFixed(1));
-      }
+      else if (key=="Weight")
+        var t = document.createTextNode(Number(obj[key]).toFixed(1));
       else 
         var t = document.createTextNode(obj[key]);        
       td.appendChild(t);
