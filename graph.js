@@ -636,7 +636,7 @@ d3.select("body")
     }
     //Catch keys delete and backspace
     if ((d3.event.keyCode == 46) || (d3.event.keyCode == 8)) { //Delete or Backspace
-      var del = deleteWeight(self.selectCircle.id);
+      var del = Dialog.deleteWeight(self.selectCircle.id);
       if (del) {
         deselectCircle(1);
       }

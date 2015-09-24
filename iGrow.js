@@ -44,7 +44,7 @@ jQuery(document).on("change", "#dropdown", function(e) {
               jQuery("#dropdown").removeAttr("disabled");
               jQuery("#editbabybutton").removeAttr("disabled");
               jQuery("#dialogbutton").removeAttr("disabled");
-              write2Cache();
+              Dialog.write2Cache();
         	}
         },
         Cancel: function() {
@@ -161,6 +161,18 @@ function getGender(){
     gender = 1
   return gender;
 }
+//Get the currently plotted gender: 1,2,-1 for male/female/unknown
+function getCurrGender() {
+  var stroke = jQuery('[id*="sigma"]').css("stroke");
+  if (stroke == "rgb(0, 255, 255)") {
+    return 1; 
+  } else if (stroke == "rgb(255, 0, 255)") {
+    return 2;
+  } else {
+    throw "getCurrGender: cannot determine the plotted gender. color in style>stroke not recognized";
+    return -1;
+  } 
+}
 //Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
 function getBirthdate(){
   var name = jQuery("#dropdown").val();
@@ -215,7 +227,7 @@ var Dialog={
           if (redrawLater) Dialog.updateDataAndGraph();
           //enable Selections
           enableSelection(true);
-          write2Cache();
+          Dialog.write2Cache();
         } else {
           //disable Selections if baby is empty
           enableSelection(false);
@@ -330,7 +342,85 @@ var Dialog={
     jQuery("#custom-alert").dialog("close");
     return true;
   }, hideTimeout)
-}   
+},
+
+
+
+
+
+
+//Get the line and data from the selected row on the table
+  getSelectedFromTable: function(){
+    var line=jQuery("table .selected")[0].getAttribute("id");
+    var date=jQuery("table .selected td:first-child").text();
+    var weight=new Number(jQuery("table .selected td:nth-child(3)").text()).toFixed(1);
+    var comment=jQuery("table .selected td:nth-child(4)").text();
+    return {date:date, weight:weight, comment:comment, line:line}
+  },
+
+  fillAccordion: function() {
+    var cells=Dialog.getSelectedFromTable();  
+    //console.log("weight,comment=",weight,comment)
+    jQuery("#datep").val(cells.date);  
+    jQuery("#weightspinnerdiv").val();
+    jQuery("#weightSpinner").spinner( "value", cells.weight+" Kg");
+    jQuery("#commentarea").val(cells.comment);
+  },
+
+  //Save table in babies[].Data
+  saveTable2BabiesData: function(){
+    var data=Dialog.table2JSON();
+    var index=getCurrIndex();
+    babies[index].Data=data;
+    //Sort data objects in babies
+    babies[index].Data.sort(Dialog.comparebabiesData);
+  },
+  //compare function to sort babies[].Data on Weeks
+  comparebabiesData: function(a,b) {
+    if (a.Weeks < b.Weeks)
+    return -1;
+    if (a.Weeks > b.Weeks)
+      return 1;
+      return 0;
+  },
+  //
+  table2JSON: function() {
+    data = jQuery('#table tr:has(td)').map(
+      function(ind, val) {
+        var td =  jQuery('td', this);
+        var index = getCurrIndex();
+        return {
+          ///Name:     babies[index].Name,
+          //BirthDate: babies[index].BirthDate,
+          //Gender: babies[index].Gender,
+          Date:    td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
+          Weeks:   Number(td.eq(1).text()/7),
+          Weight:  Number(td.eq(2).text()),
+          Comment: td.eq(3).text()
+        }
+      }).get();
+  return data;
+  },
+  //Work with the cache 
+  write2Cache: function(){
+    localStorage['iGrow'] = JSON.stringify(babies);
+  },
+  deleteWeight: function(id){ //to do: can I use the other one for in the table?
+    console.log("Dialog.deleteWeight: id=",id)
+    var indCircle = id.split("_").pop();
+    var index = getCurrIndex();
+    var string = "Weight was "+babies[index].Data["Weight"][indCircle]+"Kg on "+babies[index].Data["Date"][indCircle]
+    var conf = confirm("Do you really want to remove this point from the data?\nasdadsadThis action cannot be undone\n"+string);
+    if (conf){
+      babies[index].Data.splice(indCircle, 1);
+      //Update the circles and the scatterplot
+      graph.setCurrrentDataWeight();
+      return true;
+    }
+    return false;
+  }
+
+
 
 
 
@@ -340,9 +430,49 @@ var Dialog={
 
 
 
+//Deselect circles: nullify is set circle to null (delete?)
+function deselectCircle(nullify) {
+  if (graph.selectCircle) {
+    document.getElementById(graph.selectCircle.id).setAttribute("r",6);
+    document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
+    if (nullify) {
+      graph.selectCircle = null;
+      graph.selectCircleData=null;
+      jQuery('#deletemeasure').attr("disabled", "true");
+    }
+  }
+}
+//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+function dateToYMD(dmy) {
+  return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
+ };
+function MDYToDMY(mdy) {
+  return mdy.substring(3,5) + "/" + mdy.substring(0,2) + "/" + mdy.substring(6,10)
+ };
+
+//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+function DMYToDate(dmy) {
+	return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
+  };
+
+//Clear the graph from lines
+function removePathsInSVG() {
+   //d3.select("svg").selectAll("*").remove(); //all children
+   d3.selectAll(".pathArea").remove(); //
+  }
+
+
+
+function readFromCache(){ //cannot putit in Dialog now, "readFromCache undefined because it defines babies" 
+    var stored = localStorage['iGrow'];
+    if (stored) var babies = JSON.parse(stored);
+    else var babies = new Array(); 
+    return babies;
+}
+
+
 
 ///Actions
-
 //At startup populate the dropdown menu   //to do: put before?
 Dialog.populateDropdown(babies);
 
@@ -407,15 +537,6 @@ jQuery(function() {
     });
 });
 
-//compare function to sort babies[].Data on Weeks
-function comparebabiesData(a,b) {
-  if (a.Weeks < b.Weeks)
-  return -1;
-  if (a.Weeks > b.Weeks)
-    return 1;
-    return 0;
-}
-
 //addedittable: add or edit data to table
 jQuery(function() {
     jQuery("#addedittable").click(function() {      
@@ -452,7 +573,7 @@ jQuery(function() {
         jQuery("#addmeasure").removeAttr("disabled");
       } else if (textButton=="Edit"){
       //Edit data in tables     
-        var sel=getSelectedFromTable();
+        var sel=Dialog.getSelectedFromTable();
         jQuery("table #"+sel.line + " :nth-child(1)").text(dateDMY)
         jQuery("table #"+sel.line + " :nth-child(2)").text(days)
         jQuery("table #"+sel.line + " :nth-child(3)").text(weight)
@@ -468,7 +589,7 @@ jQuery(function() {
     jQuery("#deletemeasure").click(function() {
       var conf = confirm("Do you really want to remove this point from the table?\n");
       if (conf){
-        var sel=getSelectedFromTable();
+        var sel=Dialog.getSelectedFromTable();
         jQuery("#"+sel.line).remove();
       } else {
         //Deselect line from table
@@ -515,68 +636,12 @@ function pageFullyLoaded(e) {
   jQuery("#datep").val(todayDMY);
   jQuery("#weightSpinner").spinner( "value", "3.0 Kg");
 }
-//Deselect circles: nullify is set circle to null (delete?)
-function deselectCircle(nullify) {
-  if (graph.selectCircle) {
-    document.getElementById(graph.selectCircle.id).setAttribute("r",6);
-    document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
-    if (nullify) {
-      graph.selectCircle = null;
-      graph.selectCircleData=null;
-      jQuery('#deletemeasure').attr("disabled", "true");
-    }
-  }
-}
-//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
-function dateToYMD(dmy) {
-  return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
- };
-function MDYToDMY(mdy) {
-  return mdy.substring(3,5) + "/" + mdy.substring(0,2) + "/" + mdy.substring(6,10)
- };
-
-//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
-function DMYToDate(dmy) {
-	return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
-  };
-
-//Clear the graph from lines
-function removePathsInSVG() {
-   //d3.select("svg").selectAll("*").remove(); //all children
-   d3.selectAll(".pathArea").remove(); //
-  }
-//Get the currently plotted gender: 1,2,-1 for male/female/unknown
-function getPlottedGender() {
-  var stroke = jQuery('[id*="sigma"]').css("stroke");
-  if (stroke == "rgb(0, 255, 255)") {
-    return 1; 
-  } else if (stroke == "rgb(255, 0, 255)") {
-    return 2;
-  } else {
-    throw "getPlottedGender: cannot determine the plotted gender. color in style>stroke not recognized";
-    return -1;
-  } 
-}
-function deleteWeight(id){
-  console.log("deleteWeight: id=",id)
-	var indCircle = id.split("_").pop();
-  var index = getCurrIndex();
-	var string = "Weight was "+babies[index].Data["Weight"][indCircle]+"Kg on "+babies[index].Data["Date"][indCircle]
-	var conf = confirm("Do you really want to remove this point from the data?\nThis action cannot be undone\n"+string);
-  if (conf){
-		babies[index].Data.splice(indCircle, 1);
-		//Update the circles and the scatterplot
-		graph.setCurrrentDataWeight();
-    return true;
-	}
-  return false;
-}
 
 
 
 
 
-//Dialog
+//Actions on Dialog
 jQuery(function() {
   jQuery("#dialog").dialog({
       autoOpen: false,
@@ -600,7 +665,7 @@ jQuery(function() {
     });
   //editmeasure populates and opens the accordion
   jQuery("#editmeasure").click(function(){
-    fillAccordion();
+    Dialog.fillAccordion();
     //Change text of addedittable button 
     jQuery("#addedittable").text("Edit in table");
     //show accordion
@@ -627,8 +692,8 @@ jQuery(function() {
   jQuery("#savedialogbutton").click(function() {
       //Save to Data object
       //var conf = confirm("Do you really want edit the data and close this dialog?\nThis action cannot be undone\n");
-      saveTable2BabiesData();
-      write2Cache();
+      Dialog.saveTable2BabiesData();
+      Dialog.write2Cache();
       //replot
       Dialog.updateDataAndGraph();
       jQuery("#dialog").dialog("close");
@@ -720,7 +785,7 @@ console.log("deletemeasure disabled true")
     jQuery(this).addClass('selected')
         .siblings().removeClass('selected');    
     //populate and open accordion    
-    fillAccordion();    
+    Dialog.fillAccordion();    
     jQuery("#editmeasure").removeAttr("disabled");
     jQuery("#addmeasure").attr("disabled","true");
     
@@ -729,58 +794,7 @@ console.log("deletemeasure disabled true")
   }
 });
 
-//Get the line and data from the selected row on the table
-function getSelectedFromTable(){
-  var line=jQuery("table .selected")[0].getAttribute("id");
-  var date=jQuery("table .selected td:first-child").text();
-  var weight=new Number(jQuery("table .selected td:nth-child(3)").text()).toFixed(1);
-  var comment=jQuery("table .selected td:nth-child(4)").text();
-  return {date:date, weight:weight, comment:comment, line:line}
-}
 
-function fillAccordion() {
-  var cells=getSelectedFromTable();  
-  //console.log("weight,comment=",weight,comment)
-  jQuery("#datep").val(cells.date);  
-  jQuery("#weightspinnerdiv").val();
-  jQuery("#weightSpinner").spinner( "value", cells.weight+" Kg");
-  jQuery("#commentarea").val(cells.comment);
-}
-
-//Save table in babies[].Data
-function saveTable2BabiesData(){
-  var data=table2JSON();
-  var index=getCurrIndex();
-  babies[index].Data=data;
-  //Sort data objects in babies
-  babies[index].Data.sort(comparebabiesData);
-}
-
-//Table2JSON
-// jQuery(document).ready(function(){
-//     jQuery('#Table2JSON').click(function(){
-//         //var 
-//         data=table2JSON();  
-//     });
-// });
-function table2JSON() {
-  //var 
-  data = jQuery('#table tr:has(td)').map(
-    function(ind, val) {
-      var td =  jQuery('td', this);
-      var index = getCurrIndex();
-      return {
-        ///Name:     babies[index].Name,
-        //BirthDate: babies[index].BirthDate,
-        //Gender: babies[index].Gender,
-        Date:    td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
-        Weeks:   Number(td.eq(1).text()/7),
-        Weight:  Number(td.eq(2).text()),
-        Comment: td.eq(3).text()
-      }
-    }).get();
-return data;
-}
 
 
 
@@ -846,16 +860,6 @@ function JSONToCSVConvertor(obj){
 
 //document.getElementById("dialogbutton").focus();
 
-function write2Cache(){
-  localStorage['iGrow'] = JSON.stringify(babies);
-}
-
-function readFromCache(){
-  var stored = localStorage['iGrow'];
-  if (stored) var babies = JSON.parse(stored);
-  else var babies = new Array(); 
-  return babies;
-}
 
 //Load the data from weianthro
 jQuery(document).ready(function(){
