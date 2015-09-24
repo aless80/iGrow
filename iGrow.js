@@ -172,6 +172,7 @@ function removeBaby(name){
         if (redrawLater) updateDataAndGraph();
         //enable Selections
         enableSelection(true);
+        write2Cache();
       } else {
         //disable Selections if baby is empty
         enableSelection(false);
@@ -853,8 +854,9 @@ var datum = new Datum("01/08/2015", DaysForTest(0,"01/08/2015") / 7, 4,"Just bor
 babies[0].Data.push(datum);
 babies[0].Data.push(new Datum("30/08/2015", DaysForTest(0,"30/08/2015") / 7, 5.4));
 babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6));
-autocomplete();
 */
+autocomplete();
+
 
 //Start plot
 weiBoy = [];
