@@ -612,6 +612,7 @@ jQuery(function() {
   jQuery("#savedialogbutton").click(function() {
       //Save to Data object
       //var conf = confirm("Do you really want edit the data and close this dialog?\nThis action cannot be undone\n");
+      saveTable2BabiesData();
       //replot
       updateDataAndGraph();
       jQuery("#dialog").dialog("close");
@@ -677,8 +678,10 @@ function appendToTable(obj){
       var td = document.createElement('td');
       if (key=="Weeks") 
         var t = document.createTextNode(obj[key]*7); //days
-      else if (key=="Weight") 
-        var t = document.createTextNode(obj[key].toFixed(1));
+      else if (key=="Weight") {
+      console.log(obj[key])
+        var t = document.createTextNode(obj[key])//.toFixed(1));
+      }
       else 
         var t = document.createTextNode(obj[key]);        
       td.appendChild(t);
@@ -732,32 +735,56 @@ function fillAccordion() {
   jQuery("#commentarea").val(cells.comment);
 }
 
-//Table2JSON button
-jQuery(document).ready(function(){
-    jQuery('#Table2JSON').click(function(){
-        data=table2JSON();  
-    });
-});
+//Save table in babies[].Data
+function saveTable2BabiesData(){
+  var data=table2JSON();
+  var index=getCurrIndex();
+  babies[index].Data=data;
+}
+
+//Table2JSON
+// jQuery(document).ready(function(){
+//     jQuery('#Table2JSON').click(function(){
+//         //var 
+//         data=table2JSON();  
+//     });
+// });
 function table2JSON() {
+  //var 
   data = jQuery('#table tr:has(td)').map(
     function(ind, val) {
       var td =  jQuery('td', this);
+      var index = getCurrIndex();
       return {
+        ///Name:     babies[index].Name,
+        //BirthDate: babies[index].BirthDate,
+        //Gender: babies[index].Gender,
         Date:    td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
         Weeks:   Number(td.eq(1).text()/7),
         Weight:  Number(td.eq(2).text()),
         Comment: td.eq(3).text()
       }
     }).get();
-    //jQuery("#textarea").val("JSON.stringify( data ) = \n"+JSON.stringify(data));
 return data;
 }
 
-//Save table in babies[].Data
-function saveTable2BabiesData(){
-  var data=table2JSON();
-  var index=getCurrIndex();
-  babies[index].Data=data;
+//babies2JSON
+function babies2JSON(){
+  var json=new Array();
+  for (var index=0; index<babies.length;index++) {
+    for (var ind=0; ind<babies[index]["Data"].length;ind++) {
+      json.push({
+        Name:     babies[index].Name,
+        BirthDate: babies[index].BirthDate,
+        Gender: babies[index].Gender,
+        Date:    babies[index]["Data"][ind]["Date"],
+        Weeks:   babies[index]["Data"][ind]["Weeks"],
+        Weight:  babies[index]["Data"][ind]["Weight"],
+        Comment: babies[index]["Data"][ind]["Comment"]
+      });
+    }
+  }
+  return json;
 }
 
 //Export
@@ -766,18 +793,18 @@ jQuery(document).ready(function(){
         var data = jQuery('#txt').val();
         if(data == '')
             return;
-        table2JSON();
-        JSONToCSVConvertor();
+        var data=babies2JSON();
+        JSONToCSVConvertor(data);
     });
 });
-function JSONToCSVConvertor(){
-    out = '';
+function JSONToCSVConvertor(obj){
+    var out = '';
      //1st loop is to extract each row
-    for (var i = 0; i < data.length; i++) {
+    for (var i = 0; i < obj.length; i++) {
         var row = "";        
         //2nd loop will extract each column and convert it in string comma-seprated
-        for (var index in data[i]) 
-            row += '' + data[i][index] + ', ';
+        for (var index in obj[i]) 
+            row += '' + obj[i][index] + ', ';
         row.slice(0, row.length - 1);
         //add a line break after each row
         out += row + '\r\n';
