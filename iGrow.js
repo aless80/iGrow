@@ -610,6 +610,7 @@ jQuery(function() {
       //Save to Data object
       //var conf = confirm("Do you really want edit the data and close this dialog?\nThis action cannot be undone\n");
       saveTable2BabiesData();
+      write2Cache();
       //replot
       updateDataAndGraph();
       jQuery("#dialog").dialog("close");
