@@ -1,10 +1,10 @@
 //Create a baby instance, for testing purposes
-var babies = new Array();
-//tests:
-var obj = new Baby("Alice", "01/07/2015", "Female");
-babies.push(obj);
-babies.push(new Baby("Jack", "01/01/2015", "Male"));
-
+// var babies = new Array();
+// //tests:
+// var obj = new Baby("Alice", "01/07/2015", "Female");
+// babies.push(obj);
+// babies.push(new Baby("Jack", "01/01/2015", "Male"));
+readFromCache();
 
 //Scripts about the "add a baby" dialog
 var today = new Date();
@@ -660,7 +660,7 @@ function createTable() {
     tbl.setAttribute('cellpadding','5');
     var tbdy = document.getElementById('tablebody');
     //Table elements
-    for (var ind=0; ind<babies[index].Data.length; ind++) { //ind=measurement index  
+    for (var ind=0; ind<babies[index].Data.length; ind++) { 
       appendToTable(babies[index].Data[ind]);
     }
 }
@@ -826,13 +826,19 @@ function JSONToCSVConvertor(obj){
 
 document.getElementById("dialogbutton").focus();
 
+function write2Cache(){
+  localStorage['myKey'] = JSON.stringify(babies);
+}
 
-
-
+function readFromCache(){
+  var stored = localStorage['myKey'];
+  if (stored) babies = JSON.parse(stored);
+  else babies = new Array(); 
+}
 
 //Load the data from weianthro
 jQuery(document).ready(function(){
-//tests
+/*//tests
 var DaysForTest = function(index, date){
   //console.log("DaysForTest")
   var birthdateYMD = new Date(dateToYMD(babies[index].BirthDate));
@@ -847,7 +853,7 @@ babies[0].Data.push(datum);
 babies[0].Data.push(new Datum("30/08/2015", DaysForTest(0,"30/08/2015") / 7, 5.4));
 babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6));
 autocomplete();
-
+*/
 
 //Start plot
 weiBoy = [];
