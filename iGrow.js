@@ -54,6 +54,7 @@ jQuery(function() {
               jQuery("#editbabybutton").removeAttr("disabled");
               jQuery("#dialogbutton").removeAttr("disabled");
               jQuery("#dialogbutton").removeAttr("disabled")
+              write2Cache();
         	}
         },
         Cancel: function() {
@@ -794,33 +795,33 @@ function table2JSON() {
 return data;
 }
 
-//babies2JSON
-function babies2JSON(){
-  var json=new Array();
-  for (var index=0; index<babies.length;index++) {
-    for (var ind=0; ind<babies[index]["Data"].length;ind++) {
-      json.push({
-        Name:     babies[index].Name,
-        BirthDate: babies[index].BirthDate,
-        Gender: babies[index].Gender,
-        Date:    babies[index]["Data"][ind]["Date"],
-        Weeks:   babies[index]["Data"][ind]["Weeks"],
-        Weight:  babies[index]["Data"][ind]["Weight"],
-        Comment: babies[index]["Data"][ind]["Comment"]
-      });
-    }
-  }
-  return json;
-}
 
 //Export
 jQuery(document).ready(function(){
     jQuery('#export').click(function(){
-        var data = jQuery('#txt').val();
-        if(data == '')
-            return;
-        var data=babies2JSON();
-        JSONToCSVConvertor(data);
+      //babies2JSON
+      function babies2JSON(){
+        var json=new Array();
+        for (var index=0; index<babies.length;index++) {
+          for (var ind=0; ind<babies[index]["Data"].length;ind++) {
+            json.push({
+              Name:     babies[index].Name,
+              BirthDate: babies[index].BirthDate,
+              Gender: babies[index].Gender,
+              Date:    babies[index]["Data"][ind]["Date"],
+              Weeks:   babies[index]["Data"][ind]["Weeks"],
+              Weight:  babies[index]["Data"][ind]["Weight"],
+              Comment: babies[index]["Data"][ind]["Comment"]
+            });
+          }
+        }
+        return json;
+      }
+      var data = jQuery('#txt').val();
+      if(data == '')
+          return;
+      var data=babies2JSON();
+      JSONToCSVConvertor(data);
     });
 });
 function JSONToCSVConvertor(obj){
@@ -885,37 +886,37 @@ babies[0].Data.push(datum);
 babies[0].Data.push(new Datum("30/08/2015", DaysForTest(0,"30/08/2015") / 7, 5.4));
 babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6));
 */
-autocomplete();
-
-
-//Start plot
-weiBoy = [];
-weiGirl = [];
-//http://www.who.int/childgrowth/en/
-d3.tsv("weianthro.txt", 
-  //This function defines how "data" below will look like 
-  function(d) {
-    return {
-    gender: +d.sex,
-    age: +d.age / 7,   //weeks!
-      l: +d.l,
-      m: +d.m,
-      s: +d.s,
-    };
-  },function(error, data) {    
-      data.forEach(function(d, i) {
-        data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
+  autocomplete();
+  
+  
+  //Start plot
+  weiBoy = [];
+  weiGirl = [];
+  //http://www.who.int/childgrowth/en/
+  d3.tsv("weianthro.txt", 
+    //This function defines how "data" below will look like 
+    function(d) {
+      return {
+      gender: +d.sex,
+      age: +d.age / 7,   //weeks!
+        l: +d.l,
+        m: +d.m,
+        s: +d.s,
+      };
+    },function(error, data) {    
+        data.forEach(function(d, i) {
+          data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
+          });
+  
+        graph = new Graph("chart1", {
+            "xmin": 0, "xmax": 200,
+            "ymin": 0, "ymax": 20, 
+            "pointsBoy": weiBoy,
+            "pointsGirl": weiGirl,
+            "xlabel": "Age [Weeks]",
+            "ylabel": "Weight [Kg]",
+            "maxzoom": 2  
         });
-
-      graph = new Graph("chart1", {
-          "xmin": 0, "xmax": 200,
-          "ymin": 0, "ymax": 20, 
-          "pointsBoy": weiBoy,
-          "pointsGirl": weiGirl,
-          "xlabel": "Age [Weeks]",
-          "ylabel": "Weight [Kg]",
-          "maxzoom": 2  
-      });
-    }
-);   
+      }
+  );   
 })
