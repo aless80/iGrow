@@ -73,7 +73,6 @@ Datum = function(date, weeks, weight, comment){
     this.Date = date;
     this.Weeks = weeks;
     this.Weight = weight;
-    //this.Comment = comment;
     this.Comment=(typeof comment === "undefined")?"":comment;
 }
 

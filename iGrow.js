@@ -12,30 +12,21 @@ if (babies.length==0) {
 //Scripts about the "add a baby" dialog
 var today = new Date();
 var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + (today.getMonth()+1)).slice(-2)+"/"+today.getFullYear();
-//update the data and graph
-function updateDataAndGraph(){
-    graph.setPoints();
-    graph.setCurrrentDataWeight();
-    var currentName = getCurrName();
-    graph.title = currentName;
-    graph.redraw();
-    graph.update();
-    graph.setTitle();
-}
-//Track baby selected in dropdown
+
+//Callback: track baby selected in dropdown
 jQuery(document).on("change", "#dropdown", function(e) {
     //deselect any possible circle
     deselectCircle(1);
     //Update the lines, circles, title
     var currentName = this.options[e.target.selectedIndex].text;
-    updateDataAndGraph();
+    Dialog.updateDataAndGraph();
     //Update the minDate in date picker
-    updateMinDate("#datep");
+    Dialog.updateMinDate("#datep");
 });
 
-var names = []
+//var names = []
 //Functions for the babydialog
-//jQuery(function() {
+//jQuery(function() {  //ok?
     jQuery("#babydialog").dialog({
       autoOpen: false,
       show: { effect: "blind", duration: 500 },
@@ -45,15 +36,14 @@ var names = []
         	text : "Add baby",
         	id : "dialog_AddBaby",
         	click : function() {
-          		var ok = addToDropdown(); 
-              autocomplete();
+          		var ok = Dialog.addToDropdown(); 
+              Dialog.autocomplete();
               jQuery("#datep").val(todayDMY);
               enableSelection();
           		if (ok) jQuery( this ).dialog("close");
               jQuery("#dropdown").removeAttr("disabled");
               jQuery("#editbabybutton").removeAttr("disabled");
               jQuery("#dialogbutton").removeAttr("disabled");
-              jQuery("#dialogbutton").removeAttr("disabled")
               write2Cache();
         	}
         },
@@ -69,8 +59,8 @@ var names = []
         	id : "dialog_DelBaby",
         	click : function() {
             var text = jQuery("#inputfordropdown").val();
-            removeBaby(text);  
-            autocomplete();
+            Dialog.removeBaby(text);  
+            Dialog.autocomplete();
             if (babies.length==0) jQuery("#dialogbutton").attr("disabled","true");
             jQuery( this ).dialog("close");
           }
@@ -135,120 +125,7 @@ var names = []
 //});
 
 
-//Autocomplete baby name input
-function autocomplete() {
-    jQuery(function() {
-        var index=getCurrIndex();
-        var names = new Array();
-        babies.forEach(function(element) {
-          names.push(element.Name);
-        }, this);
-        jQuery("#inputfordropdown").autocomplete({
-          source: names
-        });
-      });
-}
-//Helper functions related to the dialog
-function emptyDropdown(){
-  //empty() removes all child nodes
-  jQuery("#dropdown").empty();
-}
-function populateDropdown(array){
-  //append children
-  jQuery.each(array, function(index, value) {//val, text
-  jQuery('#dropdown').append(jQuery('<option></option>').val(value["Name"]).html(value["Name"]).addClass("dropdownBaby") )
-    });
-}
-function removeBaby(name){
-  var index=getIndexFromName(name);
-  if (index == -1) {
-    alert(name+" was not found");
-  } else {
-    var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
-    if (conf){
-      var redrawLater=(getCurrIndex()==index)?1:0 
-      babies.splice(index, 1);
-      emptyDropdown();
-      if (babies.length > 0) {
-        populateDropdown(babies);
-        //Update only if current baby was removed
-        if (redrawLater) updateDataAndGraph();
-        //enable Selections
-        enableSelection(true);
-        write2Cache();
-      } else {
-        //disable Selections if baby is empty
-        enableSelection(false);
-      }
-    }
-  }
-}
-function areInputsValid(prompt){
-  var text = jQuery("#inputfordropdown").val();
-  //We will check whether the name in "text" is already present in the baby instance
-  var existing = getExistingElements();
-  var message = "";
-  if (existing.indexOf(text) > -1) {
-    message = "This name already exists";
-  }
-  else if (text == "") {
-    message = "The name cannot be empty"; 
-  }
-  else if (text == "Name") {
-    message = "Please select a name for your child"; 
-  }
-  //Check if the gender was selected
-  else if (jQuery("#genderinput").val() === null) {
-    message = "Please select a gender for your child";
-  }
-  //Check if the birthdate was selected
-  else if (jQuery("#birthdatep").val() == "Birthdate") {
-    message = "Please select a birthdate for your child";
-  }
-  //Prompt the problem
-  if (message !== "") {
-    if (prompt) {
-      //customAlert(message,3000); //too bad, customAlert is asynchronous and the dialog disappears
-      alert(message);
-    }
-    return false;
-  }
-  return true;
-}
-// Add all existing babies to the dropdown 
-function addToDropdown(){
-  if (areInputsValid(true)){
-    var text = jQuery("#inputfordropdown").val();  
-    var gender = jQuery("#genderinput").val();
-    if (gender == "Female") {
-      gender = 2;
-    } else if (gender == "Male") {
-      gender = 1;
-    }
-    var birthdate = jQuery("#birthdatep").val();
-    //Add to baby instance
-    babies.push(new Baby(text, birthdate, gender));
-    //Switch dropdown in UI to new baby 
-    emptyDropdown();
-    populateDropdown(babies);
-    jQuery("select option[value='"+text+"']").attr("selected","selected");
-    //Replot
-    updateDataAndGraph();
-    //Update minDate in #datep
-    updateMinDate("#datep");
-    return true
-  } else {
-    return false;
-  }
-}
-function getExistingElements(){
-  var elem = new Array();
-  jQuery(".dropdownBaby").each(
-    function(index) { 
-      elem.push(jQuery( this ).text());
-  });
-    return elem;
-}
+//Functions about retrieving data related to the babies object from DOM or babies itself 
 //Get the baby's name from the dropdown
 function getCurrName(){
   var value = jQuery("#dropdown").val();
@@ -266,25 +143,22 @@ function getCurrIndex(){
 //Get the index in the babies array from a baby's name
 function getIndexFromName(name){
   for (var ind = 0; ind < babies.length; ind++) {
-      if (babies[ind]["Name"]==name){
+      if (babies[ind]["Name"]==name)
         return ind;
-      }
   }
-  return null
+  return null;
 }
 //Get the baby's gender from the dropdown
 function getGender(){
   var name = getCurrName();
   var index=getCurrIndex();
   if (babies.length == 0) return 0;
-    //var index = babies[index].Name.indexOf(name);
     var gender = babies[index].Gender
   // solved problem: when I add a baby using the dropdown I get Male/Female, not 1/2.
-  if (gender == "Female") {
+  if (gender == "Female") 
     gender = 2;
-  } else if (gender == "Male") {
+  else if (gender == "Male") 
     gender = 1
-  }
   return gender;
 }
 //Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
@@ -296,24 +170,183 @@ function getBirthdate(){
   var index = getCurrIndex();
   return babies[index].BirthDate;
 }
-//Update minDate for e.g. #datep
-function updateMinDate(selector){
+
+//Container object for many methods
+var Dialog={
+  //Autocomplete baby name input
+  autocomplete: function() {
+    jQuery(function() {
+        var index=getCurrIndex();
+        var names = new Array();
+        babies.forEach(function(element) {
+          names.push(element.Name);
+        }, this);
+        jQuery("#inputfordropdown").autocomplete({
+          source: names
+        });
+    });
+  },
+
+  //Helper functions related to the dialog
+  emptyDropdown: function(){
+    //empty() removes all child nodes
+    jQuery("#dropdown").empty();
+  },
+  populateDropdown: function(array){
+    //append children
+    jQuery.each(array, function(index, value) {//val, text
+      jQuery('#dropdown').append(jQuery('<option></option>').val(value["Name"]).html(value["Name"]).addClass("dropdownBaby") )
+    });
+  },
+
+ removeBaby: function(name){
+  var index=getIndexFromName(name);
+  if (index == -1) {
+    alert(name+" was not found");
+    } else {
+      var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
+      if (conf){
+        var redrawLater=(getCurrIndex()==index)?1:0 
+        babies.splice(index, 1);
+        Dialog.emptyDropdown();
+        if (babies.length > 0) {
+          Dialog.populateDropdown(babies);
+          //Update only if current baby was removed
+          if (redrawLater) Dialog.updateDataAndGraph();
+          //enable Selections
+          enableSelection(true);
+          write2Cache();
+        } else {
+          //disable Selections if baby is empty
+          enableSelection(false);
+        }
+      }
+    }
+  },
+  areInputsValid: function(prompt){
+    var text = jQuery("#inputfordropdown").val();
+    //We will check whether the name in "text" is already present in the baby instance
+    var existing = Dialog.getExistingElements();
+    var message = "";
+    if (existing.indexOf(text) > -1) {
+      message = "This name already exists";
+    }
+    else if (text == "") {
+      message = "The name cannot be empty"; 
+    }
+    else if (text == "Name") {
+      message = "Please select a name for your child"; 
+    }
+    //Check if the gender was selected
+    else if (jQuery("#genderinput").val() === null) {
+      message = "Please select a gender for your child";
+    }
+    //Check if the birthdate was selected
+    else if (jQuery("#birthdatep").val() == "Birthdate") {
+      message = "Please select a birthdate for your child";
+    }
+    //Prompt the problem
+    if (message !== "") {
+      if (prompt) {
+        //Dialog.customAlert(message,3000); //too bad, Dialog.customAlert is asynchronous and the dialog disappears
+        alert(message);
+      }
+      return false;
+    }
+    return true;
+  },
+
+// Add all existing babies to the dropdown 
+  addToDropdown: function(){
+    if (Dialog.areInputsValid(true)){
+      var text = jQuery("#inputfordropdown").val();  
+      var gender = jQuery("#genderinput").val();
+      if (gender == "Female") {
+        gender = 2;
+      } else if (gender == "Male") {
+        gender = 1;
+      }
+      var birthdate = jQuery("#birthdatep").val();
+      //Add to baby instance
+      babies.push(new Baby(text, birthdate, gender));
+      //Switch dropdown in UI to new baby 
+      Dialog.emptyDropdown();
+      Dialog.populateDropdown(babies);
+      jQuery("select option[value='"+text+"']").attr("selected","selected");
+      //Replot
+      Dialog.updateDataAndGraph();
+      //Update minDate in #datep
+      Dialog.updateMinDate("#datep");
+      return true
+    } else {
+      return false;
+    }
+  },
+  getExistingElements: function(){
+    var elem = new Array();
+    jQuery(".dropdownBaby").each(
+      function(index) { 
+        elem.push(jQuery( this ).text());
+    });
+      return elem;
+  },
+  //Update minDate for e.g. #datep
+  updateMinDate: function(selector){
     var birthdateDMY = getBirthdate().split("/");
     jQuery(selector).datepicker("option", "minDate", new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0]) );
     jQuery(selector).datepicker("option", "maxDate", 0 );
-}
-//At startup populate the dropdown menu
-populateDropdown(babies);
+  },
+  //update the data and graph
+  updateDataAndGraph: function(){
+    graph.setPoints();
+    graph.setCurrrentDataWeight();
+    var currentName = getCurrName();
+    graph.title = currentName;
+    graph.redraw();
+    graph.update();
+    graph.setTitle();
+  },
+  showAccordion: function() {
+    jQuery("#accordion").removeAttr("hidden");
+    jQuery("#dialogButtons").attr("hidden","true");
+    jQuery("#editmeasure").attr("disabled","true");
+    jQuery("#deletemeasure").attr("disabled","true");
+    jQuery("#export").attr("disabled","true");
+  },
+  hideAccordion: function() {
+    jQuery("table .selected").removeClass("selected");
+    jQuery("#accordion").attr("hidden","true");
+    jQuery("#dialogButtons").removeAttr("hidden");
+    jQuery("#editmeasure").attr("disabled","true");
+    jQuery("#deletemeasure").attr("disabled","true");
+    jQuery("#export").removeAttr("disabled");
+    jQuery("#addmeasure").removeAttr("disabled");
+  },
+  customAlert: function(meassage,hideTimeout) {
+   jQuery("#custom-alert").text(meassage);
+   jQuery("#custom-alert").dialog("open");
+   //set up a timer to hide it, a.k.a a setTimeout()
+  setTimeout(function() {
+    jQuery("#custom-alert").dialog("close");
+    return true;
+  }, hideTimeout)
+}   
+
+
+
+} //end Dialog
 
 
 
 
 
-//Scripts about adding and plotting the data
-//disable weight spinner, date and add weight button  
-// jQuery(document).ready(function(){           //bug because of this Kg in weight are lost!
-  //enableSelection()
-  
+
+///Actions
+
+//At startup populate the dropdown menu   //to do: put before?
+Dialog.populateDropdown(babies);
+
+//Actions about adding and plotting the data 
 //Set birthdate picker to yesterday 
 if (jQuery("#birthdatep").val() == "") {
   var yesterday = new Date();
@@ -346,8 +379,7 @@ jQuery("#weightSpinner").pcntspinner({
     //start: 3.0,
     max: 100,
     step: .1
-    });
-  
+    });  
   });
 //Custom alert
 jQuery(function() {
@@ -374,19 +406,6 @@ jQuery(function() {
       hide: { effect: "fade", duration: 1200 }
     });
 });
-function customAlert(meassage,hideTimeout) {
-   jQuery("#custom-alert").text(meassage);
-   jQuery("#custom-alert").dialog("open");
-    /* //display the box
-  var customAlert = document.getElementById("custom-alert-1");
-  customAlert.style.visibility = 'visible';
-  */
-   //set up a timer to hide it, a.k.a a setTimeout()
-  setTimeout(function() {
-    jQuery("#custom-alert").dialog("close");
-    return true;
-  }, hideTimeout)
-}   
 
 //compare function to sort babies[].Data on Weeks
 function comparebabiesData(a,b) {
@@ -413,7 +432,7 @@ jQuery(function() {
       var dateDMY = jQuery("#datep").val();     
       for (var ind=0; ind<babies[index].Data.length;ind++) {
         if ((babies[index].Data[ind]["Date"]==dateDMY) && (babies[index].Data[ind]["Weight"]==weight)) {
-          customAlert("This point already exists",1800);
+          Dialog.customAlert("This point already exists",1800);
           return;
         }
       }
@@ -440,7 +459,7 @@ jQuery(function() {
         jQuery("table #"+sel.line + " :nth-child(4)").text(comment)
       }
       //hide accordion, reveal dialog buttons
-      hideAccordion();
+      Dialog.hideAccordion();
       return true;       
     });
  });
@@ -501,11 +520,10 @@ function deselectCircle(nullify) {
   if (graph.selectCircle) {
     document.getElementById(graph.selectCircle.id).setAttribute("r",6);
     document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
-    //document.getElementById(graph.selectCircle.id).style("cursor: ns-resize; fill: none;");
     if (nullify) {
       graph.selectCircle = null;
       graph.selectCircleData=null;
-      document.getElementById('deletemeasure').disabled = true;
+      jQuery('#deletemeasure').attr("disabled", "true");
     }
   }
 }
@@ -586,12 +604,12 @@ jQuery(function() {
     //Change text of addedittable button 
     jQuery("#addedittable").text("Edit in table");
     //show accordion
-    showAccordion();
+    Dialog.showAccordion();
   })
   //addmeasure opens the accordion
   jQuery("#addmeasure").click(function(){
     jQuery("#addedittable").text("Insert in table");
-    showAccordion();
+    Dialog.showAccordion();
   })
   //cancelweightdiv closes the accordion
   jQuery("#cancelweight").click(function(){
@@ -612,7 +630,7 @@ jQuery(function() {
       saveTable2BabiesData();
       write2Cache();
       //replot
-      updateDataAndGraph();
+      Dialog.updateDataAndGraph();
       jQuery("#dialog").dialog("close");
     });
   jQuery("#canceldialogbutton").click(function() {
@@ -644,22 +662,6 @@ jQuery('#dialog').on('dialogopen', function(event) {
   jQuery("#dialogbutton").attr("disabled","true")
 });
 
-function showAccordion() {
-      jQuery("#accordion").removeAttr("hidden");
-      jQuery("#dialogButtons").attr("hidden","true");
-      jQuery("#editmeasure").attr("disabled","true");
-      jQuery("#deletemeasure").attr("disabled","true");
-      jQuery("#export").attr("disabled","true");
-    }
-function hideAccordion() {
-      jQuery("table .selected").removeClass("selected");
-      jQuery("#accordion").attr("hidden","true");
-      jQuery("#dialogButtons").removeAttr("hidden");
-      jQuery("#editmeasure").attr("disabled","true");
-      jQuery("#deletemeasure").attr("disabled","true");
-      jQuery("#export").removeAttr("disabled");
-      jQuery("#addmeasure").removeAttr("disabled");
-}
 
 //Delete from tablebody all lines/tr elements having td elements (eg not the headers th)  
 function tableEmpty() {
@@ -779,6 +781,7 @@ return data;
 }
 
 
+
 //Export
 jQuery(document).ready(function(){
     jQuery('#export').click(function(){
@@ -869,8 +872,7 @@ babies[0].Data.push(datum);
 babies[0].Data.push(new Datum("30/08/2015", DaysForTest(0,"30/08/2015") / 7, 5.4));
 babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6));
 */
-  autocomplete();
-  
+  Dialog.autocomplete();
   
   //Start plot
   weiBoy = [];
@@ -890,7 +892,7 @@ babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6
         data.forEach(function(d, i) {
           data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
           });
-  
+
         graph = new Graph("chart1", {
             "xmin": 0, "xmax": 200,
             "ymin": 0, "ymax": 20, 
