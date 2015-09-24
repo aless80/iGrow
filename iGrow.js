@@ -4,7 +4,10 @@
 // var obj = new Baby("Alice", "01/07/2015", "Female");
 // babies.push(obj);
 // babies.push(new Baby("Jack", "01/01/2015", "Male"));
-readFromCache();
+var babies=readFromCache();
+if (babies.length==0) {
+  jQuery("#dialogbutton").attr("disabled","true")
+}
 
 //Scripts about the "add a baby" dialog
 var today = new Date();
@@ -49,7 +52,8 @@ jQuery(function() {
           		if (ok) jQuery( this ).dialog("close");
               jQuery("#dropdown").removeAttr("disabled");
               jQuery("#editbabybutton").removeAttr("disabled");
-              jQuery("#dialogbutton").removeAttr("disabled");           
+              jQuery("#dialogbutton").removeAttr("disabled");
+              jQuery("#dialogbutton").removeAttr("disabled")
         	}
         },
         Cancel: function() {
@@ -66,12 +70,12 @@ jQuery(function() {
             var text = jQuery("#inputfordropdown").val();
             removeBaby(text);  
             autocomplete();
+            if (babies.length==0) jQuery("#dialogbutton").attr("disabled","true");
             jQuery( this ).dialog("close");
           }
         }
       }
-    });
-    
+    });    
     //Fire up the help dialog of the main page
     jQuery("#helpmainpage").dialog({
       autoOpen: false,
@@ -100,9 +104,9 @@ jQuery(function() {
       jQuery("#birthdatep").val("Birthdate");
       jQuery("#babydialog").dialog("open");
       //disable all buttons on main page 
-      jQuery("#dropdown").attr("disabled","true")
-      jQuery("#editbabybutton").attr("disabled","true")
-      jQuery("#dialogbutton").attr("disabled","true")
+      // jQuery("#dropdown").attr("disabled","true")     //to do open babydialog
+      // jQuery("#editbabybutton").attr("disabled","true")
+      // jQuery("#dialogbutton").attr("disabled","true")
     });
     //Behavior when dropdown changes
     jQuery(document).on("change", "#inputfordropdown", function(e) {
@@ -132,6 +136,31 @@ jQuery(function() {
     	}
     });    
 });
+
+jQuery('#babydialog').on('dialogclose', function(event) {
+  jQuery("#dropdown").removeAttr("disabled")
+  jQuery("#editbabybutton").removeAttr("disabled")
+  jQuery("#dialogbutton").removeAttr("disabled")
+});
+jQuery('#babydialog').on('dialogopen', function(event) {
+  jQuery("#dropdown").attr("disabled","true")
+  jQuery("#editbabybutton").attr("disabled","true")
+  jQuery("#dialogbutton").attr("disabled","true")
+});
+jQuery('#dialog').on('dialogclose', function(event) {
+  jQuery("#dropdown").removeAttr("disabled")
+  jQuery("#editbabybutton").removeAttr("disabled")
+  jQuery("#dialogbutton").removeAttr("disabled")
+});
+jQuery('#dialog').on('dialogopen', function(event) {
+  jQuery("#dropdown").attr("disabled","true")
+  jQuery("#editbabybutton").attr("disabled","true")
+  jQuery("#dialogbutton").attr("disabled","true")
+});
+
+
+
+
 //Autocomplete baby name input
 function autocomplete() {
     jQuery(function() {
@@ -577,9 +606,9 @@ jQuery(function() {
       jQuery("#deletemeasure").attr("disabled","true");
       jQuery("#editmeasure").attr("disabled","true");
       //disable all buttons on main page
-      jQuery("#dropdown").attr("disabled","true");
-      jQuery("#editbabybutton").attr("disabled","true");
-      jQuery("#dialogbutton").attr("disabled","true");
+      //jQuery("#dropdown").attr("disabled","true");          //to do open dialog
+      //jQuery("#editbabybutton").attr("disabled","true");
+      //jQuery("#dialogbutton").attr("disabled","true");
     });
   //editmeasure populates and opens the accordion
   jQuery("#editmeasure").click(function(){
@@ -615,17 +644,17 @@ jQuery(function() {
       //replot
       updateDataAndGraph();
       jQuery("#dialog").dialog("close");
-      //enable all buttons on main page
-      jQuery("#dropdown").removeAttr("disabled","true")
-      jQuery("#editbabybutton").removeAttr("disabled","true")
-      jQuery("#dialogbutton").removeAttr("disabled","true")
+      // //enable all buttons on main page                   //to do close dialog
+      // jQuery("#dropdown").removeAttr("disabled")
+      // jQuery("#editbabybutton").removeAttr("disabled")
+      // jQuery("#dialogbutton").removeAttr("disabled")
     });
   jQuery("#canceldialogbutton").click(function() {
       //var conf = confirm("Do you really want discard the data and close this dialog?\nThis action cannot be undone\n");
-      //enable all buttons on main page
-      jQuery("#dropdown").removeAttr("disabled","true")
-      jQuery("#editbabybutton").removeAttr("disabled","true")
-      jQuery("#dialogbutton").removeAttr("disabled","true")
+      // //enable all buttons on main page                  //to do close dialog
+      // jQuery("#dropdown").removeAttr("disabled")
+      // jQuery("#editbabybutton").removeAttr("disabled")
+      // jQuery("#dialogbutton").removeAttr("disabled")
       //Close dialog
       jQuery("#dialog").dialog("close");
     });
@@ -720,7 +749,7 @@ function getSelectedFromTable(){
   var date=jQuery("table .selected td:first-child").text();
   var weight=new Number(jQuery("table .selected td:nth-child(3)").text()).toFixed(1);
   var comment=jQuery("table .selected td:nth-child(4)").text();
-  return {date:date, weight:weight, comment:comment, line:line} //to do
+  return {date:date, weight:weight, comment:comment, line:line}
 }
 
 function fillAccordion() {
@@ -826,16 +855,17 @@ function JSONToCSVConvertor(obj){
 //   }
 // )
 
-document.getElementById("dialogbutton").focus();
+//document.getElementById("dialogbutton").focus();
 
 function write2Cache(){
-  localStorage['myKey'] = JSON.stringify(babies);
+  localStorage['iGrow'] = JSON.stringify(babies);
 }
 
 function readFromCache(){
-  var stored = localStorage['myKey'];
-  if (stored) babies = JSON.parse(stored);
-  else babies = new Array(); 
+  var stored = localStorage['iGrow'];
+  if (stored) var babies = JSON.parse(stored);
+  else var babies = new Array(); 
+  return babies;
 }
 
 //Load the data from weianthro
