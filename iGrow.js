@@ -35,7 +35,7 @@ jQuery(document).on("change", "#dropdown", function(e) {
 
 var names = []
 //Functions for the babydialog
-jQuery(function() {
+//jQuery(function() {
     jQuery("#babydialog").dialog({
       autoOpen: false,
       show: { effect: "blind", duration: 500 },
@@ -104,10 +104,6 @@ jQuery(function() {
       jQuery("#genderinput").val("Gender");
       jQuery("#birthdatep").val("Birthdate");
       jQuery("#babydialog").dialog("open");
-      //disable all buttons on main page 
-      // jQuery("#dropdown").attr("disabled","true")     //to do open babydialog
-      // jQuery("#editbabybutton").attr("disabled","true")
-      // jQuery("#dialogbutton").attr("disabled","true")
     });
     //Behavior when dropdown changes
     jQuery(document).on("change", "#inputfordropdown", function(e) {
@@ -136,30 +132,7 @@ jQuery(function() {
     		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
     	}
     });    
-});
-
-jQuery('#babydialog').on('dialogclose', function(event) {
-  jQuery("#dropdown").removeAttr("disabled")
-  jQuery("#editbabybutton").removeAttr("disabled")
-  jQuery("#dialogbutton").removeAttr("disabled")
-});
-jQuery('#babydialog').on('dialogopen', function(event) {
-  jQuery("#dropdown").attr("disabled","true")
-  jQuery("#editbabybutton").attr("disabled","true")
-  jQuery("#dialogbutton").attr("disabled","true")
-});
-jQuery('#dialog').on('dialogclose', function(event) {
-  jQuery("#dropdown").removeAttr("disabled")
-  jQuery("#editbabybutton").removeAttr("disabled")
-  jQuery("#dialogbutton").removeAttr("disabled")
-});
-jQuery('#dialog').on('dialogopen', function(event) {
-  jQuery("#dropdown").attr("disabled","true")
-  jQuery("#editbabybutton").attr("disabled","true")
-  jQuery("#dialogbutton").attr("disabled","true")
-});
-
-
+//});
 
 
 //Autocomplete baby name input
@@ -174,7 +147,7 @@ function autocomplete() {
           source: names
         });
       });
-     }
+}
 //Helper functions related to the dialog
 function emptyDropdown(){
   //empty() removes all child nodes
@@ -585,7 +558,7 @@ function deleteWeight(id){
 
 
 
-//Functions for the dialog
+//Dialog
 jQuery(function() {
   jQuery("#dialog").dialog({
       autoOpen: false,
@@ -606,10 +579,6 @@ jQuery(function() {
       //disable delete and edit measure buttons
       jQuery("#deletemeasure").attr("disabled","true");
       jQuery("#editmeasure").attr("disabled","true");
-      //disable all buttons on main page
-      //jQuery("#dropdown").attr("disabled","true");          //to do open dialog
-      //jQuery("#editbabybutton").attr("disabled","true");
-      //jQuery("#dialogbutton").attr("disabled","true");
     });
   //editmeasure populates and opens the accordion
   jQuery("#editmeasure").click(function(){
@@ -645,20 +614,34 @@ jQuery(function() {
       //replot
       updateDataAndGraph();
       jQuery("#dialog").dialog("close");
-      // //enable all buttons on main page                   //to do close dialog
-      // jQuery("#dropdown").removeAttr("disabled")
-      // jQuery("#editbabybutton").removeAttr("disabled")
-      // jQuery("#dialogbutton").removeAttr("disabled")
     });
   jQuery("#canceldialogbutton").click(function() {
       //var conf = confirm("Do you really want discard the data and close this dialog?\nThis action cannot be undone\n");
-      // //enable all buttons on main page                  //to do close dialog
-      // jQuery("#dropdown").removeAttr("disabled")
-      // jQuery("#editbabybutton").removeAttr("disabled")
-      // jQuery("#dialogbutton").removeAttr("disabled")
       //Close dialog
       jQuery("#dialog").dialog("close");
     });
+});
+
+//Callbacks for the dialogs
+jQuery('#babydialog').on('dialogclose', function(event) {
+  jQuery("#dropdown").removeAttr("disabled")
+  jQuery("#editbabybutton").removeAttr("disabled")
+  jQuery("#dialogbutton").removeAttr("disabled")
+});
+jQuery('#babydialog').on('dialogopen', function(event) {
+  jQuery("#dropdown").attr("disabled","true")
+  jQuery("#editbabybutton").attr("disabled","true")
+  jQuery("#dialogbutton").attr("disabled","true")
+});
+jQuery('#dialog').on('dialogclose', function(event) {
+  jQuery("#dropdown").removeAttr("disabled")
+  jQuery("#editbabybutton").removeAttr("disabled")
+  jQuery("#dialogbutton").removeAttr("disabled")
+});
+jQuery('#dialog').on('dialogopen', function(event) {
+  jQuery("#dropdown").attr("disabled","true")
+  jQuery("#editbabybutton").attr("disabled","true")
+  jQuery("#dialogbutton").attr("disabled","true")
 });
 
 function showAccordion() {
