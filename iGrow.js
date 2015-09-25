@@ -1,13 +1,13 @@
 //Container object for many methods related to the dialog
 var Page={ 
     //Scripts about the "add a baby" dialog
-    //var today = new Date();
+    //var today = new Date(); private variable
     todayDMY: ("00" + (new Date()).getDate()).slice(-2)+"/"+("00" + ((new Date()).getMonth()+1)).slice(-2)+"/"+(new Date()).getFullYear(),
 
     //Functions about retrieving data related to the babies object from DOM or babies itself 
     //Get the baby's name from the dropdown
     getCurrName: function(){
-        var value = jQuery("#dropdown").val();
+        var value = $("#dropdown").val();
         if (value == null) {
             return "    ";
         }
@@ -16,7 +16,7 @@ var Page={
     //Get the baby's index from the dropdown
     getCurrIndex: function(){
         if (babies.length==0) return null;
-        var name = jQuery("#dropdown").val();
+        var name = $("#dropdown").val();
         return Page.getIndexFromName(name);
     },
     //Get the index in the babies array from a baby's name
@@ -42,7 +42,7 @@ var Page={
     },
     //Get the currently plotted gender: 1,2,-1 for male/female/unknown
     getCurrGender: function() {
-        var stroke = jQuery('[id*="sigma"]').css("stroke");
+        var stroke = $('[id*="sigma"]').css("stroke");
         if (stroke == "rgb(0, 255, 255)") {
             return 1; 
         } else if (stroke == "rgb(255, 0, 255)") {
@@ -54,7 +54,7 @@ var Page={
     },
     //Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
     getBirthdate: function(){
-        var name = jQuery("#dropdown").val();
+        var name = $("#dropdown").val();
         if (name == null) {
             return Page.todayDMY;
         }
@@ -65,13 +65,13 @@ var Page={
     populateDropdown: function(array){
         //append children
         jQuery.each(array, function(index, value) {//val, text
-            jQuery('#dropdown').append(jQuery('<option></option>').val(value["Name"]).html(value["Name"]).addClass("dropdownBaby") )
+            $('#dropdown').append($('<option></option>').val(value["Name"]).html(value["Name"]).addClass("dropdownBaby") )
         });
     },
     //Helper functions related to the dialog
     emptyDropdown: function(){
         //empty() removes all child nodes
-        jQuery("#dropdown").empty();
+        $("#dropdown").empty();
     },
         //Deselect circles: nullify is set circle to null (delete?)
     deselectCircle: function(nullify) {
@@ -81,37 +81,37 @@ var Page={
             if (nullify) {
                 graph.selectCircle = null;
                 graph.selectCircleData=null;
-                jQuery('#deletemeasure').attr("disabled", "true");
+                $('#deletemeasure').attr("disabled", "true");
             }
         }
     },
     //Custom alert
     customAlert: function(meassage,hideTimeout) {
-        jQuery("#custom-alert").text(meassage);
-        jQuery("#custom-alert").dialog("open");
+        $("#custom-alert").text(meassage);
+        $("#custom-alert").dialog("open");
         //set up a timer to hide it, a.k.a a setTimeout()
         setTimeout(function() {
-            jQuery("#custom-alert").dialog("close");
+            $("#custom-alert").dialog("close");
             return true;
         }, hideTimeout)
     },
     
     //Autocomplete baby name input
     autocomplete: function() {
-        jQuery(function() {
+        $(function() {
                 var index=Page.getCurrIndex();
                 var names = new Array();
                 babies.forEach(function(element) {
                     names.push(element.Name);
                 }, this);
-                jQuery("#inputfordropdown").autocomplete({
+                $("#inputfordropdown").autocomplete({
                     source: names
                 });
         });
     },
     //Check if inputs in baby dialog are valid
     areInputsValid: function(prompt){
-        var text = jQuery("#inputfordropdown").val();
+        var text = $("#inputfordropdown").val();
         //We will check whether the name in "text" is already present in the baby instance
         var existing = Page.getExistingNames();
         var message = "";
@@ -125,11 +125,11 @@ var Page={
             message = "Please select a name for your child"; 
         }
         //Check if the gender was selected
-        else if (jQuery("#genderinput").val() === null) {
+        else if ($("#genderinput").val() === null) {
             message = "Please select a gender for your child";
         }
         //Check if the birthdate was selected
-        else if (jQuery("#birthdatep").val() == "Birthdate") {
+        else if ($("#birthdatep").val() == "Birthdate") {
             message = "Please select a birthdate for your child";
         }
         //Prompt the problem
@@ -146,20 +146,20 @@ var Page={
     // Add all existing babies to the dropdown 
     addToDropdown: function(){
         if (Page.areInputsValid(true)){
-            var text = jQuery("#inputfordropdown").val();    
-            var gender = jQuery("#genderinput").val();
+            var text = $("#inputfordropdown").val();    
+            var gender = $("#genderinput").val();
             if (gender == "Female") {
                 gender = 2;
             } else if (gender == "Male") {
                 gender = 1;
             }
-            var birthdate = jQuery("#birthdatep").val();
+            var birthdate = $("#birthdatep").val();
             //Add to baby instance
             babies.push(new Baby(text, birthdate, gender));
             //Switch dropdown in UI to new baby 
             Page.emptyDropdown();
             Page.populateDropdown(babies);
-            jQuery("select option[value='"+text+"']").attr("selected","selected");
+            $("select option[value='"+text+"']").attr("selected","selected");
             //Replot
             Page.updateDataAndGraph();
             //Update minDate in #datep
@@ -172,17 +172,17 @@ var Page={
     //Get the names of the existing babies
     getExistingNames: function(){
         var elem = new Array();
-        jQuery(".dropdownBaby").each(
+        $(".dropdownBaby").each(
             function(index) { 
-                elem.push(jQuery( this ).text());
+                elem.push($( this ).text());
         });
             return elem;
     },    
     //Update minDate for e.g. #datep
     updateMinDate: function(selector){
         var birthdateDMY = Page.getBirthdate().split("/");
-        jQuery(selector).datepicker("option", "minDate", new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0]) );
-        jQuery(selector).datepicker("option", "maxDate", 0 );
+        $(selector).datepicker("option", "minDate", new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0]) );
+        $(selector).datepicker("option", "maxDate", 0 );
     },
     //update the data and graph
     updateDataAndGraph: function(){
@@ -234,14 +234,14 @@ var Page={
         }
     },
     enablePageButtons: function(){
-        jQuery("#dropdown").removeAttr("disabled");
-        jQuery("#editbabybutton").removeAttr("disabled");
-        jQuery("#dialogbutton").removeAttr("disabled");
+        $("#dropdown").removeAttr("disabled");
+        $("#editbabybutton").removeAttr("disabled");
+        $("#dialogbutton").removeAttr("disabled");
     },
     disablePageButtons: function(){
-        jQuery("#dropdown").attr("disabled","true");
-        jQuery("#editbabybutton").attr("disabled","true");
-        jQuery("#dialogbutton").attr("disabled","true");
+        $("#dropdown").attr("disabled","true");
+        $("#editbabybutton").attr("disabled","true");
+        $("#dialogbutton").attr("disabled","true");
     },
     //Work with the cache 
     writeToCache: function(){
@@ -258,37 +258,37 @@ var Page={
 //Container object for many methods related to the dialog
 var Dialog={
     showAccordion: function() {
-        jQuery("#accordion").removeAttr("hidden");
-        jQuery("#dialogButtons").attr("hidden","true");
-        jQuery("#editmeasure").attr("disabled","true");
-        jQuery("#deletemeasure").attr("disabled","true");
-        jQuery("#export").attr("disabled","true");
+        $("#accordion").removeAttr("hidden");
+        $("#dialogButtons").attr("hidden","true");
+        $("#editmeasure").attr("disabled","true");
+        $("#deletemeasure").attr("disabled","true");
+        $("#export").attr("disabled","true");
     },
     hideAccordion: function() {
-        jQuery("table .selected").removeClass("selected");
-        jQuery("#accordion").attr("hidden","true");
-        jQuery("#dialogButtons").removeAttr("hidden");
-        jQuery("#editmeasure").attr("disabled","true");
-        jQuery("#deletemeasure").attr("disabled","true");
-        jQuery("#export").removeAttr("disabled");
-        jQuery("#addmeasure").removeAttr("disabled");
+        $("table .selected").removeClass("selected");
+        $("#accordion").attr("hidden","true");
+        $("#dialogButtons").removeAttr("hidden");
+        $("#editmeasure").attr("disabled","true");
+        $("#deletemeasure").attr("disabled","true");
+        $("#export").removeAttr("disabled");
+        $("#addmeasure").removeAttr("disabled");
     },
     //Get the line and data from the selected row on the table
     getSelectedFromTable: function(){
-        var line=jQuery("table .selected")[0].getAttribute("id");
-        var date=jQuery("table .selected td:first-child").text();
-        var weight=new Number(jQuery("table .selected td:nth-child(3)").text()).toFixed(1);
-        var comment=jQuery("table .selected td:nth-child(4)").text();
+        var line=$("table .selected")[0].getAttribute("id");
+        var date=$("table .selected td:first-child").text();
+        var weight=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);
+        var comment=$("table .selected td:nth-child(4)").text();
         return {date:date, weight:weight, comment:comment, line:line}
     },
 
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();    
         //console.log("weight,comment=",weight,comment)
-        jQuery("#datep").val(cells.date);    
-        jQuery("#weightspinnerdiv").val();
-        jQuery("#weightSpinner").spinner( "value", cells.weight+" Kg");
-        jQuery("#commentarea").val(cells.comment);
+        $("#datep").val(cells.date);    
+        $("#weightspinnerdiv").val();
+        $("#weightSpinner").spinner( "value", cells.weight+" Kg");
+        $("#commentarea").val(cells.comment);
     },
 
     //Save table in babies[].Data
@@ -309,9 +309,9 @@ var Dialog={
     },
     //convert the table in the dialog to JSON
     tableToJSON: function() {
-        data = jQuery('#table tr:has(td)').map(
+        data = $('#table tr:has(td)').map(
             function(ind, val) {
-                var td =    jQuery('td', this);
+                var td =    $('td', this);
                 var index = Page.getCurrIndex();
                 return {
                     ///Name:         babies[index].Name,
@@ -327,7 +327,7 @@ var Dialog={
     },
     //Delete from tablebody all lines/tr elements having td elements (eg not the headers th)    
         emptyTable: function() {
-        jQuery("#tablebody tr").filter(":has(td)").remove();
+        $("#tablebody tr").filter(":has(td)").remove();
     },
     createTable: function() {
         //First empty the table
@@ -362,7 +362,7 @@ var Dialog={
             }        
         }
         //Append line
-        var ind=jQuery('#tablebody tr:last-child')[0].id.split("tr")[1]
+        var ind=$('#tablebody tr:last-child')[0].id.split("tr")[1]
         tr.setAttribute('id','tr'+(Number(ind)+1));
         tr.setAttribute('align','center');
         tbdy.appendChild(tr);
@@ -390,22 +390,22 @@ var Dialog={
                 ((babies.length)&&(babies[index].Name.length > 0)) ? enable = true : enable = false;    
             }
             //Toggle the weight spinner 
-            var spinner = jQuery( "#weightSpinner" ).spinner();
-            var datep = jQuery( "#datep" ).datepicker();
+            var spinner = $( "#weightSpinner" ).spinner();
+            var datep = $( "#datep" ).datepicker();
             if (enable) {
-                jQuery("#trlabels").removeClass("grayout");
-                jQuery("#dropdown").removeClass("grayout");
-                jQuery("#dropdown").prop("disabled", false); 
+                $("#trlabels").removeClass("grayout");
+                $("#dropdown").removeClass("grayout");
+                $("#dropdown").prop("disabled", false); 
                 spinner.spinner( "enable" );
-                jQuery( "#datep" ).datepicker( "option", "disabled", false);
-                jQuery('#addedittable').prop('disabled', false);    
+                $( "#datep" ).datepicker( "option", "disabled", false);
+                $('#addedittable').prop('disabled', false);    
             } else {
-                jQuery("#trlabels").addClass("grayout");
-                jQuery("#dropdown").addClass("grayout");
-                jQuery("#dropdown").prop("disabled", true);
+                $("#trlabels").addClass("grayout");
+                $("#dropdown").addClass("grayout");
+                $("#dropdown").prop("disabled", true);
                 spinner.spinner( "disable" );
-                jQuery( "#datep" ).datepicker( "option", "disabled", true);
-                jQuery('#addedittable').prop('disabled', true);
+                $( "#datep" ).datepicker( "option", "disabled", true);
+                $('#addedittable').prop('disabled', true);
             }
             //NB: "#deletemeasure" should be all set
     },
@@ -450,14 +450,14 @@ var Dialog={
 //Create a baby instance
 var babies=Page.readFromCache();
 if (babies.length==0) {
-  jQuery("#dialogbutton").attr("disabled","true")
+  $("#dialogbutton").attr("disabled","true")
 }
 
 //At startup populate the dropdown menu
 Page.populateDropdown(babies);
 
 //Callback: track baby selected in dropdown
-jQuery(document).on("change", "#dropdown", function(e) {
+$(document).on("change", "#dropdown", function(e) {
     //deselect any possible circle
     Page.deselectCircle(1);
     //Update the lines, circles, title
@@ -468,7 +468,7 @@ jQuery(document).on("change", "#dropdown", function(e) {
 });
 
 //Functions for the babydialog
-jQuery("#babydialog").dialog({
+$("#babydialog").dialog({
     autoOpen: false,
     show: { effect: "blind", duration: 500 },
     hide: { effect: "blind", duration: 500 },
@@ -479,15 +479,15 @@ jQuery("#babydialog").dialog({
             click : function() {
                 var ok = Page.addToDropdown(); 
                 Page.autocomplete();
-                jQuery("#datep").val(Page.todayDMY);
+                $("#datep").val(Page.todayDMY);
                 Dialog.enableSelection();
-                if (ok) jQuery( this ).dialog("close");
+                if (ok) $( this ).dialog("close");
                 Page.enablePageButtons();
                 Page.writeToCache();
             }
         },
         Cancel: function() {
-            jQuery( this ).dialog("close");
+            $( this ).dialog("close");
             Page.enablePageButtons();
         },
         "Delete this baby" : {
@@ -495,47 +495,47 @@ jQuery("#babydialog").dialog({
             disabled : true,
             id : "dialog_DelBaby",
             click : function() {
-                var text = jQuery("#inputfordropdown").val();
+                var text = $("#inputfordropdown").val();
                 Page.removeBaby(text);  
                 Page.autocomplete();
-                if (babies.length==0) jQuery("#dialogbutton").attr("disabled","true");
-                jQuery( this ).dialog("close");
+                if (babies.length==0) $("#dialogbutton").attr("disabled","true");
+                $( this ).dialog("close");
             }
         }
     }
 });
 
 //Fire up the help dialog of the main page
-jQuery("#helpmainpage").dialog({
+$("#helpmainpage").dialog({
     autoOpen: false,
     show: { effect: "blind", duration: 500 },
     hide: { effect: "blind", duration: 500 }
 }); 
-jQuery( "#helpbutton" ).click(function() {
-    jQuery("#helpmainpage").dialog("open");
+$( "#helpbutton" ).click(function() {
+    $("#helpmainpage").dialog("open");
 });  
 
 //Fire up the help dialog of the table 
-jQuery("#helpdialog").dialog({
+$("#helpdialog").dialog({
     autoOpen: false,
     show: { effect: "blind", duration: 500 },
     hide: { effect: "blind", duration: 500 }
 }); 
-jQuery("#helpdialogbutton").click(function() {
-    jQuery("#helpdialog").dialog("open");
+$("#helpdialogbutton").click(function() {
+    $("#helpdialog").dialog("open");
 });
 
 //Fire up the babydialog 
-jQuery("#editbabybutton").click(function() {
+$("#editbabybutton").click(function() {
     //Reset the inputs
-    jQuery("#inputfordropdown").val("Name");
-    jQuery("#genderinput").val("Gender");
-    jQuery("#birthdatep").val("Birthdate");
-    jQuery("#babydialog").dialog("open");
+    $("#inputfordropdown").val("Name");
+    $("#genderinput").val("Gender");
+    $("#birthdatep").val("Birthdate");
+    $("#babydialog").dialog("open");
 });
 
 //Behavior when dropdown changes
-jQuery(document).on("change", "#inputfordropdown", function(e) {
+$(document).on("change", "#inputfordropdown", function(e) {
     var index=Page.getCurrIndex();
     //Get all names
     var names=new Array(babies.length);
@@ -544,23 +544,23 @@ jQuery(document).on("change", "#inputfordropdown", function(e) {
         names[key]=babies[key]["Name"];
     }
     }    
-    var text = jQuery("#inputfordropdown").val();
+    var text = $("#inputfordropdown").val();
     if (names.indexOf(text) > -1) {  //text is existing name
         //Load the birthdate and gender
-    jQuery("#birthdatep").val(babies[index]["BirthDate"]);
+    $("#birthdatep").val(babies[index]["BirthDate"]);
         var gender = (babies[index]["Gender"] == 1 ? "Male" : "Female");
-        jQuery("#genderinput").val(gender);
+        $("#genderinput").val(gender);
         //Disable birthdatep and genderinput
         document.getElementById('birthdatep').disabled = true;
         document.getElementById('genderinput').disabled = true;    		
         //"enable Delete this baby"
-        jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("enable");
+        $(".ui-dialog-buttonpane button:contains('Delete')").button("enable");
     } else {
         //enable birthdatep 
         document.getElementById('birthdatep').disabled = false;
         document.getElementById('genderinput').disabled = false;    
         //"disable Delete this baby"
-        jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
+        $(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
     }
 });    
 
@@ -568,22 +568,22 @@ jQuery(document).on("change", "#inputfordropdown", function(e) {
 
 //Actions about adding and plotting the data 
 // //Set birthdate picker to yesterday 
-// if (jQuery("#birthdatep").val() == "") {
+// if ($("#birthdatep").val() == "") {
 //     var yesterday = new Date();
 //     yesterday.setDate(yesterday.getDate() - 1);
 //     var yesterdayDMY = ("00" + yesterday.getDate()).slice(-2)+"/"+("00" + yesterday.getMonth()).slice(-2)+"/"+yesterday.getFullYear()
-//     jQuery("#birthdatep").val(yesterdayDMY);
+//     $("#birthdatep").val(yesterdayDMY);
 // }
 //Define behaviour of date pickers and spinner
-jQuery(function() {
+$(function() {
     var birthdateDMY = Page.getBirthdate().split("/");
-    jQuery("#datep").datepicker({
+    $("#datep").datepicker({
         minDate: (new Date(birthdateDMY[2], birthdateDMY[1] - 1, birthdateDMY[0])),
         maxDate: 0, 
         numberOfMonths: 2, 
         dateFormat: "dd/mm/yy"
     });
-    jQuery("#birthdatep").datepicker({
+    $("#birthdatep").datepicker({
         maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
     });
     jQuery.widget( "ui.pcntspinner", jQuery.ui.spinner, {
@@ -593,7 +593,7 @@ jQuery(function() {
         },    
         _parse: function(value) { return parseFloat(value); }
     });
-    jQuery("#weightSpinner").pcntspinner({ 
+    $("#weightSpinner").pcntspinner({ 
         min: 1,
         suffix:'Kg',
         //start: 4.0,
@@ -603,20 +603,20 @@ jQuery(function() {
 });
 
 //Custom alert
-jQuery(function() {
-    jQuery("#custom-alert").dialog({
+$(function() {
+    $("#custom-alert").dialog({
       id: "custom",
       buttons: {
         "Close" : {
         	text : "Close",
         	id : "dialog_AddBaby",
         	click : function() {       
-            jQuery( this ).dialog("close"); 
+            $( this ).dialog("close"); 
             //enable all buttons on main page
             Page.enablePageButtons();
-            // jQuery("#dropdown").removeAttr("disabled"); //to do 
-            // jQuery("#editbabybutton").removeAttr("disabled");
-            // jQuery("#dialogbutton").removeAttr("disabled");          
+            // $("#dropdown").removeAttr("disabled"); //to do 
+            // $("#editbabybutton").removeAttr("disabled");
+            // $("#dialogbutton").removeAttr("disabled");          
         	}
         }
       },
@@ -630,19 +630,19 @@ jQuery(function() {
 });
 
 //addedittable button: add or edit data to table
-jQuery(function() {
-    jQuery("#addedittable").click(function() {      
-        var textButton=jQuery("#addedittable").text().substring(0,4);
+$(function() {
+    $("#addedittable").click(function() {      
+        var textButton=$("#addedittable").text().substring(0,4);
         //First remove circle selection, if any
         Page.deselectCircle(1);
-        if (jQuery("#weightSpinner").pcntspinner("isValid") == false) {
+        if ($("#weightSpinner").pcntspinner("isValid") == false) {
             alert("Please insert a correct weight");
             return False;
         }
         //Get the data inserted by the user 
         var index=Page.getCurrIndex();
-        var weight = jQuery("#weightSpinner").pcntspinner("value");
-        var dateDMY = jQuery("#datep").val();
+        var weight = $("#weightSpinner").pcntspinner("value");
+        var dateDMY = $("#datep").val();
         var table=Dialog.tableToJSON();
         for (var ind=0,length=table.length; ind<length;ind++) {
             if ((table[ind]["Date"]==dateDMY) && (table[ind]["Weight"]==weight)) {
@@ -653,7 +653,7 @@ jQuery(function() {
         var birthdateYMD = new Date(Dialog.dateToYMD(Page.getBirthdate()));
         var date = new Date(Dialog.dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
-        var comment = jQuery("#commentarea").val();
+        var comment = $("#commentarea").val();
         if (textButton=="Inse"){
             //Append data to the babies' data
             var obj = {
@@ -663,14 +663,14 @@ jQuery(function() {
             "Comment": comment
             };
             Dialog.appendToTable(obj);
-            jQuery("#addmeasure").removeAttr("disabled");
+            $("#addmeasure").removeAttr("disabled");
         } else if (textButton=="Edit"){
         //Edit data in tables     
             var sel=Dialog.getSelectedFromTable();
-            jQuery("table #"+sel.line + " :nth-child(1)").text(dateDMY)
-            jQuery("table #"+sel.line + " :nth-child(2)").text(days)
-            jQuery("table #"+sel.line + " :nth-child(3)").text(weight)
-            jQuery("table #"+sel.line + " :nth-child(4)").text(comment)
+            $("table #"+sel.line + " :nth-child(1)").text(dateDMY)
+            $("table #"+sel.line + " :nth-child(2)").text(days)
+            $("table #"+sel.line + " :nth-child(3)").text(weight)
+            $("table #"+sel.line + " :nth-child(4)").text(comment)
         }
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
@@ -678,20 +678,20 @@ jQuery(function() {
     });
  });
 //Delete point button
-jQuery(function() {
-    jQuery("#deletemeasure").click(function() {
+$(function() {
+    $("#deletemeasure").click(function() {
         var conf = confirm("Do you really want to remove this point from the table?\n");
         if (conf){
             var sel=Dialog.getSelectedFromTable();
-            jQuery("#"+sel.line).remove();
+            $("#"+sel.line).remove();
         } else {
             //Deselect line from table
-            jQuery("table .selected").removeClass("selected");
+            $("table .selected").removeClass("selected");
         }
             //Disable/enable buttons
-            jQuery("#deletemeasure").attr("disabled","true");
-            jQuery("#editmeasure").attr("disabled","true");
-            jQuery("#addmeasure").removeAttr("disabled");        
+            $("#deletemeasure").attr("disabled","true");
+            $("#editmeasure").attr("disabled","true");
+            $("#addmeasure").removeAttr("disabled");        
     })
 });
 
@@ -701,8 +701,8 @@ window.addEventListener("load", pageFullyLoaded, false);
 function pageFullyLoaded(e) {
     Dialog.enableSelection();
     //Set date picker to today and weight spinner to 4.0 Kg
-    jQuery("#datep").val(Page.todayDMY);
-    jQuery("#weightSpinner").spinner( "value", "4.0 Kg");
+    $("#datep").val(Page.todayDMY);
+    $("#weightSpinner").spinner( "value", "4.0 Kg");
 }
 
 
@@ -710,8 +710,8 @@ function pageFullyLoaded(e) {
 
 
 //Actions on Dialog
-jQuery(function() {
-    jQuery("#dialog").dialog({
+$(function() {
+    $("#dialog").dialog({
         autoOpen: false,
         minHeight: 400,
         minWidth: 600,
@@ -719,96 +719,96 @@ jQuery(function() {
         hide: { effect: "blind", duration: 500 }
         });
         //Fire up the dialog 
-    jQuery("#dialogbutton").click(function() {
+    $("#dialogbutton").click(function() {
         Dialog.createTable();
         //deselect the graph.selectedCircle
         Page.deselectCircle();      
         var str = "Please edit the table for " + Page.getCurrName() + ", born on "+ babies[Page.getCurrIndex()]["BirthDate"];  
-        jQuery("#tabletitle").text(str);
-        jQuery("#textarea").value="";
-        jQuery("#dialog").dialog("open");
+        $("#tabletitle").text(str);
+        $("#textarea").value="";
+        $("#dialog").dialog("open");
         //disable delete and edit measure buttons
-        jQuery("#deletemeasure").attr("disabled","true");
-        jQuery("#editmeasure").attr("disabled","true");
+        $("#deletemeasure").attr("disabled","true");
+        $("#editmeasure").attr("disabled","true");
         });
     //editmeasure populates and opens the accordion
-    jQuery("#editmeasure").click(function(){
+    $("#editmeasure").click(function(){
         Dialog.fillAccordion();
         //Change text of addedittable button 
-        jQuery("#addedittable").text("Edit in table");
+        $("#addedittable").text("Edit in table");
         //show accordion
         Dialog.showAccordion();
     })
     //addmeasure opens the accordion
-    jQuery("#addmeasure").click(function(){
-        jQuery("#addedittable").text("Insert in table");
+    $("#addmeasure").click(function(){
+        $("#addedittable").text("Insert in table");
         Dialog.showAccordion();
     })
     //cancelaccordiondiv closes the accordion
-    jQuery("#cancelaccordion").click(function(){
-        jQuery("#accordion").attr("hidden","true");
-        jQuery("#dialogButtons").removeAttr("hidden");
-        jQuery("#editmeasure").removeAttr("disabled");
-        jQuery("#addmeasure").removeAttr("disabled");
-        jQuery("#editmeasure").attr("disabled","true");
-        jQuery("#deletemeasure").attr("disabled","true");
-        jQuery("#export").removeAttr("disabled");
+    $("#cancelaccordion").click(function(){
+        $("#accordion").attr("hidden","true");
+        $("#dialogButtons").removeAttr("hidden");
+        $("#editmeasure").removeAttr("disabled");
+        $("#addmeasure").removeAttr("disabled");
+        $("#editmeasure").attr("disabled","true");
+        $("#deletemeasure").attr("disabled","true");
+        $("#export").removeAttr("disabled");
         //Deselect line from table
-        jQuery("table .selected").removeClass("selected");
+        $("table .selected").removeClass("selected");
     })
     //Dialog buttons
-    jQuery("#savedialogbutton").click(function() {
+    $("#savedialogbutton").click(function() {
         //Save to Data object
         //var conf = confirm("Do you really want edit the data and close this dialog?\nThis action cannot be undone\n");
         Dialog.saveTable2BabiesData();
         Page.writeToCache();
         //replot
         Page.updateDataAndGraph();
-        jQuery("#dialog").dialog("close");
+        $("#dialog").dialog("close");
         });
-    jQuery("#canceldialogbutton").click(function() {
+    $("#canceldialogbutton").click(function() {
         //var conf = confirm("Do you really want discard the data and close this dialog?\nThis action cannot be undone\n");
         //Close dialog
-        jQuery("#dialog").dialog("close");
+        $("#dialog").dialog("close");
         });
 });
 
 
  
 //Callbacks for the dialogs
-jQuery('#babydialog').on('dialogclose', function(event) {
+$('#babydialog').on('dialogclose', function(event) {
     Page.enablePageButtons();
 });
-jQuery('#babydialog').on('dialogopen', function(event) {
+$('#babydialog').on('dialogopen', function(event) {
     Page.disablePageButtons();
 });
-jQuery('#dialog').on('dialogclose', function(event) {
+$('#dialog').on('dialogclose', function(event) {
     Page.enablePageButtons();
 });
-jQuery('#dialog').on('dialogopen', function(event) {
+$('#dialog').on('dialogopen', function(event) {
     Page.disablePageButtons();
 });
 
 
 //Select the whole row when clicking, populate and open accordion
-jQuery("#table").on("click", "tr", function(event) {
+$("#table").on("click", "tr", function(event) {
   event.preventDefault();
-  if (jQuery(this).hasClass('selected')) {
-    jQuery(this).removeClass('selected');
+  if ($(this).hasClass('selected')) {
+    $(this).removeClass('selected');
 console.log("deletemeasure disabled true")
-    jQuery("#deletemeasure").attr("disabled","true");
-    jQuery("#addmeasure").removeAttr("disabled");
-    jQuery("#editmeasure").attr("disabled","true");
+    $("#deletemeasure").attr("disabled","true");
+    $("#addmeasure").removeAttr("disabled");
+    $("#editmeasure").attr("disabled","true");
   } else {
-    jQuery(this).addClass('selected')
+    $(this).addClass('selected')
         .siblings().removeClass('selected');    
     //populate and open accordion    
     Dialog.fillAccordion();    
-    jQuery("#editmeasure").removeAttr("disabled");
-    jQuery("#addmeasure").attr("disabled","true");
+    $("#editmeasure").removeAttr("disabled");
+    $("#addmeasure").attr("disabled","true");
     
     //enable deletemeasure button
-    jQuery("#deletemeasure").removeAttr("disabled");
+    $("#deletemeasure").removeAttr("disabled");
   }
 });
 
@@ -817,9 +817,9 @@ console.log("deletemeasure disabled true")
 
 
 //Export
-jQuery(document).ready(function(){
-    jQuery('#export').click(function(){
-      var data = jQuery('#txt').val();
+$(document).ready(function(){
+    $('#export').click(function(){
+      var data = $('#txt').val();
       if(data == '')
           return;
       var data=Dialog.babiesToJSON();
@@ -856,13 +856,13 @@ jQuery(document).ready(function(){
 
 
 //testing: click on 
-// jQuery(document).ready(function(){
-//     jQuery('#dialogbutton').trigger('click');
+// $(document).ready(function(){
+//     $('#dialogbutton').trigger('click');
 //   }
 //)
 
 //Load the data from weianthro
-jQuery(document).ready(function(){
+$(document).ready(function(){
   Page.autocomplete();  
   //Start plot
   weiBoy = [];
