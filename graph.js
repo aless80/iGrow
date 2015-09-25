@@ -87,7 +87,7 @@ Graph = function(elemid, options) {
   this.cy = this.chart.clientHeight;
   this.options = options || {};
 
-  this.title = getCurrName();
+  this.title = Page.getCurrName();
 
   this.setPoints();
 
@@ -152,7 +152,7 @@ Graph = function(elemid, options) {
       .on("mousedown", function(d){
         if (self.selectCircle != null) {
           //selectCircle.r = 6;  //NB: does not work. use setAttribute for attributes:
-          deselectCircle(1);
+          Page.deselectCircle(1);
           self.update(); //update so that circles get their normal color. not able to selectAll circle??
         }
       });
@@ -491,7 +491,7 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
 
 Graph.prototype.plotLines = function() {
   var self = this;
-  var gender = getGender();
+  var gender = Page.getGender();
   this.plotNSigmaLine(0, gender);
   this.plotNSigmaLine(0.674, gender);
   this.plotNSigmaLine(-0.674, gender);
@@ -534,12 +534,12 @@ Graph.prototype.update = function() {
           if (self.selectCircle != null) {
             //recolor/delect the previous circle
   //self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;" moved to iGrow.js
-            deselectCircle(0)
+            Page.deselectCircle(0)
           }
           //Store the selected circle. it will be needed for the table in the dialog        
           self.selectCircle = this;
           self.selectCircleData={
-            Baby: getCurrName(),
+            Baby: Page.getCurrName(),
             Weeks:d[0],
             Weight:d[1]
           };
@@ -568,7 +568,7 @@ Graph.prototype.update = function() {
               } else if (d[0] < 20) {
 	              string = string.concat(Math.floor(d[0]) + " weeks");
               } else {                
-                  var birthdate = getBirthdate(); 
+                  var birthdate = Page.getBirthdate(); 
                   var yearsBDate = birthdate.substring(6,10);   
                   var yearsDate = date.substring(6,10);
                   var monthsBDate = birthdate .substring(3,5);   
@@ -636,9 +636,9 @@ d3.select("body")
     }
     //Catch keys delete and backspace
     if ((d3.event.keyCode == 46) || (d3.event.keyCode == 8)) { //Delete or Backspace
-      var del = Dialog.deleteWeight(self.selectCircle.id);
+      var del = Page.deleteWeight(self.selectCircle.id);
       if (del) {
-        deselectCircle(1);
+        Page.deselectCircle(1);
       }
       self.update();
       tooltip.transition()
@@ -661,7 +661,7 @@ Graph.prototype.removePathsInSVG = function() {
 }
 
 Graph.prototype.setCurrrentDataWeight = function(){
-  var index = getCurrIndex();
+  var index = Page.getCurrIndex();
   //Plot males when no baby is defined
   var dataWeight;
   if (index == null) {
@@ -696,7 +696,7 @@ Graph.prototype.setTitle = function(){
 //set this.Points containing the data for the lines according to the current gender
 Graph.prototype.setPoints = function(){
   var self = this;
-  switch (getGender()) {
+  switch (Page.getGender()) {
   case 0:
     this.points = this.options.pointsGirl;
     break;
@@ -707,7 +707,7 @@ Graph.prototype.setPoints = function(){
     this.points =  this.options.pointsGirl;
     break;
   default:
-    throw "Error: unrecognized child's gender: " + getGender();
+    throw "Error: unrecognized child's gender: " + Page.getGender();
   }
 }
 
