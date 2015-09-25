@@ -1,9 +1,4 @@
 //Create a baby instance, for testing purposes
-// var babies = new Array();
-// //tests:
-// var obj = new Baby("Alice", "01/07/2015", "Female");
-// babies.push(obj);
-// babies.push(new Baby("Jack", "01/01/2015", "Male"));
 var babies=readFromCache();
 if (babies.length==0) {
   jQuery("#dialogbutton").attr("disabled","true")
@@ -24,7 +19,6 @@ jQuery(document).on("change", "#dropdown", function(e) {
     Dialog.updateMinDate("#datep");
 });
 
-//var names = []
 //Functions for the babydialog
 //jQuery(function() {  //ok?
     jQuery("#babydialog").dialog({
@@ -101,7 +95,9 @@ jQuery(document).on("change", "#dropdown", function(e) {
       //Get all names
       var names=new Array(babies.length);
       for (var key in babies) {
-        names[key]=babies[key]["Name"];
+        if (babies.hasOwnProperty(key)) {
+          names[key]=babies[key]["Name"];
+        }
       }    
       var text = jQuery("#inputfordropdown").val();
       if (names.indexOf(text) > -1) {  //text is existing name
@@ -142,7 +138,7 @@ function getCurrIndex(){
 }
 //Get the index in the babies array from a baby's name
 function getIndexFromName(name){
-  for (var ind = 0; ind < babies.length; ind++) {
+  for (var ind = 0, length=babies.length; ind < length; ind++) {
       if (babies[ind]["Name"]==name)
         return ind;
   }
@@ -434,7 +430,7 @@ var Dialog={
     tbl.setAttribute('cellpadding','5');
     var tbdy = document.getElementById('tablebody');
     //Table elements
-    for (var ind=0; ind<babies[index].Data.length; ind++) { 
+    for (var ind=0,length=babies[index].Data.length; ind<length; ind++) { 
       Dialog.appendToTable(babies[index].Data[ind]);
     }
   },
@@ -446,15 +442,17 @@ var Dialog={
     var tr = document.createElement('tr');
     //Append td elements to the tr
     for (var key in obj) {
-      var td = document.createElement('td');
-      if (key=="Weeks") 
-        var t = document.createTextNode(obj[key]*7); //days
-      else if (key=="Weight")
-        var t = document.createTextNode(Number(obj[key]).toFixed(1));
-      else 
-        var t = document.createTextNode(obj[key]);        
-      td.appendChild(t);
-      tr.appendChild(td);    
+      if (obj.hasOwnProperty(key)) {          
+        var td = document.createElement('td');
+        if (key=="Weeks") 
+          var t = document.createTextNode(obj[key]*7); //days
+        else if (key=="Weight")
+          var t = document.createTextNode(Number(obj[key]).toFixed(1));
+        else 
+          var t = document.createTextNode(obj[key]);        
+        td.appendChild(t);
+        tr.appendChild(td);
+      }    
     }
     //Append line
     var ind=jQuery('#tablebody tr:last-child')[0].id.split("tr")[1]
@@ -519,7 +517,38 @@ var Dialog={
         jQuery('#addedittable').prop('disabled', true);
       }
       //NB: "#deletemeasure" should be all set
-  }
+  },
+  
+  babiesToJSON: function(){
+        var json=new Array();
+        for (var index=0,length=babies.length; index<length; index++) {
+          var datalength=babies[index]["Data"].length;
+          if (datalength==0) {
+            json.push({
+                Name:     babies[index].Name,
+                BirthDate: babies[index].BirthDate,
+                Gender: babies[index].Gender
+            });
+          } else {
+            for (var ind=0,length=datalength; ind<length; ind++) {
+              var obj={
+                Name:     babies[index].Name,
+                BirthDate: babies[index].BirthDate,
+                Gender: babies[index].Gender,
+                Date:    babies[index]["Data"][ind]["Date"],
+                Weeks:   babies[index]["Data"][ind]["Weeks"],
+                Weight:  babies[index]["Data"][ind]["Weight"],
+                Comment: babies[index]["Data"][ind]["Comment"]
+              }
+              json.push(obj);
+            }
+          }
+        }
+        return json;
+      }
+
+
+
 } //end Dialog
 
 
@@ -541,7 +570,7 @@ function readFromCache(){ //cannot putit in Dialog now, "readFromCache undefined
 
 
 ///Actions
-//At startup populate the dropdown menu   //to do: put before?
+//At startup populate the dropdown menu   //to do: put earlier?
 Dialog.populateDropdown(babies);
 
 //Actions about adding and plotting the data 
@@ -618,11 +647,11 @@ jQuery(function() {
       //Get the data inserted by the user 
       var index=getCurrIndex();
       var weight = jQuery("#weightSpinner").pcntspinner("value");
-      var dateDMY = jQuery("#datep").val();     
-      for (var ind=0; ind<babies[index].Data.length;ind++) {
-        if ((babies[index].Data[ind]["Date"]==dateDMY) && (babies[index].Data[ind]["Weight"]==weight)) {
+      var dateDMY = jQuery("#datep").val();
+      var table=Dialog.table2JSON();
+      for (var ind=0,length=table.length; ind<length;ind++) {
+        if ((table[ind]["Date"]==dateDMY) && (table[ind]["Weight"]==weight)) {
           //to do: check in table, not in babies! otherwise duplicate in table
-          
           Dialog.customAlert("This point already exists",1800);
           return;
         }
@@ -803,37 +832,20 @@ console.log("deletemeasure disabled true")
 //Export
 jQuery(document).ready(function(){
     jQuery('#export').click(function(){
-      //babies2JSON
-      function babies2JSON(){
-        var json=new Array();
-        for (var index=0; index<babies.length;index++) {
-          for (var ind=0; ind<babies[index]["Data"].length;ind++) {
-            json.push({
-              Name:     babies[index].Name,
-              BirthDate: babies[index].BirthDate,
-              Gender: babies[index].Gender,
-              Date:    babies[index]["Data"][ind]["Date"],
-              Weeks:   babies[index]["Data"][ind]["Weeks"],
-              Weight:  babies[index]["Data"][ind]["Weight"],
-              Comment: babies[index]["Data"][ind]["Comment"]
-            });
-          }
-        }
-        return json;
-      }
       var data = jQuery('#txt').val();
       if(data == '')
           return;
-      var data=babies2JSON();
+      var data=Dialog.babiesToJSON();
       JSONToCSVConvertor(data);
       //function to 
       function JSONToCSVConvertor(obj){
         var out = '';
         //1st loop is to extract each row
-        for (var i = 0; i < obj.length; i++) {
+        for (var i = 0, length=obj.length; i < length; i++) {
             var row = "";        
             //2nd loop will extract each column and convert it in string comma-seprated
             for (var index in obj[i]) 
+              if (obj[i].hasOwnProperty(index))
                 row += '' + obj[i][index] + ', ';
             row.slice(0, row.length - 1);
             //add a line break after each row
@@ -867,23 +879,7 @@ jQuery(document).ready(function(){
 
 //Load the data from weianthro
 jQuery(document).ready(function(){
-/*//tests
-var DaysForTest = function(index, date){
-  //console.log("DaysForTest")
-  var birthdateYMD = new Date(Dialog.dateToYMD(babies[index].BirthDate));
-	//console.log("birthdateYMD=",birthdateYMD)
-  var date = new Date(Dialog.dateToYMD(date));
-	var days = Math.abs(date - birthdateYMD) / 3600 / 24000
-	return days;
-	//console.log("days=",days)
-}
-var datum = new Datum("01/08/2015", DaysForTest(0,"01/08/2015") / 7, 4,"Just born!");
-babies[0].Data.push(datum);
-babies[0].Data.push(new Datum("30/08/2015", DaysForTest(0,"30/08/2015") / 7, 5.4));
-babies[1].Data.push(new Datum("10/08/2014", DaysForTest(1,"01/08/2015") / 7, 8.6));
-*/
-  Dialog.autocomplete();
-  
+  Dialog.autocomplete();  
   //Start plot
   weiBoy = [];
   weiGirl = [];

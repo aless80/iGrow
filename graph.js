@@ -675,7 +675,7 @@ Graph.prototype.setCurrrentDataWeight = function(){
     dataWeight.Weeks=new Array();
     dataWeight.Date=new Array();
     dataWeight.Weight=new Array();
-    for (var i=0;i<dataWeight.length;i++){
+    for (var i=0,length=dataWeight.length;i<length;i++){
       dataWeight.Weeks.push( babies[index].Data[i]["Weeks"]);
       dataWeight.Date.push(  babies[index].Data[i]["Date"]);
       dataWeight.Weight.push(babies[index].Data[i]["Weight"]);
