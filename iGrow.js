@@ -744,8 +744,8 @@ jQuery(function() {
         jQuery("#addedittable").text("Insert in table");
         Dialog.showAccordion();
     })
-    //cancelweightdiv closes the accordion
-    jQuery("#cancelweight").click(function(){
+    //cancelaccordiondiv closes the accordion
+    jQuery("#cancelaccordion").click(function(){
         jQuery("#accordion").attr("hidden","true");
         jQuery("#dialogButtons").removeAttr("hidden");
         jQuery("#editmeasure").removeAttr("disabled");
