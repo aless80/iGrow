@@ -16,7 +16,7 @@ var todayDMY = ("00" + today.getDate()).slice(-2)+"/"+("00" + (today.getMonth()+
 //Callback: track baby selected in dropdown
 jQuery(document).on("change", "#dropdown", function(e) {
     //deselect any possible circle
-    deselectCircle(1);
+    Dialog.deselectCircle(1);
     //Update the lines, circles, title
     var currentName = this.options[e.target.selectedIndex].text;
     Dialog.updateDataAndGraph();
@@ -39,7 +39,7 @@ jQuery(document).on("change", "#dropdown", function(e) {
           		var ok = Dialog.addToDropdown(); 
               Dialog.autocomplete();
               jQuery("#datep").val(todayDMY);
-              enableSelection();
+              Dialog.enableSelection();
           		if (ok) jQuery( this ).dialog("close");
               jQuery("#dropdown").removeAttr("disabled");
               jQuery("#editbabybutton").removeAttr("disabled");
@@ -226,11 +226,11 @@ var Dialog={
           //Update only if current baby was removed
           if (redrawLater) Dialog.updateDataAndGraph();
           //enable Selections
-          enableSelection(true);
+          Dialog.enableSelection(true);
           Dialog.write2Cache();
         } else {
           //disable Selections if baby is empty
-          enableSelection(false);
+          Dialog.enableSelection(false);
         }
       }
     }
@@ -373,15 +373,15 @@ var Dialog={
     var index=getCurrIndex();
     babies[index].Data=data;
     //Sort data objects in babies
-    babies[index].Data.sort(Dialog.comparebabiesData);
-  },
-  //compare function to sort babies[].Data on Weeks
-  comparebabiesData: function(a,b) {
-    if (a.Weeks < b.Weeks)
-    return -1;
-    if (a.Weeks > b.Weeks)
-      return 1;
-      return 0;
+    //compare function to sort babies[].Data on Weeks
+    function comparebabiesData(a,b) {
+      if (a.Weeks < b.Weeks)
+      return -1;
+      if (a.Weeks > b.Weeks)
+        return 1;
+        return 0;
+    }
+    babies[index].Data.sort(comparebabiesData);
   },
   //
   table2JSON: function() {
@@ -418,48 +418,116 @@ var Dialog={
       return true;
     }
     return false;
+  },
+
+  //Delete from tablebody all lines/tr elements having td elements (eg not the headers th)  
+    tableEmpty: function() {
+    jQuery("#tablebody tr").filter(":has(td)").remove();
+  },
+
+  createTable: function() {
+    //First empty the table
+    Dialog.tableEmpty();
+    var index = getCurrIndex();
+    var tbl = document.getElementById('table')
+    tbl.setAttribute('cellspacing','1');
+    tbl.setAttribute('cellpadding','5');
+    var tbdy = document.getElementById('tablebody');
+    //Table elements
+    for (var ind=0; ind<babies[index].Data.length; ind++) { 
+      Dialog.appendToTable(babies[index].Data[ind]);
+    }
+  },
+
+//Append a line to the table
+  appendToTable: function(obj){
+    var tbdy = document.getElementById('tablebody');
+    //Create a tr line element
+    var tr = document.createElement('tr');
+    //Append td elements to the tr
+    for (var key in obj) {
+      var td = document.createElement('td');
+      if (key=="Weeks") 
+        var t = document.createTextNode(obj[key]*7); //days
+      else if (key=="Weight")
+        var t = document.createTextNode(Number(obj[key]).toFixed(1));
+      else 
+        var t = document.createTextNode(obj[key]);        
+      td.appendChild(t);
+      tr.appendChild(td);    
+    }
+    //Append line
+    var ind=jQuery('#tablebody tr:last-child')[0].id.split("tr")[1]
+    tr.setAttribute('id','tr'+(Number(ind)+1));
+    tr.setAttribute('align','center');
+    tbdy.appendChild(tr);
+  },
+  //Deselect circles: nullify is set circle to null (delete?)
+  deselectCircle: function(nullify) {
+    if (graph.selectCircle) {
+      document.getElementById(graph.selectCircle.id).setAttribute("r",6);
+      document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
+      if (nullify) {
+        graph.selectCircle = null;
+        graph.selectCircleData=null;
+        jQuery('#deletemeasure').attr("disabled", "true");
+      }
+    }
+  },
+  
+  
+  //Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+  dateToYMD: function(dmy) {
+    return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
+  },
+  MDYToDMY: function(mdy) {
+    return mdy.substring(3,5) + "/" + mdy.substring(0,2) + "/" + mdy.substring(6,10)
+  },
+  //Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
+  DMYToDate: function(dmy) {
+	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
+  },
+
+//Clear the graph from lines
+  removePathsInSVG: function() {
+   //d3.select("svg").selectAll("*").remove(); //all children
+   d3.selectAll(".pathArea").remove(); //
+  },
+
+  //Enable a bunch of elements
+  enableSelection: function(enable) {
+      if (typeof enable === "undefined") {
+        var index=getCurrIndex();
+        ((babies.length)&&(babies[index].Name.length > 0)) ? enable = true : enable = false;  
+      }
+      //Toggle the weight spinner 
+      var spinner = jQuery( "#weightSpinner" ).spinner();
+      var datep = jQuery( "#datep" ).datepicker();
+      if (enable) {
+        jQuery("#trlabels").removeClass("grayout");
+        jQuery("#dropdown").removeClass("grayout");
+        jQuery("#dropdown").prop("disabled", false); 
+        spinner.spinner( "enable" );
+        jQuery( "#datep" ).datepicker( "option", "disabled", false);
+        jQuery('#addedittable').prop('disabled', false);  
+      } else {
+        jQuery("#trlabels").addClass("grayout");
+        jQuery("#dropdown").addClass("grayout");
+        jQuery("#dropdown").prop("disabled", true);
+        spinner.spinner( "disable" );
+        jQuery( "#datep" ).datepicker( "option", "disabled", true);
+        jQuery('#addedittable').prop('disabled', true);
+      }
+      //NB: "#deletemeasure" should be all set
   }
-
-
-
-
-
 } //end Dialog
 
 
 
 
 
-//Deselect circles: nullify is set circle to null (delete?)
-function deselectCircle(nullify) {
-  if (graph.selectCircle) {
-    document.getElementById(graph.selectCircle.id).setAttribute("r",6);
-    document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
-    if (nullify) {
-      graph.selectCircle = null;
-      graph.selectCircleData=null;
-      jQuery('#deletemeasure').attr("disabled", "true");
-    }
-  }
-}
-//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
-function dateToYMD(dmy) {
-  return dmy.substring(6,10) + "/" + dmy.substring(3,5) + "/" + dmy.substring(0,2)
- };
-function MDYToDMY(mdy) {
-  return mdy.substring(3,5) + "/" + mdy.substring(0,2) + "/" + mdy.substring(6,10)
- };
 
-//Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
-function DMYToDate(dmy) {
-	return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
-  };
 
-//Clear the graph from lines
-function removePathsInSVG() {
-   //d3.select("svg").selectAll("*").remove(); //all children
-   d3.selectAll(".pathArea").remove(); //
-  }
 
 
 
@@ -506,7 +574,7 @@ jQuery.widget( "ui.pcntspinner", jQuery.ui.spinner, {
 jQuery("#weightSpinner").pcntspinner({ 
     min: 1,
     suffix:'Kg',
-    //start: 3.0,
+    //start: 4.0,
     max: 100,
     step: .1
     });  
@@ -542,7 +610,7 @@ jQuery(function() {
     jQuery("#addedittable").click(function() {      
       var textButton=jQuery("#addedittable").text().substring(0,4);
       //First remove circle selection, if any
-      deselectCircle(1);
+      Dialog.deselectCircle(1);
       if (jQuery("#weightSpinner").pcntspinner("isValid") == false) {
         alert("Please insert a correct weight");
         return False;
@@ -553,12 +621,14 @@ jQuery(function() {
       var dateDMY = jQuery("#datep").val();     
       for (var ind=0; ind<babies[index].Data.length;ind++) {
         if ((babies[index].Data[ind]["Date"]==dateDMY) && (babies[index].Data[ind]["Weight"]==weight)) {
+          //to do: check in table, not in babies! otherwise duplicate in table
+          
           Dialog.customAlert("This point already exists",1800);
           return;
         }
       }
-      var birthdateYMD = new Date(dateToYMD(getBirthdate()));
-      var date = new Date(dateToYMD(dateDMY));
+      var birthdateYMD = new Date(Dialog.dateToYMD(getBirthdate()));
+      var date = new Date(Dialog.dateToYMD(dateDMY));
       var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
       var comment = jQuery("#commentarea").val();
       if (textButton=="Inse"){
@@ -569,7 +639,7 @@ jQuery(function() {
           "Weight" : weight.toFixed(1),
           "Comment": comment
         };
-        appendToTable(obj);
+        Dialog.appendToTable(obj);
         jQuery("#addmeasure").removeAttr("disabled");
       } else if (textButton=="Edit"){
       //Edit data in tables     
@@ -594,47 +664,23 @@ jQuery(function() {
       } else {
         //Deselect line from table
         jQuery("table .selected").removeClass("selected");
+      }
         //Disable/enable buttons
         jQuery("#deletemeasure").attr("disabled","true");
         jQuery("#editmeasure").attr("disabled","true");
         jQuery("#addmeasure").removeAttr("disabled");
-      }
+      
     })
 });
 
-//Enable a bunch of elements
-function enableSelection(enable) {
-    if (typeof enable === "undefined") {
-      var index=getCurrIndex();
-      ((babies.length)&&(babies[index].Name.length > 0)) ? enable = true : enable = false;  
-    }
-    //Toggle the weight spinner 
-    var spinner = jQuery( "#weightSpinner" ).spinner();
-    var datep = jQuery( "#datep" ).datepicker();
-    if (enable) {
-      jQuery("#trlabels").removeClass("grayout");
-      jQuery("#dropdown").removeClass("grayout");
-      jQuery("#dropdown").prop("disabled", false); 
-      spinner.spinner( "enable" );
-      jQuery( "#datep" ).datepicker( "option", "disabled", false);
-      jQuery('#addedittable').prop('disabled', false);  
-    } else {
-      jQuery("#trlabels").addClass("grayout");
-      jQuery("#dropdown").addClass("grayout");
-      jQuery("#dropdown").prop("disabled", true);
-      spinner.spinner( "disable" );
-      jQuery( "#datep" ).datepicker( "option", "disabled", true);
-      jQuery('#addedittable').prop('disabled', true);
-    }
-    //NB: "#deletemeasure" should be all set
-}
+
 //Disable selection div after the page has loaded
 window.addEventListener("load", pageFullyLoaded, false);
 function pageFullyLoaded(e) {
-  enableSelection();
-  //Set date picker to today and weight spinner to 3.0 Kg
+  Dialog.enableSelection();
+  //Set date picker to today and weight spinner to 4.0 Kg
   jQuery("#datep").val(todayDMY);
-  jQuery("#weightSpinner").spinner( "value", "3.0 Kg");
+  jQuery("#weightSpinner").spinner( "value", "4.0 Kg");
 }
 
 
@@ -652,9 +698,9 @@ jQuery(function() {
     });
     //Fire up the dialog 
   jQuery("#dialogbutton").click(function() {
-      createTable();
+      Dialog.createTable();
       //deselect the graph.selectedCircle
-      deselectCircle();      
+      Dialog.deselectCircle();      
       var str = "Please edit the table for " + getCurrName() + ", born on "+ babies[getCurrIndex()]["BirthDate"];  
       jQuery("#tabletitle").text(str);
       jQuery("#textarea").value="";
@@ -728,50 +774,6 @@ jQuery('#dialog').on('dialogopen', function(event) {
 });
 
 
-//Delete from tablebody all lines/tr elements having td elements (eg not the headers th)  
-function tableEmpty() {
-  jQuery("#tablebody tr").filter(":has(td)").remove();
-}
-
-function createTable() {
-    //First empty the table
-    tableEmpty();
-    var index = getCurrIndex();
-    var tbl = document.getElementById('table')
-    tbl.setAttribute('cellspacing','1');
-    tbl.setAttribute('cellpadding','5');
-    var tbdy = document.getElementById('tablebody');
-    //Table elements
-    for (var ind=0; ind<babies[index].Data.length; ind++) { 
-      appendToTable(babies[index].Data[ind]);
-    }
-}
-
-//Append a line to the table
-function appendToTable(obj){
-    var tbdy = document.getElementById('tablebody');
-    //Create a tr line element
-    var tr = document.createElement('tr');
-    //Append td elements to the tr
-    for (var key in obj) {
-      var td = document.createElement('td');
-      if (key=="Weeks") 
-        var t = document.createTextNode(obj[key]*7); //days
-      else if (key=="Weight")
-        var t = document.createTextNode(Number(obj[key]).toFixed(1));
-      else 
-        var t = document.createTextNode(obj[key]);        
-      td.appendChild(t);
-      tr.appendChild(td);    
-    }
-    //Append line
-    var ind=jQuery('#tablebody tr:last-child')[0].id.split("tr")[1]
-    tr.setAttribute('id','tr'+(Number(ind)+1));
-    tr.setAttribute('align','center');
-    tbdy.appendChild(tr);
-}
-
-
 //Select the whole row when clicking, populate and open accordion
 jQuery("#table").on("click", "tr", function(event) {
   event.preventDefault();
@@ -824,33 +826,35 @@ jQuery(document).ready(function(){
           return;
       var data=babies2JSON();
       JSONToCSVConvertor(data);
+      //function to 
+      function JSONToCSVConvertor(obj){
+        var out = '';
+        //1st loop is to extract each row
+        for (var i = 0; i < obj.length; i++) {
+            var row = "";        
+            //2nd loop will extract each column and convert it in string comma-seprated
+            for (var index in obj[i]) 
+                row += '' + obj[i][index] + ', ';
+            row.slice(0, row.length - 1);
+            //add a line break after each row
+            out += row + '\r\n';
+        }
+        //Download as file
+        var uri = 'data:text/csv;charset=utf-8,' + escape(out);
+        // window.open(uri);  //will not work in some browsers or bad file extension
+        //this trick generates a temp <a /> tag
+            var link = document.createElement("a");    
+            link.href = uri;
+            link.style = "visibility:hidden";
+            link.download = "output.csv";    
+        //this part will append the anchor tag and remove it after automatic click
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+    }
     });
 });
-function JSONToCSVConvertor(obj){
-    var out = '';
-     //1st loop is to extract each row
-    for (var i = 0; i < obj.length; i++) {
-        var row = "";        
-        //2nd loop will extract each column and convert it in string comma-seprated
-        for (var index in obj[i]) 
-            row += '' + obj[i][index] + ', ';
-        row.slice(0, row.length - 1);
-        //add a line break after each row
-        out += row + '\r\n';
-    }
-     //Download as file
-    var uri = 'data:text/csv;charset=utf-8,' + escape(out);
-     // window.open(uri);  //will not work in some browsers or bad file extension
-     //this trick generates a temp <a /> tag
-        var link = document.createElement("a");    
-        link.href = uri;
-        link.style = "visibility:hidden";
-        link.download = "output.csv";    
-     //this part will append the anchor tag and remove it after automatic click
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-}
+
 
 //testing: click on 
 // jQuery(document).ready(function(){
@@ -866,9 +870,9 @@ jQuery(document).ready(function(){
 /*//tests
 var DaysForTest = function(index, date){
   //console.log("DaysForTest")
-  var birthdateYMD = new Date(dateToYMD(babies[index].BirthDate));
+  var birthdateYMD = new Date(Dialog.dateToYMD(babies[index].BirthDate));
 	//console.log("birthdateYMD=",birthdateYMD)
-  var date = new Date(dateToYMD(date));
+  var date = new Date(Dialog.dateToYMD(date));
 	var days = Math.abs(date - birthdateYMD) / 3600 / 24000
 	return days;
 	//console.log("days=",days)
