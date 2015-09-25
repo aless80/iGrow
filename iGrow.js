@@ -483,18 +483,12 @@ jQuery("#babydialog").dialog({
                 Dialog.enableSelection();
                 if (ok) jQuery( this ).dialog("close");
                 Page.enablePageButtons();
-                // jQuery("#dropdown").removeAttr("disabled");  //to do babydialog').on('dialogclose'
-                // jQuery("#editbabybutton").removeAttr("disabled");
-                // jQuery("#dialogbutton").removeAttr("disabled");
                 Page.writeToCache();
             }
         },
         Cancel: function() {
             jQuery( this ).dialog("close");
             Page.enablePageButtons();
-            // jQuery("#dropdown").removeAttr("disabled");      //to do babydialog').on('dialogclose'
-            // jQuery("#editbabybutton").removeAttr("disabled");
-            // jQuery("#dialogbutton").removeAttr("disabled");
         },
         "Delete this baby" : {
             text : "Delete this baby",
@@ -865,10 +859,7 @@ jQuery(document).ready(function(){
 // jQuery(document).ready(function(){
 //     jQuery('#dialogbutton').trigger('click');
 //   }
-// )
-
-//document.getElementById("dialogbutton").focus();
-
+//)
 
 //Load the data from weianthro
 jQuery(document).ready(function(){
