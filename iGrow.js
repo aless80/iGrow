@@ -4,8 +4,6 @@ var Page = function() {
     //var today = new Date(); private variable
     var todayDMY = ("00" + (new Date()).getDate()).slice(-2)+"/"+("00" + ((new Date()).getMonth()+1)).slice(-2)+"/"+(new Date()).getFullYear();
 
-
-
     //Check if inputs in baby dialog are valid
     var areInputsValid = function(prompt){
         var text = $("#inputfordropdown").val();
@@ -93,7 +91,7 @@ var Page = function() {
         getBirthdate: function(){
             var name = $("#dropdown").val();
             if (name == null) {
-                return Page.todayDMY;
+                return todayDMY;
             }
             var index = Page.getCurrIndex();
             return babies[index].BirthDate;
@@ -146,8 +144,6 @@ var Page = function() {
                     });
             });
         },
-        
-        
     
         // Add all existing babies to the dropdown 
         addToDropdown: function(){
@@ -258,13 +254,27 @@ var Page = function() {
             if (stored) var babies = JSON.parse(stored);
             else var babies = new Array(); 
             return babies;
+        },
+    
+        //
+        pageFullyLoaded: function(e) {
+            Dialog.enableSelection();
+            //Set date picker to today and weight spinner to 4.0 Kg
+            $("#datep").val(todayDMY);
+            $("#weightSpinner").spinner( "value", "4.0 Kg");
         }
     }
+    
 }();//end Page
 
 //Container object for many methods related to the dialog
-var Dialog={
+var Dialog = function(){
+    //Private variable
+    var todayDMY = ("00" + (new Date()).getDate()).slice(-2)+"/"+("00" + ((new Date()).getMonth()+1)).slice(-2)+"/"+(new Date()).getFullYear();
+    //return public Methods in the Dialog "module"
+    return {
     showAccordion: function() {
+        $("#datep").val(todayDMY);
         $("#accordion").removeAttr("hidden");
         $("#dialogButtons").attr("hidden","true");
         $("#editmeasure").attr("disabled","true");
@@ -287,11 +297,9 @@ var Dialog={
         var weight=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);
         var comment=$("table .selected td:nth-child(4)").text();
         return {date:date, weight:weight, comment:comment, line:line}
-    },
-
+    },    
     fillAccordion: function() {
-        var cells=Dialog.getSelectedFromTable();    
-        //console.log("weight,comment=",weight,comment)
+        var cells=Dialog.getSelectedFromTable();
         $("#datep").val(cells.date);    
         $("#weightspinnerdiv").val();
         $("#weightSpinner").spinner( "value", cells.weight+" Kg");
@@ -397,8 +405,8 @@ var Dialog={
                 ((babies.length)&&(babies[index].Name.length > 0)) ? enable = true : enable = false;    
             }
             //Toggle the weight spinner 
-            var spinner = $( "#weightSpinner" ).spinner();
-            var datep = $( "#datep" ).datepicker();
+            var spinner = $("#weightSpinner").spinner();
+            var datep = $("#datep").datepicker();
             if (enable) {
                 $("#trlabels").removeClass("grayout");
                 $("#dropdown").removeClass("grayout");
@@ -444,7 +452,8 @@ var Dialog={
         }
         return json;
       }
-} //end Dialog
+    }
+}(); //end Dialog
 
 
 
@@ -486,7 +495,7 @@ $("#babydialog").dialog({
             click : function() {
                 var ok = Page.addToDropdown(); 
                 Page.autocomplete();
-                $("#datep").val(Page.todayDMY);
+                //$("#datep").val(Page.todayDMY);  //to do
                 Dialog.enableSelection();
                 if (ok) $( this ).dialog("close");
                 Page.enablePageButtons();
@@ -694,13 +703,7 @@ $(function() {
 
 
 //Disable selection div after the page has loaded
-window.addEventListener("load", pageFullyLoaded, false);
-function pageFullyLoaded(e) {
-    Dialog.enableSelection();
-    //Set date picker to today and weight spinner to 4.0 Kg
-    $("#datep").val(Page.todayDMY);
-    $("#weightSpinner").spinner( "value", "4.0 Kg");
-}
+window.addEventListener("load", Page.pageFullyLoaded, false);
 
 
 
