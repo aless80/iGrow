@@ -567,13 +567,6 @@ $(document).on("change", "#inputfordropdown", function(e) {
 
 
 //Actions about adding and plotting the data 
-// //Set birthdate picker to yesterday 
-// if ($("#birthdatep").val() == "") {
-//     var yesterday = new Date();
-//     yesterday.setDate(yesterday.getDate() - 1);
-//     var yesterdayDMY = ("00" + yesterday.getDate()).slice(-2)+"/"+("00" + yesterday.getMonth()).slice(-2)+"/"+yesterday.getFullYear()
-//     $("#birthdatep").val(yesterdayDMY);
-// }
 //Define behaviour of date pickers and spinner
 $(function() {
     var birthdateDMY = Page.getBirthdate().split("/");
@@ -614,9 +607,6 @@ $(function() {
             $( this ).dialog("close"); 
             //enable all buttons on main page
             Page.enablePageButtons();
-            // $("#dropdown").removeAttr("disabled"); //to do 
-            // $("#editbabybutton").removeAttr("disabled");
-            // $("#dialogbutton").removeAttr("disabled");          
         	}
         }
       },
