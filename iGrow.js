@@ -219,8 +219,8 @@ var Page={
         graph.update();
         graph.setTitle();
     },
-    //Delete a measurement
-    deleteWeight: function(id){ //to do: can I use the other one for in the table?
+    //Delete a measurement when selecting a circle on graph and pressing Del
+    deleteWeight: function(id){
         var indCircle = id.split("_").pop();
         var index = Page.getCurrIndex();
         var string = "Weight was "+babies[index].Data["Weight"][indCircle]+"Kg on "+babies[index].Data["Date"][indCircle]
@@ -237,6 +237,12 @@ var Page={
     writeToCache: function(){
         localStorage['iGrow'] = JSON.stringify(babies);
     },
+    readFromCache: function(){ 
+        var stored = localStorage['iGrow'];
+        if (stored) var babies = JSON.parse(stored);
+        else var babies = new Array(); 
+        return babies;
+    }
 }//end Page
 
 //Container object for many methods related to the dialog
@@ -432,10 +438,13 @@ var Dialog={
 
 ///Actions
 //Create a baby instance
-var babies=readFromCache();
+var babies=Page.readFromCache();
 if (babies.length==0) {
   jQuery("#dialogbutton").attr("disabled","true")
 }
+
+//At startup populate the dropdown menu
+Page.populateDropdown(babies);
 
 //Callback: track baby selected in dropdown
 jQuery(document).on("change", "#dropdown", function(e) {
@@ -449,105 +458,103 @@ jQuery(document).on("change", "#dropdown", function(e) {
 });
 
 //Functions for the babydialog
-//jQuery(function() {  //ok?
-    jQuery("#babydialog").dialog({
-      autoOpen: false,
-      show: { effect: "blind", duration: 500 },
-      hide: { effect: "blind", duration: 500 },
-      buttons: {
-        "Add baby" : {
-        	text : "Add baby",
-        	id : "dialog_AddBaby",
-        	click : function() {
-          		var ok = Page.addToDropdown(); 
-              Page.autocomplete();
-              jQuery("#datep").val(Page.todayDMY);
-              Dialog.enableSelection();
-          		if (ok) jQuery( this ).dialog("close");
-              jQuery("#dropdown").removeAttr("disabled");
-              jQuery("#editbabybutton").removeAttr("disabled");
-              jQuery("#dialogbutton").removeAttr("disabled");
-              Page.writeToCache();
-        	}
-        },
-        Cancel: function() {
-            jQuery( this ).dialog("close");
+jQuery("#babydialog").dialog({
+    autoOpen: false,
+    show: { effect: "blind", duration: 500 },
+    hide: { effect: "blind", duration: 500 },
+    buttons: {
+    "Add baby" : {
+        text : "Add baby",
+        id : "dialog_AddBaby",
+        click : function() {
+            var ok = Page.addToDropdown(); 
+            Page.autocomplete();
+            jQuery("#datep").val(Page.todayDMY);
+            Dialog.enableSelection();
+            if (ok) jQuery( this ).dialog("close");
             jQuery("#dropdown").removeAttr("disabled");
             jQuery("#editbabybutton").removeAttr("disabled");
             jQuery("#dialogbutton").removeAttr("disabled");
-          },
-        "Delete this baby" : {
-        	text : "Delete this baby",
-        	disabled : true,
-        	id : "dialog_DelBaby",
-        	click : function() {
-            var text = jQuery("#inputfordropdown").val();
-            Page.removeBaby(text);  
-            Page.autocomplete();
-            if (babies.length==0) jQuery("#dialogbutton").attr("disabled","true");
-            jQuery( this ).dialog("close");
-          }
+            Page.writeToCache();
         }
-      }
-    });    
-    //Fire up the help dialog of the main page
-    jQuery("#helpmainpage").dialog({
-      autoOpen: false,
-      show: { effect: "blind", duration: 500 },
-      hide: { effect: "blind", duration: 500 }
-    }); 
-    jQuery( "#helpbutton" ).click(function() {
-      jQuery("#helpmainpage").dialog("open");
-    });  
-  
-    //Fire up the help dialog of the table 
-    jQuery("#helpdialog").dialog({
-      autoOpen: false,
-      show: { effect: "blind", duration: 500 },
-      hide: { effect: "blind", duration: 500 }
-    }); 
-    jQuery("#helpdialogbutton").click(function() {
-      jQuery("#helpdialog").dialog("open");
-    });
-    
-    //Fire up the babydialog 
-    jQuery("#editbabybutton").click(function() {
-      //Reset the inputs
-      jQuery("#inputfordropdown").val("Name");
-      jQuery("#genderinput").val("Gender");
-      jQuery("#birthdatep").val("Birthdate");
-      jQuery("#babydialog").dialog("open");
-    });
-    //Behavior when dropdown changes
-    jQuery(document).on("change", "#inputfordropdown", function(e) {
-      var index=Page.getCurrIndex();
-      //Get all names
-      var names=new Array(babies.length);
-      for (var key in babies) {
-        if (babies.hasOwnProperty(key)) {
-          names[key]=babies[key]["Name"];
+    },
+    Cancel: function() {
+        jQuery( this ).dialog("close");
+        jQuery("#dropdown").removeAttr("disabled");
+        jQuery("#editbabybutton").removeAttr("disabled");
+        jQuery("#dialogbutton").removeAttr("disabled");
+        },
+    "Delete this baby" : {
+        text : "Delete this baby",
+        disabled : true,
+        id : "dialog_DelBaby",
+        click : function() {
+        var text = jQuery("#inputfordropdown").val();
+        Page.removeBaby(text);  
+        Page.autocomplete();
+        if (babies.length==0) jQuery("#dialogbutton").attr("disabled","true");
+        jQuery( this ).dialog("close");
         }
-      }    
-      var text = jQuery("#inputfordropdown").val();
-      if (names.indexOf(text) > -1) {  //text is existing name
-    		//Load the birthdate and gender
-        jQuery("#birthdatep").val(babies[index]["BirthDate"]);
-    		var gender = (babies[index]["Gender"] == 1 ? "Male" : "Female");
-    		jQuery("#genderinput").val(gender);
-    		//Disable birthdatep and genderinput
-    		document.getElementById('birthdatep').disabled = true;
-    		document.getElementById('genderinput').disabled = true;    		
-    		//"enable Delete this baby"
-    		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("enable");
-    	} else {
-    		//enable birthdatep 
-    		document.getElementById('birthdatep').disabled = false;
-    		document.getElementById('genderinput').disabled = false;    
-    		//"disable Delete this baby"
-    		jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
-    	}
-    });    
-//});
+    }
+    }
+});    
+//Fire up the help dialog of the main page
+jQuery("#helpmainpage").dialog({
+    autoOpen: false,
+    show: { effect: "blind", duration: 500 },
+    hide: { effect: "blind", duration: 500 }
+}); 
+jQuery( "#helpbutton" ).click(function() {
+    jQuery("#helpmainpage").dialog("open");
+});  
+
+//Fire up the help dialog of the table 
+jQuery("#helpdialog").dialog({
+    autoOpen: false,
+    show: { effect: "blind", duration: 500 },
+    hide: { effect: "blind", duration: 500 }
+}); 
+jQuery("#helpdialogbutton").click(function() {
+    jQuery("#helpdialog").dialog("open");
+});
+
+//Fire up the babydialog 
+jQuery("#editbabybutton").click(function() {
+    //Reset the inputs
+    jQuery("#inputfordropdown").val("Name");
+    jQuery("#genderinput").val("Gender");
+    jQuery("#birthdatep").val("Birthdate");
+    jQuery("#babydialog").dialog("open");
+});
+//Behavior when dropdown changes
+jQuery(document).on("change", "#inputfordropdown", function(e) {
+    var index=Page.getCurrIndex();
+    //Get all names
+    var names=new Array(babies.length);
+    for (var key in babies) {
+    if (babies.hasOwnProperty(key)) {
+        names[key]=babies[key]["Name"];
+    }
+    }    
+    var text = jQuery("#inputfordropdown").val();
+    if (names.indexOf(text) > -1) {  //text is existing name
+        //Load the birthdate and gender
+    jQuery("#birthdatep").val(babies[index]["BirthDate"]);
+        var gender = (babies[index]["Gender"] == 1 ? "Male" : "Female");
+        jQuery("#genderinput").val(gender);
+        //Disable birthdatep and genderinput
+        document.getElementById('birthdatep').disabled = true;
+        document.getElementById('genderinput').disabled = true;    		
+        //"enable Delete this baby"
+        jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("enable");
+    } else {
+        //enable birthdatep 
+        document.getElementById('birthdatep').disabled = false;
+        document.getElementById('genderinput').disabled = false;    
+        //"disable Delete this baby"
+        jQuery(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
+    }
+});    
 
 
 
@@ -564,18 +571,8 @@ jQuery(document).on("change", "#dropdown", function(e) {
 
 
 
-function readFromCache(){ //cannot putit in Dialog now, "readFromCache undefined because it defines babies" 
-    var stored = localStorage['iGrow'];
-    if (stored) var babies = JSON.parse(stored);
-    else var babies = new Array(); 
-    return babies;
-}
 
 
-
-///Actions
-//At startup populate the dropdown menu   //to do: put earlier?
-Page.populateDropdown(babies);
 
 //Actions about adding and plotting the data 
 //Set birthdate picker to yesterday 
@@ -655,7 +652,6 @@ jQuery(function() {
       var table=Dialog.tableToJSON();
       for (var ind=0,length=table.length; ind<length;ind++) {
         if ((table[ind]["Date"]==dateDMY) && (table[ind]["Weight"]==weight)) {
-          //to do: check in table, not in babies! otherwise duplicate in table
           Page.customAlert("This point already exists",1800);
           return;
         }
