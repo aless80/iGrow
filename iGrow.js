@@ -296,7 +296,8 @@ var Dialog = function(){
         var date=$("table .selected td:first-child").text();
         var weight=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);
         var comment=$("table .selected td:nth-child(4)").text();
-        return {date:date, weight:weight, comment:comment, line:line}
+        var quantile=$("table .selected td:nth-child(5)").text();
+        return {date:date, weight:weight, comment:comment, quantile:quantile, line:line}
     },    
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
@@ -335,7 +336,8 @@ var Dialog = function(){
                     Date:        td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
                     Weeks:     Number(td.eq(1).text()/7),
                     Weight:    Number(td.eq(2).text()),
-                    Comment: td.eq(3).text()
+                    Comment: td.eq(3).text(),
+                    Quantile: td.eq(4).text()
                 }
             }).get();
     return data;
@@ -427,9 +429,11 @@ var Dialog = function(){
     //Convert the babies array to JSON    
     babiesToJSON: function(){
                 var json=new Array();
-                for (var index=0,length=babies.length; index<length; index++) {
+                for (var index=0,len=babies.length; index<len; index++) {
+                    console.log("len,index=",len,index)
                     var datalength=babies[index]["Data"].length;
                     if (datalength==0) {
+                                 console.log("if, index=",index)
                         json.push({
                                 Name:         babies[index].Name,
                                 BirthDate: babies[index].BirthDate,
@@ -437,14 +441,16 @@ var Dialog = function(){
                         });
                     } else {
                         for (var ind=0,length=datalength; ind<length; ind++) {
+            console.log("else for, index=",index)
                             var obj={
-                                Name:         babies[index].Name,
-                            BirthDate: babies[index].BirthDate,
-                Gender: babies[index].Gender,
-                Date:    babies[index]["Data"][ind]["Date"],
-                Weeks:   babies[index]["Data"][ind]["Weeks"],
-                Weight:  babies[index]["Data"][ind]["Weight"],
-                Comment: babies[index]["Data"][ind]["Comment"]
+                                Name:   babies[index].Name,
+                            BirthDate:  babies[index].BirthDate,
+                            Gender:   babies[index].Gender,
+                            Date:     babies[index]["Data"][ind]["Date"],
+                            Weeks:    babies[index]["Data"][ind]["Weeks"],
+                            Weight:   babies[index]["Data"][ind]["Weight"],
+                            Comment:  babies[index]["Data"][ind]["Comment"],
+                            Quantile: babies[index]["Data"][ind]["Quantile"]
               }
               json.push(obj);
             }
@@ -660,13 +666,16 @@ $(function() {
         var date = new Date(Dialog.dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
         var comment = $("#commentarea").val();
+        var hmo = graph.points[days];
+        var quantile=Math.round(cdf(weight,hmo.m,hmo.s)*100);
         if (textButton=="Inse"){
             //Append data to the babies' data
             var obj = {
             "Date" : dateDMY,
             "Weeks" : days / 7,
             "Weight" : weight.toFixed(1),
-            "Comment": comment
+            "Comment": comment,
+            "Quantile": quantile
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
@@ -793,7 +802,6 @@ $("#table").on("click", "tr", function(event) {
   event.preventDefault();
   if ($(this).hasClass('selected')) {
     $(this).removeClass('selected');
-console.log("deletemeasure disabled true")
     $("#deletemeasure").attr("disabled","true");
     $("#addmeasure").removeAttr("disabled");
     $("#editmeasure").attr("disabled","true");

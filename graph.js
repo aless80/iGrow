@@ -73,6 +73,7 @@ Datum = function(date, weeks, weight, comment){
     this.Date = date;
     this.Weeks = weeks;
     this.Weight = weight;
+    this.Quantile = (typeof quantile === "undefined")?"N/A":quantile; 
     this.Comment=(typeof comment === "undefined")?"":comment;
 }
 
@@ -234,8 +235,8 @@ Graph.prototype.zoomHandler = function() {
     if (self.scale==d3.event.scale) { //translate
     xdomain = [this.options.xmin+halfdiffrangex-d3.event.translate[0]/6,
                this.options.xmax-halfdiffrangex-d3.event.translate[0]/6 ];
-    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/6,
-               this.options.ymin+halfdiffrangey+d3.event.translate[1]/6];      
+    ydomain = [this.options.ymax-halfdiffrangey+d3.event.translate[1]/25,
+               this.options.ymin+halfdiffrangey+d3.event.translate[1]/25];      
     } else { //scale
     xdomain = [this.options.xmin+halfdiffrangex, 
                this.options.xmax-halfdiffrangex];
@@ -564,7 +565,7 @@ Graph.prototype.update = function() {
               //Show the age
               if (d[0] < 3) {
             	  string = string.concat(d[0] * 7 + " day");
-                if (d[0]/7 > 1) string = string.concat("s");
+                if (d[0]*7 > 1) string = string.concat("s");
               } else if (d[0] < 20) {
 	              string = string.concat(Math.floor(d[0]) + " weeks");
               } else {                
@@ -589,9 +590,9 @@ Graph.prototype.update = function() {
               //Show the weight
               string = string.concat("<br/>Weight: "  + d[1] + " Kg");
               //Show the data from WHO
-              var obj = self.points[Math.round(d[0] * 7)];              
-              string = string.concat("<br/>Average weight from WHO: " + Math.round(obj.m*100)/100);
-              var quantile=""+Math.round(cdf(d[1],obj.m,obj.s)*100);
+              var hmo = self.points[Math.round(d[0] * 7)];              
+              string = string.concat("<br/>Average weight from WHO: " + Math.round(hmo.m*100)/100);
+              var quantile=""+Math.round(cdf(d[1],hmo.m,hmo.s)*100); //d[1] is weight
               var ordinal = new String(2);
               if ((quantile[1]=="1") && (quantile!="11")) ordinal="st";
               else if ((quantile[1]=="2") && (quantile!="12")) ordinal="nd";
