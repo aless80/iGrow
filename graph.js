@@ -52,7 +52,7 @@ git clone https://github.com/aless80/iGrow
 
 //Diff
 git diff zoom
-git diff <lbranch> <rbranch>
+git diff master origin/maste
 */
 
 //Baby class
