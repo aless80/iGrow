@@ -13,10 +13,10 @@ var Page = function() {
         if (existing.indexOf(text) > -1) {
             message = "This name already exists";
         }
-        else if (text == "") {
+        else if (text === "") {
             message = "The name cannot be empty"; 
         }
-        else if (text == "Name") {
+        else if (text === "Name") {
             message = "Please select a name for your child"; 
         }
         //Check if the gender was selected
@@ -43,14 +43,14 @@ var Page = function() {
         //Get the baby's name from the dropdown
         getCurrName: function(){
             var value = $("#dropdown").val();
-            if (value == null) {
+            if (value === null) {
                 return "    ";
             }
             return value
         },
         //Get the baby's index from the dropdown
         getCurrIndex: function(){
-            if (babies.length==0) return null;
+            if (babies.length===0) return null;
             var name = $("#dropdown").val();
             return Page.getIndexFromName(name);
         },
@@ -66,12 +66,12 @@ var Page = function() {
         getGender: function(){
             var name = Page.getCurrName();
             var index=Page.getCurrIndex();
-            if (babies.length == 0) return 0;
+            if (babies.length === 0) return 0;
                 var gender = babies[index].Gender
             // solved problem: when I add a baby using the dropdown I get Male/Female, not 1/2.
-            if (gender == "Female") 
+            if (gender === "Female") 
                 gender = 2;
-            else if (gender == "Male") 
+            else if (gender === "Male") 
                 gender = 1
             return gender;
         },
@@ -90,7 +90,7 @@ var Page = function() {
         //Get the baby's BirthDate from the dropdown as string (e.g. 27/11/2015)
         getBirthdate: function(){
             var name = $("#dropdown").val();
-            if (name == null) {
+            if (name === null) {
                 return todayDMY;
             }
             var index = Page.getCurrIndex();
@@ -150,9 +150,9 @@ var Page = function() {
             if (areInputsValid(true)){
                 var text = $("#inputfordropdown").val();    
                 var gender = $("#genderinput").val();
-                if (gender == "Female") {
+                if (gender === "Female") {
                     gender = 2;
-                } else if (gender == "Male") {
+                } else if (gender === "Male") {
                     gender = 1;
                 }
                 var birthdate = $("#birthdatep").val();
@@ -368,9 +368,9 @@ var Dialog = function(){
         for (var key in obj) {
             if (obj.hasOwnProperty(key)) {                    
                 var td = document.createElement('td');
-                if (key=="Weeks") 
+                if (key==="Weeks") 
                     var t = document.createTextNode(obj[key]*7); //days
-                else if (key=="Weight")
+                else if (key==="Weight")
                     var t = document.createTextNode(Number(obj[key]).toFixed(1));
                 else 
                     var t = document.createTextNode(obj[key]);                
@@ -432,7 +432,7 @@ var Dialog = function(){
                 for (var index=0,len=babies.length; index<len; index++) {
                     console.log("len,index=",len,index)
                     var datalength=babies[index]["Data"].length;
-                    if (datalength==0) {
+                    if (datalength===0) {
                                  console.log("if, index=",index)
                         json.push({
                                 Name:         babies[index].Name,
@@ -471,7 +471,7 @@ var Dialog = function(){
 ///Actions
 //Create a baby instance
 var babies=Page.readFromCache();
-if (babies.length==0) {
+if (babies.length===0) {
   $("#dialogbutton").attr("disabled","true")
 }
 
@@ -520,7 +520,7 @@ $("#babydialog").dialog({
                 var text = $("#inputfordropdown").val();
                 Page.removeBaby(text);  
                 Page.autocomplete();
-                if (babies.length==0) $("#dialogbutton").attr("disabled","true");
+                if (babies.length===0) $("#dialogbutton").attr("disabled","true");
                 $( this ).dialog("close");
             }
         }
@@ -570,7 +570,7 @@ $(document).on("change", "#inputfordropdown", function(e) {
     if (names.indexOf(text) > -1) {  //text is existing name
         //Load the birthdate and gender
     $("#birthdatep").val(babies[index]["BirthDate"]);
-        var gender = (babies[index]["Gender"] == 1 ? "Male" : "Female");
+        var gender = (babies[index]["Gender"] === 1 ? "Male" : "Female");
         $("#genderinput").val(gender);
         //Disable birthdatep and genderinput
         document.getElementById('birthdatep').disabled = true;
@@ -668,7 +668,7 @@ $(function() {
         var comment = $("#commentarea").val();
         var hmo = graph.points[days];
         var quantile=Math.round(cdf(weight,hmo.m,hmo.s)*100);
-        if (textButton=="Inse"){
+        if (textButton==="Inse"){
             //Append data to the babies' data
             var obj = {
             "Date" : dateDMY,
@@ -679,7 +679,7 @@ $(function() {
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
-        } else if (textButton=="Edit"){
+        } else if (textButton==="Edit"){
         //Edit data in tables     
             var sel=Dialog.getSelectedFromTable();
             $("table #"+sel.line + " :nth-child(1)").text(dateDMY)
@@ -886,7 +886,7 @@ $(document).ready(function(){
       };
     },function(error, data) {    
         data.forEach(function(d, i) {
-          data[i].gender == 1 ? weiBoy.push(d) : weiGirl.push(d);
+          data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
           });
 
         graph = new Graph("chart1", {

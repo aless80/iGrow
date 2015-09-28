@@ -4,6 +4,9 @@ registerKeyboardHandler = function(callback) {
   d3.select(window).on("keydown", callback);  
 };
 
+/* Style
+http://jshint.com/
+*/
 /* git
 http://stackoverflow.com/questions/2745076/what-are-the-differences-between-git-commit-and-git-push
 git config --global user.name "Alessandro"
