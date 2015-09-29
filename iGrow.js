@@ -368,8 +368,8 @@ var Dialog = function(){
         for (var key in obj) {
             if (obj.hasOwnProperty(key)) {                    
                 var td = document.createElement('td');
-                if (key==="Weeks") 
-                    var t = document.createTextNode(obj[key]*7); //days
+                if (key==="Weeks")
+                    var t = document.createTextNode(Math.round(obj[key]*7)); //days
                 else if (key==="Weight")
                     var t = document.createTextNode(Number(obj[key]).toFixed(1));
                 else 
