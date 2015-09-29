@@ -899,5 +899,38 @@ $(document).ready(function(){
             "maxzoom": 2  
         });
       }
-  );   
+  );
+  
+  
+  
+  
+  
+  d3.tsv("lenanthro.txt", 
+    //This function defines how "data" below will look like 
+    function(d) {
+      return {
+      gender: +d.sex,
+      age: +d.age / 7,
+        l: +d.l,
+        m: +d.m,
+        s: +d.s,
+        loh: +d.loh
+      };
+    },function(error, data) {    
+        data.forEach(function(d, i) {
+          data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
+          });
+
+        graph2 = new Graph("chart1", {
+            "xmin": 0, "xmax": 200,
+            "ymin": 0, "ymax": 20, 
+            "pointsBoy": lenBoy,
+            "pointsGirl": lenGirl,
+            "xlabel": "Age [Weeks]",
+            "ylabel": "Weight [Kg]",
+            "maxzoom": 2  
+        });
+      }
+  );
+  
 })

@@ -49,10 +49,6 @@ git fetch --all
 git reset --hard origin/master        //delete local master or:
 git reset --hard origin/your_branch   //delete local branch
 
-//Clone
-git checkout zoom
-git clone https://github.com/aless80/iGrow
-
 //Diff
 git diff zoom
 git diff master origin/maste
