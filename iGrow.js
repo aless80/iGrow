@@ -266,8 +266,8 @@ var Page = function() {
             Dialog.enableSelection();
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
-            $("#weightSpinner").spinner( "value", "4.0 Kg");
-//$("#lengthSpinner").spinner( "value", "4.0 ??");
+            $("#weightSpinner").spinner("value", "4.0 Kg");
+//$("#lengthSpinner").spinner("value", "4.0 ??");
         }
     }
     
@@ -277,12 +277,33 @@ var Page = function() {
 var Dialog = function(){
     //Private variable
     var todayDMY = ("00" + (new Date()).getDate()).slice(-2)+"/"+("00" + ((new Date()).getMonth()+1)).slice(-2)+"/"+(new Date()).getFullYear();
-    //Private method
-    var getMeasureFromDialog = function(){
-        return $("#measureselectdialog").val();
-    }
+    
     //return public Methods in the Dialog "module"
     return {
+        //Private method
+    getMeasureType: function(){
+        return $("#measureselect").val();
+    },
+    changeMeasurementType: function(){
+        var measurementType=$("#measureselect").val();    
+        document.getElementById('measurementspinnerlabel').innerHTML=measurementType;
+        //Change spinner's suffix and starting value
+        //var cells=Dialog.getSelectedFromTable();
+        switch (measurementType){
+            case 'Weight':
+            var suffix=' Kg';
+            var start=4; // to do
+            break;
+            case 'Length':
+            var suffix=' ??';
+            var start=10; // to do
+            break;
+        }
+        $("#weightSpinner").spinner("value", start+suffix);
+        //Change header: thmeasure
+        $("#thmeasure").text(measurementType);
+                
+    },
     showAccordion: function() {
         $("#datep").val(todayDMY);
         $("#accordion").removeAttr("hidden");
@@ -308,7 +329,7 @@ var Dialog = function(){
   //var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
   var weight=NaN;
   var length=NaN;
-  switch (getMeasureFromDialog()){
+  switch (Dialog.getMeasureType()){
       case "Weight":
       var weight=measure;
       break;
@@ -324,9 +345,9 @@ var Dialog = function(){
         var cells=Dialog.getSelectedFromTable();
         $("#datep").val(cells.date);    
         $("#weightspinnerdiv").val();
-        $("#weightSpinner").spinner( "value", cells.weight+" Kg");
+        $("#weightSpinner").spinner("value", cells.weight+" Kg");
      //   $("#lengthspinnerdiv").val();
-     //   $("#lengthSpinner").spinner( "value", cells.length+" ??"); //to do
+     //   $("#lengthSpinner").spinner("value", cells.length+" ??"); //to do
         $("#commentarea").val(cells.comment);
     },
 
@@ -367,7 +388,7 @@ var Dialog = function(){
     return data;
     },
     //Delete from tablebody all lines/tr elements having td elements (eg not the headers th)    
-        emptyTable: function() {
+    emptyTable: function() {
         $("#tablebody tr").filter(":has(td)").remove();
     },
     createTable: function() {
@@ -379,21 +400,23 @@ var Dialog = function(){
         tbl.setAttribute('cellpadding','5');
         var tbdy = document.getElementById('tablebody');
         //Table elements
-        for (var ind=0,length=babies[index].Data.length; ind<length; ind++) { 
+        for (var ind=0,len=babies[index].Data.length; ind<len; ind++) { 
             Dialog.appendToTable(babies[index].Data[ind]);
         }
     },
-    //Append a line to the table
+    //Append a line to the table                        //to do  put as private method
     appendToTable: function(obj){
         var tbdy = document.getElementById('tablebody');
         //Create a tr line element
         var tr = document.createElement('tr');
         //Append td elements to the tr
- var fields=["Date","Days","Comment","Quantile"];
- fields.push(getMeasureFromDialog()); 
+ var fields=["Date","Weeks","Comment","Quantile"];
+ fields.push(Dialog.getMeasureType()); 
         for (var key in obj) {
+console.log("key,obj[key]=",key,obj[key]); 
             if (obj.hasOwnProperty(key)) {
-  if (fields.indexOf(key)>-1){ //write only the selected measure to the table                                  
+  if (fields.indexOf(key)>-1){ //write only the selected measure to the table
+console.log("key,obj[key]=",key,obj[key]);
                 var td = document.createElement('td');
                 if (key==="Weeks")
                     var t = document.createTextNode(Math.round(obj[key]*7)); //days
@@ -404,7 +427,6 @@ var Dialog = function(){
 
                     td.appendChild(t);
                     tr.appendChild(td);
-//                }
             }
             }        
         }
@@ -587,6 +609,10 @@ $("#editbabybutton").click(function() {
     $("#babydialog").dialog("open");
 });
 
+$(document).on("change", "#measureselect", function(e) {
+    Dialog.changeMeasurementType();
+})
+    
 //Behavior when dropdown changes
 $(document).on("change", "#inputfordropdown", function(e) {
     var index=Page.getCurrIndex();
@@ -699,7 +725,7 @@ $(function() {
 // var length = $("#lengthSpinner").pcntspinner("value");
 var weight=NaN;
 var length=NaN;
-switch (getMeasureFromDialog()){
+switch (Dialog.getMeasureType()){
     case "Weight":
     var weight=measure;
     break;

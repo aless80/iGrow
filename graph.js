@@ -621,12 +621,13 @@ Graph.prototype.plotLines = function() {
   var self = this;
   var gender = Page.getGender();
   this.plotNSigmaLine(0, gender);
-  this.plotNSigmaLine(0.674, gender);
+  /*this.plotNSigmaLine(0.674, gender);
   this.plotNSigmaLine(-0.674, gender);
   this.plotNSigmaLine(3, gender);
   this.plotNSigmaLine(-3, gender);
   this.plotNSigmaLine(2, gender);
   this.plotNSigmaLine(-2, gender);
+  */
 }
 
 //Update the lines and the circles
