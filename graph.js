@@ -229,7 +229,7 @@ Graph = function(elemid, options) {
 // Graph methods
 //
 Graph.prototype.zoomHandler = function() {
-  self = this;
+    var self = this;
     var rangex = (this.options.xmax-this.options.xmin);    
     var halfdiffrangex = (rangex - (rangex / d3.event.scale))/2
     var rangey = (this.options.ymax-this.options.ymin);
@@ -495,7 +495,6 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
 }
 
 Graph.prototype.plotLines = function() {
-  var self = this;
   var gender = Page.getGender();
   this.plotNSigmaLine(0, gender);
   this.plotNSigmaLine(0.674, gender);
@@ -691,7 +690,6 @@ Graph.prototype.setCurrrentDataWeight = function(){
 
 Graph.prototype.setTitle = function(){
   // write the Chart Title
-  var self = this;
   if (this.title) {
     d3.select("#title")
         .text(this.title);
@@ -700,7 +698,6 @@ Graph.prototype.setTitle = function(){
 
 //set this.Points containing the data for the lines according to the current gender
 Graph.prototype.setPoints = function(){
-  var self = this;
   switch (Page.getGender()) {
   case 0:
     this.points = this.options.pointsGirl;
