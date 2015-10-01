@@ -192,9 +192,12 @@ var Page = function() {
             graph.setCurrrentDataWeight();
             var currentName = Page.getCurrName();
             graph.title = currentName;
+            graph.setScale();
+            graph.regenerate();  //to do  move inside somewhere?
             graph.redraw();
             graph.update();
             graph.setTitle();
+            graph.setAxisLabels();
         },
         //Delete a measurement when selecting a circle on graph and pressing Del
         deleteWeight: function(id){
@@ -262,6 +265,7 @@ var Page = function() {
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
             $("#weightSpinner").spinner( "value", "4.0 Kg");
+            $("#lengthSpinner").spinner( "value", "4.0 ??");
         }
     }
     
@@ -295,15 +299,19 @@ var Dialog = function(){
         var line=$("table .selected")[0].getAttribute("id");
         var date=$("table .selected td:first-child").text();
         var weight=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);
-        var comment=$("table .selected td:nth-child(4)").text();
-        var quantile=$("table .selected td:nth-child(5)").text();
-        return {date:date, weight:weight, comment:comment, quantile:quantile, line:line}
+        
+  var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
+        var comment=$("table .selected td:nth-child(5)").text();
+        var quantile=$("table .selected td:nth-child(6)").text();
+        return {date:date, weight:weight, length:length, comment:comment, quantile:quantile, line:line}
     },    
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
         $("#datep").val(cells.date);    
         $("#weightspinnerdiv").val();
         $("#weightSpinner").spinner( "value", cells.weight+" Kg");
+        $("#lengthspinnerdiv").val();
+        $("#lengthSpinner").spinner( "value", cells.length+" ??"); //to do
         $("#commentarea").val(cells.comment);
     },
 
@@ -336,8 +344,9 @@ var Dialog = function(){
                     Date:        td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
                     Weeks:     Number(td.eq(1).text()/7),
                     Weight:    Number(td.eq(2).text()),
-                    Comment: td.eq(3).text(),
-                    Quantile: td.eq(4).text()
+                    Length:    Number(td.eq(3).text()),
+                    Comment: td.eq(4).text(),
+                    Quantile: td.eq(5).text()
                 }
             }).get();
     return data;
@@ -370,7 +379,7 @@ var Dialog = function(){
                 var td = document.createElement('td');
                 if (key==="Weeks")
                     var t = document.createTextNode(Math.round(obj[key]*7)); //days
-                else if (key==="Weight")
+                else if (key==="Weight") //||(key==="Length"))
                     var t = document.createTextNode(Number(obj[key]).toFixed(1));
                 else 
                     var t = document.createTextNode(obj[key]);                
@@ -408,6 +417,7 @@ var Dialog = function(){
             }
             //Toggle the weight spinner 
             var spinner = $("#weightSpinner").spinner();
+            var spinner = $("#lengthSpinner").spinner();
             var datep = $("#datep").datepicker();
             if (enable) {
                 $("#trlabels").removeClass("grayout");
@@ -449,6 +459,7 @@ var Dialog = function(){
                             Date:     babies[index]["Data"][ind]["Date"],
                             Weeks:    babies[index]["Data"][ind]["Weeks"],
                             Weight:   babies[index]["Data"][ind]["Weight"],
+                            Length:   babies[index]["Data"][ind]["Length"],
                             Comment:  babies[index]["Data"][ind]["Comment"],
                             Quantile: babies[index]["Data"][ind]["Quantile"]
               }
@@ -614,7 +625,14 @@ $(function() {
         //start: 4.0,
         max: 100,
         step: .1
-        });  
+    });
+    $("#lengthSpinner").pcntspinner({ 
+        min: 1,
+        suffix:'??',
+        //start: 4.0,
+        max: 100,
+        step: .1
+    });
 });
 
 //Custom alert
@@ -651,13 +669,18 @@ $(function() {
             alert("Please insert a correct weight");
             return False;
         }
+        if ($("#lengthSpinner").pcntspinner("isValid") == false) {
+            alert("Please insert a correct length");
+            return False;
+        }
         //Get the data inserted by the user 
         var index=Page.getCurrIndex();
         var weight = $("#weightSpinner").pcntspinner("value");
+        var length = $("#lengthSpinner").pcntspinner("value");
         var dateDMY = $("#datep").val();
         var table=Dialog.tableToJSON();
-        for (var ind=0,length=table.length; ind<length;ind++) {
-            if ((table[ind]["Date"]==dateDMY) && (table[ind]["Weight"]==weight)) {
+        for (var ind=0,len=table.length; ind<len;ind++) {
+            if ((table[ind]["Date"]==dateDMY) && (table[ind]["Weight"]==weight) && (table[ind]["Length"]==length)) { //to do  check
             Page.customAlert("This point already exists",1800);
             return;
             }
@@ -667,13 +690,15 @@ $(function() {
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
         var comment = $("#commentarea").val();
         var hmo = graph.points[days];
-        var quantile=Math.round(cdf(weight,hmo.m,hmo.s)*100);
+        var quantile=Math.round(cdf(weight,hmo.m,hmo.s)*100); //to do for length
         if (textButton==="Inse"){
+  console.log("#addedittable click: length=",length)
             //Append data to the babies' data
             var obj = {
             "Date" : dateDMY,
             "Weeks" : days / 7,
             "Weight" : weight.toFixed(1),
+            "Length" : length.toFixed(1),
             "Comment": comment,
             "Quantile": quantile
             };
@@ -684,8 +709,9 @@ $(function() {
             var sel=Dialog.getSelectedFromTable();
             $("table #"+sel.line + " :nth-child(1)").text(dateDMY)
             $("table #"+sel.line + " :nth-child(2)").text(days)
-            $("table #"+sel.line + " :nth-child(3)").text(weight)
-            $("table #"+sel.line + " :nth-child(4)").text(comment)
+            $("table #"+sel.line + " :nth-child(3)").text(weight.toFixed(1))
+            $("table #"+sel.line + " :nth-child(4)").text(length.toFixed(1))
+            $("table #"+sel.line + " :nth-child(5)").text(comment)
         }
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
@@ -861,6 +887,96 @@ $(document).ready(function(){
 });
 
 
+$(document).on("change", "#measureselect", function(e) {
+    switch ($("#measureselect").val()) {
+    case "Length": 
+        d3.tsv("lenanthro.txt", 
+        //This function defines how "data" below will look like 
+        function(d) {
+        return {
+            gender: +d.sex,
+            age: +d.age / 7,
+            l: +d.l,
+            m: +d.m,
+            s: +d.s,
+            loh: d.loh
+        };
+        },function(error, data) {    
+            data.forEach(function(d, i) {
+            data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
+            });
+            
+            graph.options={
+                "xmin": 0, "xmax": 200,
+                "ymin": 0, "ymax": 230, 
+                "pointsBoy": lenBoy,
+                "pointsGirl": lenGirl,
+                "xlabel": "Age [Weeks]",
+                "ylabel": "Length [??]",
+                "maxzoom": 2  
+            };
+        graph.useOptions(graph.options); 
+        graph.changeMeasure();
+        Page.updateDataAndGraph();        
+        /*graph.setPoints();
+            graph.setCurrrentDataWeight();
+            var currentName = Page.getCurrName();
+            graph.title = currentName;
+            graph.setScale();
+            graph.regenerate();
+            graph.redraw();
+            graph.update();
+            graph.setTitle();
+            graph.setAxisLabels();*/
+        
+        })
+        break;
+    case "Weight":
+        d3.tsv("weianthro.txt", 
+        //This function defines how "data" below will look like 
+        function(d) {
+            return {
+                gender: +d.sex,
+                age: +d.age / 7,   //weeks!
+                l: +d.l,
+                m: +d.m,
+                s: +d.s,
+            };
+            },function(error, data) {    
+                data.forEach(function(d, i) {
+                data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
+                });
+        
+                graph.options={
+                    "xmin": 0, "xmax": 200,
+                    "ymin": 0, "ymax": 20, 
+                    "pointsBoy": weiBoy,
+                    "pointsGirl": weiGirl,
+                    "xlabel": "Age [Weeks]",
+                    "ylabel": "Weight [Kg]",
+                    "maxzoom": 2  
+                };
+            graph.useOptions(graph.options); 
+            graph.changeMeasure();
+            Page.updateDataAndGraph();
+
+            }
+        );
+        break;
+    }
+            
+    
+    
+    // //deselect any possible circle
+    // Page.deselectCircle(1);
+    // //Update the lines, circles, title
+    // var currentName = this.options[e.target.selectedIndex].text;
+    // Page.updateDataAndGraph();
+    
+});
+
+
+
 //testing: click on 
 // $(document).ready(function(){
 //     $('#dialogbutton').trigger('click');
@@ -869,68 +985,68 @@ $(document).ready(function(){
 
 //Load the data from weianthro
 $(document).ready(function(){
-  Page.autocomplete();  
-  //Start plot
-  weiBoy = [];
-  weiGirl = [];
-  //http://www.who.int/childgrowth/en/
-  d3.tsv("weianthro.txt", 
-    //This function defines how "data" below will look like 
-    function(d) {
-      return {
-      gender: +d.sex,
-      age: +d.age / 7,   //weeks!
-        l: +d.l,
-        m: +d.m,
-        s: +d.s,
-      };
-    },function(error, data) {    
-        data.forEach(function(d, i) {
-          data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
-          });
-
-        graph = new Graph("chart1", {
-            "xmin": 0, "xmax": 200,
-            "ymin": 0, "ymax": 20, 
-            "pointsBoy": weiBoy,
-            "pointsGirl": weiGirl,
-            "xlabel": "Age [Weeks]",
-            "ylabel": "Weight [Kg]",
-            "maxzoom": 2  
-        });
-      }
-  );
+    Page.autocomplete();  
+    //Start plot
+    weiBoy = [];
+    weiGirl = [];
+    lenBoy = [];
+    lenGirl = [];
+    //http://www.who.int/childgrowth/en/
+    d3.tsv("weianthro.txt", 
+        //This function defines how "data" below will look like 
+        function(d) {
+        return {
+            gender: +d.sex,
+            age: +d.age / 7,   //weeks!
+            l: +d.l,
+            m: +d.m,
+            s: +d.s,
+        };
+        },function(error, data) {    
+            data.forEach(function(d, i) {
+            data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
+            });
+    
+            graph = new Graph("chart1", {
+                "xmin": 0, "xmax": 200,
+                "ymin": 0, "ymax": 20, 
+                "pointsBoy": weiBoy,
+                "pointsGirl": weiGirl,
+                "xlabel": "Age [Weeks]",
+                "ylabel": "Weight [Kg]",
+                "maxzoom": 2  
+            });
+        }
+    );
   
   
   
-  
-  
-  d3.tsv("lenanthro.txt", 
-    //This function defines how "data" below will look like 
-    function(d) {
-      return {
-      gender: +d.sex,
-      age: +d.age / 7,
-        l: +d.l,
-        m: +d.m,
-        s: +d.s,
-        loh: +d.loh
-      };
-    },function(error, data) {    
-        data.forEach(function(d, i) {
-          data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
-          });
-
-        graph2 = new Graph("chart1", {
-            "xmin": 0, "xmax": 200,
-            "ymin": 0, "ymax": 20, 
-            "pointsBoy": lenBoy,
-            "pointsGirl": lenGirl,
-            "xlabel": "Age [Weeks]",
-            "ylabel": "Weight [Kg]",
-            "maxzoom": 2  
-        });
-      }
-  );
+    // d3.tsv("lenanthro.txt", 
+    //     //This function defines how "data" below will look like 
+    //     function(d) {
+    //     return {
+    //         gender: +d.sex,
+    //         age: +d.age / 7,
+    //         l: +d.l,
+    //         m: +d.m / 5,
+    //         s: +d.s,
+    //         loh: d.loh
+    //     };
+    //     },function(error, data) {    
+    //         data.forEach(function(d, i) {
+    //         data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
+    //         });
+    // console.log("lenanthro")
+    //         graph2 = new Graph("chart1", {
+    //             "xmin": 0, "xmax": 200,
+    //             "ymin": 0, "ymax": 20, 
+    //             "pointsBoy": lenBoy,
+    //             "pointsGirl": lenGirl,
+    //             "xlabel": "Age [Weeks]",
+    //             "ylabel": "Length [??]",
+    //             "maxzoom": 2  
+    //         });
+    //     }
+    // );
   
 })

@@ -3,7 +3,7 @@
   <head>
   <!--http://edosil.net/igrow/-->
     <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
-    <title>iGrow</title>    
+    <title>length</title>    
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css"> 
     <link href="stylesheet.css" rel="stylesheet" type="text/css">
     <style type="text/css">   
@@ -56,6 +56,14 @@
               <td>
                 <div id="helpdiv">
                   <button id="helpbutton" title="">Help</button>   
+                </div>
+              </td>
+              <td>
+                <div>
+                  <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
+                    <option value="Weight">Weight</option>
+                    <option value="Length">Length</option>
+                  </select>   
                 </div>
               </td>
             </tr>
@@ -155,6 +163,7 @@
                         <th style="width:100px">Date</th>
                         <th style="width:50px">Days</th>
                         <th style="width:50px">Weight</th>
+                        <th style="width:50px">Length</th>
                         <th style="width:152px">Comment</th>
                         <th style="width:50px">Quantile</th>
                         </tr>                      
@@ -206,12 +215,17 @@
                   </div>
                 </td>
                 <td>
-                  <div id="spinnerlabeldiv">
+                  <div id="weightspinnerlabeldiv">
                     <label for="spinner">Weight</label>
                   </div>
                 </td>
                 <td>
-                  <div id="spinnerlabeldiv">
+                  <div id="lengthspinnerlabeldiv">
+                    <label for="spinner">Length</label>
+                  </div>
+                </td>
+                <td>
+                  <div id="commentspinnerlabeldiv">
                     <label>Comment</label>                  
                   </div>
                 </td>
@@ -223,10 +237,15 @@
                   </div>
                 </td>            
                 <td>
-                  <div class="spinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
+                  <div class="weightspinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
                     <input id="weightSpinner" name="value" style="height:40px; width:66px"> 
                   </div>
-                </td>              
+                </td>
+                <td>
+                  <div class="lengthspinnerdiv" id="lengthspinnerdiv" title="Select the baby's length'">                  
+                    <input id="lengthSpinner" name="value" style="height:40px; width:66px"> 
+                  </div>
+                </td>
                 <td colspan="2">
                   <div id="">
                     <textarea id="commentarea" value="" rows="2" cols="17"></textarea>
@@ -276,7 +295,7 @@
                 <div>
                   <button id="helpdialogbutton" title="">Help</button>   
                 </div>
-              </td>
+              </td>              
             </tr>            
           </tbody>
         </table>
