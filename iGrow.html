@@ -47,15 +47,9 @@
                   <div id='custom-alert' class="custom-alert"></div>                  
                 </div>
               </td>
-              <!--Add measure dialog-->
               <td>
                 <div id="dialogdiv">
                   <button id="dialogbutton" title="">Edit Measures</button>   
-                </div>
-              </td>
-              <td>
-                <div id="helpdiv">
-                  <button id="helpbutton" title="">Help</button>   
                 </div>
               </td>
               <td>
@@ -64,6 +58,11 @@
                     <option value="Weight">Weight</option>
                     <option value="Length">Length</option>
                   </select>   
+                </div>
+              </td>
+              <td>
+                <div id="helpdiv">
+                  <button id="helpbutton" title="">Help</button>   
                 </div>
               </td>
             </tr>
@@ -162,8 +161,8 @@
                         <tr id="tr0">
                         <th style="width:100px">Date</th>
                         <th style="width:50px">Days</th>
-                        <th style="width:50px">Weight</th>
-                        <th style="width:50px">Length</th>
+                        <th style="width:50px">Measure</th>
+                        <!--<th style="width:50px">Length</th>-->
                         <th style="width:152px">Comment</th>
                         <th style="width:50px">Quantile</th>
                         </tr>                      
@@ -179,6 +178,14 @@
           <table class="group">
             <tbody>
               <tr>
+                <td>
+                  <div>
+                    <select id="measureselectdialog" style="text-align:center" value="" title="Choose the measure" style="min-width: 97px; width: auto;">
+                        <option value="Weight">Weight</option>
+                        <option value="Length">Length</option>
+                    </select>   
+                  </div>
+                </td>
                 <td>
                   <div id="addmeasurediv">
                     <button id="addmeasure" title="Add a measurement to the table">Add a measure</button>
@@ -219,11 +226,11 @@
                     <label for="spinner">Weight</label>
                   </div>
                 </td>
-                <td>
+                <!--<td>
                   <div id="lengthspinnerlabeldiv">
                     <label for="spinner">Length</label>
                   </div>
-                </td>
+                </td>-->
                 <td>
                   <div id="commentspinnerlabeldiv">
                     <label>Comment</label>                  
@@ -310,7 +317,8 @@
     <script type="text/javascript" src="http://d3js.org/d3.v3.min.js"></script>
     <script type="text/javascript" src="iGrow.js"></script>
     
-    <!--     -->
+    <!--bug: now i can edit the header of the table!   
+    removePathsInSVG can help? -->
   </body>
 </html>
 

@@ -56,7 +56,7 @@ var Page = function() {
         },
         //Get the index in the babies array from a baby's name
         getIndexFromName: function(name){
-            for (var ind = 0, length=babies.length; ind < length; ind++) {
+            for (var ind = 0, len=babies.length; ind < len; ind++) {
                     if (babies[ind]["Name"]==name)
                         return ind;
             }
@@ -242,11 +242,13 @@ var Page = function() {
             $("#dropdown").removeAttr("disabled");
             $("#editbabybutton").removeAttr("disabled");
             $("#dialogbutton").removeAttr("disabled");
+            $("#measureselect").removeAttr("disabled");            
         },
         disablePageButtons: function(){
             $("#dropdown").attr("disabled","true");
             $("#editbabybutton").attr("disabled","true");
             $("#dialogbutton").attr("disabled","true");
+            $("#measureselect").attr("disabled","true");
         },
         //Work with the cache 
         writeToCache: function(){
@@ -265,7 +267,7 @@ var Page = function() {
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
             $("#weightSpinner").spinner( "value", "4.0 Kg");
-            $("#lengthSpinner").spinner( "value", "4.0 ??");
+//$("#lengthSpinner").spinner( "value", "4.0 ??");
         }
     }
     
@@ -275,6 +277,10 @@ var Page = function() {
 var Dialog = function(){
     //Private variable
     var todayDMY = ("00" + (new Date()).getDate()).slice(-2)+"/"+("00" + ((new Date()).getMonth()+1)).slice(-2)+"/"+(new Date()).getFullYear();
+    //Private method
+    var getMeasureFromDialog = function(){
+        return $("#measureselectdialog").val();
+    }
     //return public Methods in the Dialog "module"
     return {
     showAccordion: function() {
@@ -298,11 +304,20 @@ var Dialog = function(){
     getSelectedFromTable: function(){
         var line=$("table .selected")[0].getAttribute("id");
         var date=$("table .selected td:first-child").text();
-        var weight=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);
-        
-  var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
-        var comment=$("table .selected td:nth-child(5)").text();
-        var quantile=$("table .selected td:nth-child(6)").text();
+        var measure=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);      
+  //var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
+  var weight=NaN;
+  var length=NaN;
+  switch (getMeasureFromDialog()){
+      case "Weight":
+      var weight=measure;
+      break;
+      case "Length":
+      var length=measure;
+      break;
+  }
+        var comment=$("table .selected td:nth-child(4)").text();
+        var quantile=$("table .selected td:nth-child(5)").text();
         return {date:date, weight:weight, length:length, comment:comment, quantile:quantile, line:line}
     },    
     fillAccordion: function() {
@@ -310,8 +325,8 @@ var Dialog = function(){
         $("#datep").val(cells.date);    
         $("#weightspinnerdiv").val();
         $("#weightSpinner").spinner( "value", cells.weight+" Kg");
-        $("#lengthspinnerdiv").val();
-        $("#lengthSpinner").spinner( "value", cells.length+" ??"); //to do
+     //   $("#lengthspinnerdiv").val();
+     //   $("#lengthSpinner").spinner( "value", cells.length+" ??"); //to do
         $("#commentarea").val(cells.comment);
     },
 
@@ -335,7 +350,7 @@ var Dialog = function(){
     tableToJSON: function() {
         data = $('#table tr:has(td)').map(
             function(ind, val) {
-                var td =    $('td', this);
+                var td = $('td', this);
                 var index = Page.getCurrIndex();
                 return {
                     ///Name:         babies[index].Name,
@@ -344,9 +359,9 @@ var Dialog = function(){
                     Date:        td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
                     Weeks:     Number(td.eq(1).text()/7),
                     Weight:    Number(td.eq(2).text()),
-                    Length:    Number(td.eq(3).text()),
-                    Comment: td.eq(4).text(),
-                    Quantile: td.eq(5).text()
+ //Length:    Number(td.eq(3).text()),
+                    Comment: td.eq(3).text(),
+                    Quantile: td.eq(4).text()
                 }
             }).get();
     return data;
@@ -374,17 +389,23 @@ var Dialog = function(){
         //Create a tr line element
         var tr = document.createElement('tr');
         //Append td elements to the tr
+ var fields=["Date","Days","Comment","Quantile"];
+ fields.push(getMeasureFromDialog()); 
         for (var key in obj) {
-            if (obj.hasOwnProperty(key)) {                    
+            if (obj.hasOwnProperty(key)) {
+  if (fields.indexOf(key)>-1){ //write only the selected measure to the table                                  
                 var td = document.createElement('td');
                 if (key==="Weeks")
                     var t = document.createTextNode(Math.round(obj[key]*7)); //days
-                else if (key==="Weight") //||(key==="Length"))
+                else if (key==="Weight") //||(key==="Length")) //to do
                     var t = document.createTextNode(Number(obj[key]).toFixed(1));
                 else 
-                    var t = document.createTextNode(obj[key]);                
-                td.appendChild(t);
-                tr.appendChild(td);
+                    var t = document.createTextNode(obj[key]);
+
+                    td.appendChild(t);
+                    tr.appendChild(td);
+//                }
+            }
             }        
         }
         //Append line
@@ -417,7 +438,7 @@ var Dialog = function(){
             }
             //Toggle the weight spinner 
             var spinner = $("#weightSpinner").spinner();
-            var spinner = $("#lengthSpinner").spinner();
+ //var spinner = $("#lengthSpinner").spinner();
             var datep = $("#datep").datepicker();
             if (enable) {
                 $("#trlabels").removeClass("grayout");
@@ -445,23 +466,22 @@ var Dialog = function(){
                     if (datalength===0) {
                                  console.log("if, index=",index)
                         json.push({
-                                Name:         babies[index].Name,
-                                BirthDate: babies[index].BirthDate,
-                                Gender: babies[index].Gender
+                                Name:       babies[index].Name,
+                                BirthDate:  babies[index].BirthDate,
+                                Gender:     babies[index].Gender
                         });
                     } else {
-                        for (var ind=0,length=datalength; ind<length; ind++) {
-            console.log("else for, index=",index)
+                        for (var ind=0,len=datalength; ind<len; ind++) {
                             var obj={
-                                Name:   babies[index].Name,
+                            Name:       babies[index].Name,
                             BirthDate:  babies[index].BirthDate,
-                            Gender:   babies[index].Gender,
-                            Date:     babies[index]["Data"][ind]["Date"],
-                            Weeks:    babies[index]["Data"][ind]["Weeks"],
-                            Weight:   babies[index]["Data"][ind]["Weight"],
-                            Length:   babies[index]["Data"][ind]["Length"],
-                            Comment:  babies[index]["Data"][ind]["Comment"],
-                            Quantile: babies[index]["Data"][ind]["Quantile"]
+                            Gender:     babies[index].Gender,
+                            Date:       babies[index]["Data"][ind]["Date"],
+                            Weeks:      babies[index]["Data"][ind]["Weeks"],
+                            Weight:     babies[index]["Data"][ind]["Weight"],
+                            Length:     babies[index]["Data"][ind]["Length"],
+                            Comment:    babies[index]["Data"][ind]["Comment"],
+                            Quantile:   babies[index]["Data"][ind]["Quantile"]
               }
               json.push(obj);
             }
@@ -626,13 +646,13 @@ $(function() {
         max: 100,
         step: .1
     });
-    $("#lengthSpinner").pcntspinner({ 
-        min: 1,
-        suffix:'??',
-        //start: 4.0,
-        max: 100,
-        step: .1
-    });
+// $("#lengthSpinner").pcntspinner({ 
+//     min: 1,
+//     suffix:'??',
+//     //start: 4.0,
+//     max: 100,
+//     step: .1
+// });
 });
 
 //Custom alert
@@ -644,7 +664,7 @@ $(function() {
         	text : "Close",
         	id : "dialog_AddBaby",
         	click : function() {       
-            $( this ).dialog("close"); 
+            $(this).dialog("close"); 
             //enable all buttons on main page
             Page.enablePageButtons();
         	}
@@ -661,7 +681,7 @@ $(function() {
 
 //addedittable button: add or edit data to table
 $(function() {
-    $("#addedittable").click(function() {      
+    $("#addedittable").click(function() {
         var textButton=$("#addedittable").text().substring(0,4);
         //First remove circle selection, if any
         Page.deselectCircle(1);
@@ -669,18 +689,28 @@ $(function() {
             alert("Please insert a correct weight");
             return False;
         }
-        if ($("#lengthSpinner").pcntspinner("isValid") == false) {
-            alert("Please insert a correct length");
-            return False;
-        }
+// if ($("#lengthSpinner").pcntspinner("isValid") == false) {
+//     alert("Please insert a correct length");
+//     return False;
+// }
         //Get the data inserted by the user 
         var index=Page.getCurrIndex();
-        var weight = $("#weightSpinner").pcntspinner("value");
-        var length = $("#lengthSpinner").pcntspinner("value");
+        var measure = $("#weightSpinner").pcntspinner("value");
+// var length = $("#lengthSpinner").pcntspinner("value");
+var weight=NaN;
+var length=NaN;
+switch (getMeasureFromDialog()){
+    case "Weight":
+    var weight=measure;
+    break;
+    case "Length":
+    var length=measure;
+    break;
+}
         var dateDMY = $("#datep").val();
         var table=Dialog.tableToJSON();
         for (var ind=0,len=table.length; ind<len;ind++) {
-            if ((table[ind]["Date"]==dateDMY) && (table[ind]["Weight"]==weight) && (table[ind]["Length"]==length)) { //to do  check
+            if ((table[ind]["Date"]==dateDMY) && ((table[ind]["Weight"]==weight) || (table[ind]["Length"]==length))){ //to do  check
             Page.customAlert("This point already exists",1800);
             return;
             }
@@ -710,8 +740,8 @@ $(function() {
             $("table #"+sel.line + " :nth-child(1)").text(dateDMY)
             $("table #"+sel.line + " :nth-child(2)").text(days)
             $("table #"+sel.line + " :nth-child(3)").text(weight.toFixed(1))
-            $("table #"+sel.line + " :nth-child(4)").text(length.toFixed(1))
-            $("table #"+sel.line + " :nth-child(5)").text(comment)
+//$("table #"+sel.line + " :nth-child(4)").text(length.toFixed(1))
+            $("table #"+sel.line + " :nth-child(4)").text(comment)
         }
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
@@ -860,7 +890,7 @@ $(document).ready(function(){
       function JSONToCSVConvertor(obj){
         var out = '';
         //1st loop is to extract each row
-        for (var i = 0, length=obj.length; i < length; i++) {
+        for (var i = 0, len=obj.length; i < len; i++) {
             var row = "";        
             //2nd loop will extract each column and convert it in string comma-seprated
             for (var index in obj[i]) 
