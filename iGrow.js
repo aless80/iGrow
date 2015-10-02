@@ -562,9 +562,9 @@ $(document).on("change", "#inputfordropdown", function(e) {
     //Get all names
     var names=new Array(babies.length);
     for (var key in babies) {
-    if (babies.hasOwnProperty(key)) {
-        names[key]=babies[key]["Name"];
-    }
+        if (babies.hasOwnProperty(key)) {
+            names[key]=babies[key]["Name"];
+        }
     }    
     var text = $("#inputfordropdown").val();
     if (names.indexOf(text) > -1) {  //text is existing name
