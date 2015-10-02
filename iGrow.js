@@ -945,10 +945,8 @@ $(document).ready(function(){
 
         
 $(document).on("change", "#measureselect", function(e) {
-    lenBoy = [];
-    lenGirl = [];
-    weiBoy = [];
-    weiGirl = [];
+    measBoy = [];
+    measGirl = [];
     switch ($("#measureselect").val()) {
     case "Length":
         d3.tsv("lenanthro.txt", 
@@ -963,16 +961,14 @@ $(document).on("change", "#measureselect", function(e) {
             loh: d.loh
         };
         },function(error, data) {
-console.log("lenGirl=",lenGirl)
             data.forEach(function(d, i) {
-            data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
+            data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
             });
-console.log("lenGirl end=",lenGirl)
             graph.options={
                 "xmin": 0, "xmax": 200,
                 "ymin": 0, "ymax": 230, 
-                "pointsBoy": lenBoy,
-                "pointsGirl": lenGirl,
+                "pointsBoy": measBoy,
+                "pointsGirl": measGirl,
                 "xlabel": "Age [Weeks]",
                 "ylabel": "Length [??]",
                 "maxzoom": 2  
@@ -982,8 +978,7 @@ console.log("lenGirl end=",lenGirl)
         Page.updateDataAndGraph();        
         })
         break;
-    case "Weight":
-console.log("weiGirl=",weiGirl)   
+    case "Weight":   
         d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
@@ -996,14 +991,13 @@ console.log("weiGirl=",weiGirl)
             };
             },function(error, data) {    
                 data.forEach(function(d, i) {
-                data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
+                data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
                 });
-console.log("weiGirl end=",weiGirl)
                 graph.options={
                     "xmin": 0, "xmax": 200,
                     "ymin": 0, "ymax": 20, 
-                    "pointsBoy": weiBoy,
-                    "pointsGirl": weiGirl,
+                    "pointsBoy": measBoy,
+                    "pointsGirl": measGirl,
                     "xlabel": "Age [Weeks]",
                     "ylabel": "Weight [Kg]",
                     "maxzoom": 2  
@@ -1011,7 +1005,6 @@ console.log("weiGirl end=",weiGirl)
             graph.useOptions(graph.options); 
             graph.changeMeasure();
             Page.updateDataAndGraph();
-            //updateDataAndGraphTest()
             }
         );
         break;
@@ -1039,10 +1032,9 @@ console.log("weiGirl end=",weiGirl)
 $(document).ready(function(){
     Page.autocomplete();  
     //Start plot
-    weiBoy = [];
-    weiGirl = [];
-    lenBoy = [];
-    lenGirl = [];
+    measBoy = [];
+    measGirl = [];
+    
     //http://www.who.int/childgrowth/en/
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
@@ -1056,14 +1048,14 @@ $(document).ready(function(){
         };
         },function(error, data) {    
             data.forEach(function(d, i) {
-            data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
+            data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
             });
     
             graph = new Graph("chart1", {
                 "xmin": 0, "xmax": 200,
                 "ymin": 0, "ymax": 20, 
-                "pointsBoy": weiBoy,
-                "pointsGirl": weiGirl,
+                "pointsBoy": measBoy,
+                "pointsGirl": measGirl,
                 "xlabel": "Age [Weeks]",
                 "ylabel": "Weight [Kg]",
                 "maxzoom": 2  

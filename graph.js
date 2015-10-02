@@ -464,7 +464,7 @@ Graph.prototype.zoomHandler = function() {
 
 //Redraws the axes
 Graph.prototype.redraw = function(zoom) {
-    var self = this; //to do: var self is better!
+    var self = this;
     return function() {
         var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
         //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse)
@@ -595,13 +595,16 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
         return this.y(Y); })
     
         var color = {"1":"cyan", "2":"magenta"};
-        var weiGender = {"1":weiBoy, "2":weiGirl};
-    
+        var measGender = (gender==1)?measBoy:measGirl;
+        //{"1":measBoy, "2":measGirl};
+
+console.log("measGender",measGender)
+
     self.svg.append("path")
         .attr("class", "line")
-        .attr("id" , gender+"_"+n+"sigma")   // to do: when i replot line goes to beginning 
+        .attr("id" , gender+"_"+n+"sigma")
         //.classed("pathArea", true)
-        .attr("d", this.line(weiGender[gender]))
+        .attr("d", this.line(measGender))
         .style("stroke" , color[gender])
         .style("stroke-width" , (n==0 ? 2 : 1))
         .style("fill" , "none");
@@ -610,14 +613,13 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
         self.svg.append("path")
         .attr("class", "line")
         .attr("id" ,"area_"+n)
-        .attr("d" , this.area(weiGender[gender]))
+        .attr("d" , this.area(measGender))
         .style("opacity" ,1 - Math.abs(n/3))
         .style("fill" , color[gender]);
     }
 }
 
 Graph.prototype.plotLines = function() {
-    var self = this;
     var gender = Page.getGender();
     this.plotNSigmaLine(0, gender);
     /*this.plotNSigmaLine(0.674, gender);
@@ -814,7 +816,6 @@ Graph.prototype.setCurrrentDataWeight = function(){
 
 Graph.prototype.setTitle = function(){
     // write the Chart Title
-    var self = this; // to do: useless
     if (this.title) {
         d3.select("#title")
             .text(this.title);
