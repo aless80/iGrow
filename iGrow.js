@@ -799,23 +799,23 @@ $('#dialog').on('dialogopen', function(event) {
 
 //Select the whole row when clicking, populate and open accordion
 $("#table").on("click", "tr", function(event) {
-  event.preventDefault();
-  if ($(this).hasClass('selected')) {
-    $(this).removeClass('selected');
-    $("#deletemeasure").attr("disabled","true");
-    $("#addmeasure").removeAttr("disabled");
-    $("#editmeasure").attr("disabled","true");
-  } else {
-    $(this).addClass('selected')
-        .siblings().removeClass('selected');    
-    //populate and open accordion    
-    Dialog.fillAccordion();    
-    $("#editmeasure").removeAttr("disabled");
-    $("#addmeasure").attr("disabled","true");
-    
-    //enable deletemeasure button
-    $("#deletemeasure").removeAttr("disabled");
-  }
+    event.preventDefault();
+    if ($(this).hasClass('selected')) {
+        $(this).removeClass('selected');
+        $("#deletemeasure").attr("disabled","true");
+        $("#addmeasure").removeAttr("disabled");
+        $("#editmeasure").attr("disabled","true");
+    } else {
+        $(this).addClass('selected')
+            .siblings().removeClass('selected');    
+        //populate and open accordion    
+        Dialog.fillAccordion();    
+        $("#editmeasure").removeAttr("disabled");
+        $("#addmeasure").attr("disabled","true");
+        
+        //enable deletemeasure button
+        $("#deletemeasure").removeAttr("disabled");
+    }
 });
 
 
@@ -869,35 +869,35 @@ $(document).ready(function(){
 
 //Load the data from weianthro
 $(document).ready(function(){
-  Page.autocomplete();  
-  //Start plot
-  weiBoy = [];
-  weiGirl = [];
-  //http://www.who.int/childgrowth/en/
-  d3.tsv("weianthro.txt", 
-    //This function defines how "data" below will look like 
-    function(d) {
-      return {
-      gender: +d.sex,
-      age: +d.age / 7,   //weeks!
-        l: +d.l,
-        m: +d.m,
-        s: +d.s,
-      };
-    },function(error, data) {    
-        data.forEach(function(d, i) {
-          data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
-          });
-
-        graph = new Graph("chart1", {
-            "xmin": 0, "xmax": 200,
-            "ymin": 0, "ymax": 20, 
-            "pointsBoy": weiBoy,
-            "pointsGirl": weiGirl,
-            "xlabel": "Age [Weeks]",
-            "ylabel": "Weight [Kg]",
-            "maxzoom": 2  
-        });
-      }
-  );   
+    Page.autocomplete();  
+    //Start plot
+    var weiBoy = [],
+        weiGirl = [];
+    //http://www.who.int/childgrowth/en/
+    d3.tsv("weianthro.txt", 
+        //This function defines how "data" below will look like 
+        function(d) {
+        return {
+        gender: +d.sex,
+        age: +d.age / 7,   //weeks!
+            l: +d.l,
+            m: +d.m,
+            s: +d.s,
+        };
+        },function(error, data) {    
+            data.forEach(function(d, i) {
+            data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
+            });
+    
+            graph = new Graph("chart1", {
+                "xmin": 0, "xmax": 200,
+                "ymin": 0, "ymax": 20, 
+                "pointsBoy": weiBoy,
+                "pointsGirl": weiGirl,
+                "xlabel": "Age [Weeks]",
+                "ylabel": "Weight [Kg]",
+                "maxzoom": 2  
+            });
+        }
+    );   
 })

@@ -473,15 +473,14 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
         var Y = ((n > 0) ? (this.points[i].m) : (this.points[i].m + n * this.points[i].s));
         return this.y(Y); })
     
-        var color = {"1":"cyan", "2":"magenta"};
-        var weiGender = {"1":weiBoy, "2":weiGirl};
-    
-        self.svg.append("path")
+        var color = (gender==1)?("cyan"):("magenta");
+            
+    self.svg.append("path")
         .attr("class", "line")
         .attr("id" , gender+"_"+n+"sigma")
         //.classed("pathArea", true)
-        .attr("d", this.line(weiGender[gender]))
-        .style("stroke" , color[gender])
+        .attr("d", this.line(self.points))
+        .style("stroke" , color)
         .style("stroke-width" , (n==0 ? 2 : 1))
         .style("fill" , "none");
     
@@ -489,9 +488,9 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
         self.svg.append("path")
         .attr("class", "line")
         .attr("id" ,"area_"+n)    
-        .attr("d" , this.area(weiGender[gender]))
+        .attr("d" , this.area(self.points))
         .style("opacity" ,1 - Math.abs(n/3))
-        .style("fill" , color[gender]);
+        .style("fill" , color);
     } 
 }
 
