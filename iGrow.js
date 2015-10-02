@@ -267,7 +267,6 @@ var Page = function() {
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
             $("#weightSpinner").spinner("value", "4.0 Kg");
-//$("#lengthSpinner").spinner("value", "4.0 ??");
         }
     }
     
@@ -295,14 +294,11 @@ var Dialog = function(){
             var start=4; // to do
             break;
             case 'Length':
-            var suffix=' ??';
+            var suffix=' cm';
             var start=10; // to do. is this working?
             break;
         }
-        $("#weightSpinner").spinner("value", start+suffix);
-        //Change header: thmeasure
-        $("#thmeasure").text(measurementType);
-                
+        $("#weightSpinner").spinner("value", start+suffix);                
     },
     showAccordion: function() {
         $("#datep").val(todayDMY);
@@ -323,23 +319,29 @@ var Dialog = function(){
     },
     //Get the line and data from the selected row on the table
     getSelectedFromTable: function(){
+        if ($("table .selected").length==0) {
+            return {};
+        }
         var line=$("table .selected")[0].getAttribute("id");
         var date=$("table .selected td:first-child").text();
-        var measure=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);      
+// var measure=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);      
 //var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
-var weight=NaN;
-var length=NaN;
-switch (Dialog.getMeasureType()){
-    case "Weight":
-    var weight=measure;
-    break;
-    case "Length":
-    var length=measure;
-    break;
-};
-        var comment=$("table .selected td:nth-child(4)").text();
-        var weightq=$("table .selected td:nth-child(5)").text();
-        return {date:date, weight:weight, length:length, weightq:weightq, comment:comment, line:line}
+//var weight=NaN;
+//var length=NaN;
+// switch (Dialog.getMeasureType()){
+//     case "Weight":
+//     var weight=measure;
+//     break;
+//     case "Length":
+//     var length=measure;
+//     break;
+// };
+        var weight=$("table .selected td:nth-child(3)").text();        
+        var weightq=$("table .selected td:nth-child(4)").text();
+        var length=$("table .selected td:nth-child(5)").text();
+        var lengthq=$("table .selected td:nth-child(6)").text();
+        var comment=$("table .selected td:nth-child(7)").text();
+        return {date:date, weight:weight, weightq:weightq, length:length, lengthq:lengthq, comment:comment, line:line}
     },    
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
@@ -351,12 +353,12 @@ switch (Dialog.getMeasureType()){
                 var suffix=" Kg";
                 break;
             case 'Length':
-                var suffix=" ??";
+                var suffix=" cm";
                 break;
         }
         $("#weightSpinner").spinner("value", cells.weight+suffix); //to do
      //   $("#lengthspinnerdiv").val();
-     //   $("#lengthSpinner").spinner("value", cells.length+" ??"); //to do
+     //   $("#lengthSpinner").spinner("value", cells.length+" cm"); //to do
         $("#commentarea").val(cells.comment);
     },
 
@@ -386,16 +388,16 @@ switch (Dialog.getMeasureType()){
                     ///Name:         babies[index].Name,
                     //BirthDate: babies[index].BirthDate,
                     //Gender: babies[index].Gender,
-                    Date:        td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
-                    Weeks:     Number(td.eq(1).text()/7),
-                    Weight:    Number(td.eq(2).text()),
-                    WeightQ: td.eq(3).text(),
-Length:    Number(td.eq(4).text()),
-LengthQ:    Number(td.eq(5).text()),
-                    Comment: td.eq(6).text()                    
+                    Date:       td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
+                    Weeks:      Number(td.eq(1).text()/7),
+                    Weight:     Number(td.eq(2).text()),
+                    WeightQ:    td.eq(3).text(),
+                    Length:     Number(td.eq(4).text()),
+                    LengthQ:    Number(td.eq(5).text()),
+                    Comment:    td.eq(6).text()
                 }
             }).get();
-    return data;
+        return data;
     },
     //Delete from tablebody all lines/tr elements having td elements (eg not the headers th)    
     emptyTable: function() {
@@ -420,13 +422,13 @@ LengthQ:    Number(td.eq(5).text()),
         //Create a tr line element
         var tr = document.createElement('tr');
         //Append td elements to the tr
- var fields=["Date","Weeks","WeightQ","Length","LengthQ","Comment"];
+ var fields=["Date","Weeks","Weight","WeightQ","Length","LengthQ","Comment"];
  fields.push(Dialog.getMeasureType()); 
         for (var key in obj) {
-console.log("key,obj[key]=",key,obj[key]); 
+//console.log("key,obj[key]=",key,obj[key]); 
             if (obj.hasOwnProperty(key)) {
   if (fields.indexOf(key)>-1){ //write only the selected measure to the table
-console.log("key,obj[key]=",key,obj[key]);
+//console.log("key,obj[key]=",key,obj[key]);
                 var td = document.createElement('td');
                 if (key==="Weeks")
                     var t = document.createTextNode(Math.round(obj[key]*7)); //days
@@ -728,41 +730,66 @@ $(function() {
             alert("Please insert a correct weight");
             return False;
         }
-// if ($("#lengthSpinner").pcntspinner("isValid") == false) {
-//     alert("Please insert a correct length");
-//     return False;
-// }
         //Get the data inserted by the user 
         var index=Page.getCurrIndex();
-        var measure = $("#weightSpinner").pcntspinner("value");
-// var length = $("#lengthSpinner").pcntspinner("value");
-var weight=NaN;
-var length=NaN;
-switch (Dialog.getMeasureType()){
-    case "Weight":
-    var weight=measure;
-    break;
-    case "Length":
-    var length=measure;
-    break;
-}
+        var measureType=Dialog.getMeasureType();
+        var measure=$("#weightSpinner").pcntspinner("value");
+        //Calculate the days
         var dateDMY = $("#datep").val();
-        var table=Dialog.tableToJSON();
-        for (var ind=0,len=table.length; ind<len;ind++) {
-            if ((table[ind]["Date"]==dateDMY) && ((table[ind]["Weight"]==weight) || (table[ind]["Length"]==length))){ //to do  check
-            Page.customAlert("This point already exists",1800);
-            return;
-            }
-        }
         var birthdateYMD = new Date(Dialog.dateToYMD(Page.getBirthdate()));
         var date = new Date(Dialog.dateToYMD(dateDMY));
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
-        var comment = $("#commentarea").val();
-        var hmo = graph.points[days];
-        var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100); //to do for length
-var lengthq=weightq; //to do fix this
         
-        if (textButton==="Inse"){
+        //Get the value from the graph
+        var hmo = graph.points[days];
+        //Get data from the table        
+        var row=Dialog.getSelectedFromTable();
+        //Get the measurements and quantiles
+        switch (measureType){
+            case "Weight":
+                var weight=measure;
+                var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
+                var length=(row.length)?(row.length):(NaN);
+                var lengthq=(row.length)?(row.lengthq):(NaN);
+                break;
+            case "Length":
+                var weight=(row.length)?(row.weight):(NaN);
+                var weightq=(row.length)?(row.weightq):(NaN);
+                var length=measure;
+                var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
+                break;
+        }
+        //Check if point already exists
+        //to do Check if date already present!
+        var forceEdit=0;
+        var table=Dialog.tableToJSON();
+        for (var ind=0,len=table.length; ind<len;ind++) {
+            if (table[ind]["Date"]===dateDMY){
+                //Date exists in table! if current measure is identical return.    
+                if (table[ind][measureType]===measure)
+                                    //if ((table[ind]["Weight"]==weight) || (table[ind]["Length"]==length)){ //to do  check
+                    Page.customAlert("This point already exists",1800);
+                else {
+                //If other measures exist edit line in table, otherwise add normally
+                    var othermeasurementtypes=['Weight','Length'].pop(measureType);
+                    for (var i=0; i<othermeasurementtypes.length; i++) {
+                        if (isNaN(table[ind][othermeasurementtypes[i]])){  //to do this works when empty measurements in .Data are NaN, not "". ok?
+                            //add normally
+                        }
+                        else {
+                            //edit the right line ind
+                            forceEdit=1;
+                            var forceEditLine=ind+1;
+                        }
+                    }                    
+                }
+            return;
+            }
+        }
+        //Get the comment from the accordion
+        var comment = $("#commentarea").val();
+        
+        if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
             var obj = {
             "Date" : dateDMY,
@@ -775,25 +802,29 @@ var lengthq=weightq; //to do fix this
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
-        } else if (textButton==="Edit"){
-        //Edit data in tables     
+        } else if ((textButton==="Edit")||(forceEdit===1)){
+        //Edit data in tables
+            if (forceEdit===1)
+                //simulate click on right line //to do: think if I want to edit the first or last occurrence
+$("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
+            
             var sel=Dialog.getSelectedFromTable();
-            $("table #"+sel.line + " :nth-child(1)").text(dateDMY)
-            $("table #"+sel.line + " :nth-child(2)").text(days)
-
+            forceEditLine
+            
+            $("#"+sel.line+" :nth-child(1)").text(dateDMY)
+            $("#"+sel.line+" :nth-child(2)").text(days)
 
 switch (Dialog.getMeasureType()){
     case "Weight":
-    $("table #"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
-    $("table #"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
+        $("#"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
+        $("#"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
     break;
     case "Length":
-    $("table #"+sel.line + " :nth-child(5)").text(length.toFixed(1))
-    $("table #"+sel.line + " :nth-child(4)").text(lengthq.toFixed(1));
+        $("table #"+sel.line + " :nth-child(5)").text(length.toFixed(1))
+        $("table #"+sel.line + " :nth-child(6)").text(lengthq.toFixed(1));
     break;
 }
-
-            $("table #"+sel.line + " :nth-child(4)").text(comment)
+            $("table #"+sel.line + " :nth-child(7)").text(comment)
         }
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
@@ -881,11 +912,15 @@ $(function() {
         //replot
         Page.updateDataAndGraph();
         $("#dialog").dialog("close");
-        });
+        //Deselect line from table
+        $("table .selected").removeClass("selected");
+    });
     $("#canceldialogbutton").click(function() {
         //Close dialog
         $("#dialog").dialog("close");
-        });
+        //Deselect line from table
+        $("table .selected").removeClass("selected");
+    });
 });
 
 
@@ -996,7 +1031,7 @@ $(document).on("change", "#measureselect", function(e) {
                 "pointsBoy": measBoy,
                 "pointsGirl": measGirl,
                 "xlabel": "Age [Weeks]",
-                "ylabel": "Length [??]",
+                "ylabel": "Length [cm]",
                 "maxzoom": 2  
             };
         graph.useOptions(graph.options); 
