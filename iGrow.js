@@ -296,7 +296,7 @@ var Dialog = function(){
             break;
             case 'Length':
             var suffix=' ??';
-            var start=10; // to do
+            var start=10; // to do. is this working?
             break;
         }
         $("#weightSpinner").spinner("value", start+suffix);
@@ -344,8 +344,17 @@ switch (Dialog.getMeasureType()){
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
         $("#datep").val(cells.date);    
-        $("#weightspinnerdiv").val();
-        $("#weightSpinner").spinner("value", cells.weight+" Kg");
+        //$("#weightspinnerdiv").val(); //to do I commented this out, ok?
+        var measurementType=$("#measureselect").val();
+        switch (measurementType){
+            case 'Weight':
+                var suffix=" Kg";
+                break;
+            case 'Length':
+                var suffix=" ??";
+                break;
+        }
+        $("#weightSpinner").spinner("value", cells.weight+suffix); //to do
      //   $("#lengthspinnerdiv").val();
      //   $("#lengthSpinner").spinner("value", cells.length+" ??"); //to do
         $("#commentarea").val(cells.comment);
@@ -380,9 +389,10 @@ switch (Dialog.getMeasureType()){
                     Date:        td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
                     Weeks:     Number(td.eq(1).text()/7),
                     Weight:    Number(td.eq(2).text()),
- //Length:    Number(td.eq(3).text()),
-                    Comment: td.eq(3).text(),
-                    WeightQ: td.eq(4).text()
+                    WeightQ: td.eq(3).text(),
+Length:    Number(td.eq(4).text()),
+LengthQ:    Number(td.eq(5).text()),
+                    Comment: td.eq(6).text()                    
                 }
             }).get();
     return data;
@@ -410,7 +420,7 @@ switch (Dialog.getMeasureType()){
         //Create a tr line element
         var tr = document.createElement('tr');
         //Append td elements to the tr
- var fields=["Date","Weeks","Comment","WeightQ"];
+ var fields=["Date","Weeks","WeightQ","Length","LengthQ","Comment"];
  fields.push(Dialog.getMeasureType()); 
         for (var key in obj) {
 console.log("key,obj[key]=",key,obj[key]); 
@@ -501,8 +511,9 @@ console.log("key,obj[key]=",key,obj[key]);
                             Date:       babies[index]["Data"][ind]["Date"],
                             Weeks:      babies[index]["Data"][ind]["Weeks"],
                             Weight:     babies[index]["Data"][ind]["Weight"],
-                            Length:     babies[index]["Data"][ind]["Length"],
                             WeightQ:   babies[index]["Data"][ind]["WeightQ"],
+                            Length:     babies[index]["Data"][ind]["Length"],
+                            LengthQ:     babies[index]["Data"][ind]["LengthQ"],
                             Comment:    babies[index]["Data"][ind]["Comment"]
               }
               json.push(obj);
@@ -749,16 +760,18 @@ switch (Dialog.getMeasureType()){
         var comment = $("#commentarea").val();
         var hmo = graph.points[days];
         var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100); //to do for length
+var lengthq=weightq; //to do fix this
+        
         if (textButton==="Inse"){
-  console.log("#addedittable click: length=",length)
             //Append data to the babies' data
             var obj = {
             "Date" : dateDMY,
             "Weeks" : days / 7,
             "Weight" : weight.toFixed(1),
+            "WeightQ": weightq,
             "Length" : length.toFixed(1),
-            "Comment": comment,
-            "WeightQ": weightq
+            "LengthQ": lengthq,
+            "Comment": comment
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
@@ -767,8 +780,19 @@ switch (Dialog.getMeasureType()){
             var sel=Dialog.getSelectedFromTable();
             $("table #"+sel.line + " :nth-child(1)").text(dateDMY)
             $("table #"+sel.line + " :nth-child(2)").text(days)
-            $("table #"+sel.line + " :nth-child(3)").text(weight.toFixed(1))
-//$("table #"+sel.line + " :nth-child(4)").text(length.toFixed(1))
+
+
+switch (Dialog.getMeasureType()){
+    case "Weight":
+    $("table #"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
+    $("table #"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
+    break;
+    case "Length":
+    $("table #"+sel.line + " :nth-child(5)").text(length.toFixed(1))
+    $("table #"+sel.line + " :nth-child(4)").text(lengthq.toFixed(1));
+    break;
+}
+
             $("table #"+sel.line + " :nth-child(4)").text(comment)
         }
         //hide accordion, reveal dialog buttons

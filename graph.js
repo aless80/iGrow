@@ -251,8 +251,6 @@ Graph.prototype.useOptions = function(options) {
 
 Graph.prototype.setScale = function(){
     self = this;
-    console.log(self)
-    console.log("setScale: this.options.ymax=",this.options.ymax)
     // x-scale
     this.x = d3.scale.linear()
         .domain([this.options.xmin, this.options.xmax])
