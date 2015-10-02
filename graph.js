@@ -196,7 +196,8 @@ Graph = function(elemid, options) {
 
   // add y-axis label
   if (this.options.ylabel) {
-    this.vis.append("g").append("text")
+    //this.vis.append("g").append("text")
+    this.vis.append("text")
         .attr("class", "axis")
         .text(this.options.ylabel)
         .style("text-anchor","middle")
