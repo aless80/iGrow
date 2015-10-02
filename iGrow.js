@@ -521,7 +521,7 @@ $("#babydialog").dialog({
                 Page.removeBaby(text);  
                 Page.autocomplete();
                 if (babies.length===0) $("#dialogbutton").attr("disabled","true");
-                $( this ).dialog("close");
+                $(this).dialog("close");
             }
         }
     }
@@ -530,8 +530,8 @@ $("#babydialog").dialog({
 //Fire up the help dialog of the main page
 $("#helpmainpage").dialog({
     autoOpen: false,
-    show: { effect: "blind", duration: 500 },
-    hide: { effect: "blind", duration: 500 }
+    show: {effect: "blind", duration: 500},
+    hide: {effect: "blind", duration: 500}
 }); 
 $( "#helpbutton" ).click(function() {
     $("#helpmainpage").dialog("open");
@@ -871,7 +871,7 @@ $(document).ready(function(){
 $(document).ready(function(){
     Page.autocomplete();  
     //Start plot
-    var weiBoy = [],
+    weiBoy = [],
         weiGirl = [];
     //http://www.who.int/childgrowth/en/
     d3.tsv("weianthro.txt", 
