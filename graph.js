@@ -1,7 +1,7 @@
 
 registerKeyboardHandler = function(callback) {
-  var callback = callback;
-  d3.select(window).on("keydown", callback);
+    var callback = callback;
+    d3.select(window).on("keydown", callback);
 };
 
 /* Style
@@ -351,9 +351,9 @@ Graph.prototype.regenerate = function(){
 Graph.prototype.zoomHandler = function() {
     var self = this;
     var rangex = (this.options.xmax-this.options.xmin);
-    var halfdiffrangex = (rangex - (rangex / d3.event.scale))/2
+    var halfdiffrangex = (rangex - (rangex / d3.event.scale))/2;
     var rangey = (this.options.ymax-this.options.ymin);
-    var halfdiffrangey = (rangey - (rangey / d3.event.scale))/2
+    var halfdiffrangey = (rangey - (rangey / d3.event.scale))/2;
     //If scale/range changes do not translate much. if range does not change translate
     var xdomain, ydomain;
     if (self.scale==d3.event.scale) { //translate
@@ -466,16 +466,15 @@ Graph.prototype.zoomHandler = function() {
 Graph.prototype.redraw = function(zoom) {
     var self = this; //to do: var self is better!
     return function() {
-        var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1] ]
-//console.log("newrange=",newrange)
+        var newrange = [self.x.domain()[1]-self.x.domain()[0], self.y.domain()[0]-self.y.domain()[1]];
         //zooming: Compute if the domain range is changing more than 1% (user is zooming out) or not (user is dragging with mouse)
         //Zooming if the new range is significantly different from
         var zooming = ((Math.abs(newrange[0] - self.origrange[0])/self.origrange[0] > 0.1) &&
-                    (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1))
+                    (Math.abs(newrange[1] - self.origrange[1])/self.origrange[1] > 0.1));
         if (zooming){
             //Check if we are attempting to zoom out more than the original range
             if (newrange[0] / self.origrange[0] > 1.1) {
-                console.log("zooming out too much. return")
+                console.log("zooming out too much. return");
                 return false;
                 }
             //Check if we are attempting to zoom in more than self.options.maxzoom
@@ -483,7 +482,7 @@ Graph.prototype.redraw = function(zoom) {
                 var domainx = [(self.x.domain()[1]+self.x.domain()[0] - self.options.maxzoom * self.origrange[0])/2-1,
                                 (self.x.domain()[1]+self.x.domain()[0] + self.options.maxzoom * self.origrange[0])/2],
                 domainy = [(self.y.domain()[1]+self.y.domain()[0] + self.options.maxzoom * self.origrange[1])/2,
-                            (self.y.domain()[1]+self.y.domain()[0] - self.options.maxzoom * self.origrange[1])/2-1]
+                            (self.y.domain()[1]+self.y.domain()[0] - self.options.maxzoom * self.origrange[1])/2-1];
                 return false;
             }
         }
@@ -575,251 +574,251 @@ Graph.prototype.redraw = function(zoom) {
 }
 
 Graph.prototype.plotNSigmaLine = function(n, gender){
-  var self = this;
-  //Choose Female if no babies are defined
-  if (gender == 0) {gender = 2}
-  self.line = d3.svg.line()
-    .x(function(d, i) {
-      return this.x(this.points[i].age); })
-    .y(function(d, i) {
-      return this.y(this.points[i].m + n * this.points[i].s); })
-    .interpolate("linear");
-
-  self.area = d3.svg.area()
-    .x(function(d, i) {
-      return this.x(this.points[i].age); })
-    .y1(function(d, i) {
-      var Y = ((n > 0) ? (this.points[i].m + n * this.points[i].s) : (this.points[i].m));
-      return this.y(Y);})
-    .y0(function(d, i) {
-      var Y = ((n > 0) ? (this.points[i].m) : (this.points[i].m + n * this.points[i].s));
-      return this.y(Y); })
-
-    var color = {"1":"cyan", "2":"magenta"};
-    var weiGender = {"1":weiBoy, "2":weiGirl};
-
-    self.svg.append("path")
-      .attr("class", "line")
-      .attr("id" , gender+"_"+n+"sigma")
-      //.classed("pathArea", true)
-      .attr("d", this.line(weiGender[gender]))
-      .style("stroke" , color[gender])
-      .style("stroke-width" , (n==0 ? 2 : 1))
-      .style("fill" , "none");
-
-  if (n > -3 && n < 3 && n != 0) {
-    self.svg.append("path")
-    .attr("class", "line")
-    .attr("id" ,"area_"+n)
-    .attr("d" , this.area(weiGender[gender]))
-    .style("opacity" ,1 - Math.abs(n/3))
-    .style("fill" , color[gender]);
-  }
+    var self = this;
+    //Choose Female if no babies are defined
+    if (gender == 0) {gender = 2}
+    self.line = d3.svg.line()
+        .x(function(d, i) {
+        return this.x(this.points[i].age); })
+        .y(function(d, i) {
+        return this.y(this.points[i].m + n * this.points[i].s); })
+        .interpolate("linear");
+    
+    self.area = d3.svg.area()
+        .x(function(d, i) {
+        return this.x(this.points[i].age); })
+        .y1(function(d, i) {
+        var Y = ((n > 0) ? (this.points[i].m + n * this.points[i].s) : (this.points[i].m));
+        return this.y(Y);})
+        .y0(function(d, i) {
+        var Y = ((n > 0) ? (this.points[i].m) : (this.points[i].m + n * this.points[i].s));
+        return this.y(Y); })
+    
+        var color = {"1":"cyan", "2":"magenta"};
+        var weiGender = {"1":weiBoy, "2":weiGirl};
+    
+        self.svg.append("path")
+        .attr("class", "line")
+        .attr("id" , gender+"_"+n+"sigma")
+        //.classed("pathArea", true)
+        .attr("d", this.line(weiGender[gender]))
+        .style("stroke" , color[gender])
+        .style("stroke-width" , (n==0 ? 2 : 1))
+        .style("fill" , "none");
+    
+    if (n > -3 && n < 3 && n != 0) {
+        self.svg.append("path")
+        .attr("class", "line")
+        .attr("id" ,"area_"+n)
+        .attr("d" , this.area(weiGender[gender]))
+        .style("opacity" ,1 - Math.abs(n/3))
+        .style("fill" , color[gender]);
+    }
 }
 
 Graph.prototype.plotLines = function() {
-  var self = this;
-  var gender = Page.getGender();
-  this.plotNSigmaLine(0, gender);
-  /*this.plotNSigmaLine(0.674, gender);
-  this.plotNSigmaLine(-0.674, gender);
-  this.plotNSigmaLine(3, gender);
-  this.plotNSigmaLine(-3, gender);
-  this.plotNSigmaLine(2, gender);
-  this.plotNSigmaLine(-2, gender);
-  */
+    var self = this;
+    var gender = Page.getGender();
+    this.plotNSigmaLine(0, gender);
+    /*this.plotNSigmaLine(0.674, gender);
+    this.plotNSigmaLine(-0.674, gender);
+    this.plotNSigmaLine(3, gender);
+    this.plotNSigmaLine(-3, gender);
+    this.plotNSigmaLine(2, gender);
+    this.plotNSigmaLine(-2, gender);
+    */
 }
 
 //Update the lines and the circles
 Graph.prototype.update = function() {
-  var self = this;
-  //This line with selectAll messes up the area plot because  it puts the line data to this.points for all lines
-  //var lines = this.vis.selectAll("path").attr("d", this.line(this.points));
-  //So I remove and replot the lines:
-  this.removePathsInSVG();
-  this.plotLines(); //is this really needed? there it recreates all lines.
-  var circle = this.vis.select("svg").selectAll("circle")
-      .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
-      .style("stroke","blue");
-
-  //Define tooltips
-  var tooltip = d3.select("body").append("div")
-    .attr("class", "tooltip")
-    .style("opacity", 0)
-    .style("position", "absolute");
-
-  circle.enter().append("circle")
-      .attr("id", function(d, i){ return "circle_"+i;})
-      .attr("class", function(d) {
-        return d === self.selected ? "selected" : null; })
-      .attr("cx", function(d) { return self.x(d[0]); })
-      .attr("cy", function(d) { return self.y(d[1]); })
-      .attr("r", 6.0)
-      .style("stroke","blue")
-      .style("cursor", "ns-resize")
-      //.on("mousedown.drag",  self.datapoint_drag())
-      //.on("touchstart.drag", self.datapoint_drag())
-      .on("mousedown", function(d){
-          if (self.selectCircle != null) {
-            //recolor/delect the previous circle
-  //self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;" moved to iGrow.js
-            Page.deselectCircle(0)
-          }
-          //Store the selected circle. it will be needed for the table in the dialog
-          self.selectCircle = this;
-          self.selectCircleData={
-            Baby: Page.getCurrName(),
-            Weeks:d[0],
-            Weight:d[1]
-          };
-          d3.select(this)
-              .style("stroke","red")
-              .attr("r",8)
-              .style("fill","orange");
+    var self = this;
+    //This line with selectAll messes up the area plot because  it puts the line data to this.points for all lines
+    //var lines = this.vis.selectAll("path").attr("d", this.line(this.points));
+    //So I remove and replot the lines:
+    this.removePathsInSVG();
+    this.plotLines(); //is this really needed? there it recreates all lines.
+    var circle = this.vis.select("svg").selectAll("circle")
+        .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
+        .style("stroke","blue");
+    
+    //Define tooltips
+    var tooltip = d3.select("body").append("div")
+        .attr("class", "tooltip")
+        .style("opacity", 0)
+        .style("position", "absolute");
+    
+    circle.enter().append("circle")
+        .attr("id", function(d, i){ return "circle_"+i;})
+        .attr("class", function(d) {
+            return d === self.selected ? "selected" : null; })
+        .attr("cx", function(d) { return self.x(d[0]); })
+        .attr("cy", function(d) { return self.y(d[1]); })
+        .attr("r", 6.0)
+        .style("stroke","blue")
+        .style("cursor", "ns-resize")
+        //.on("mousedown.drag",  self.datapoint_drag())
+        //.on("touchstart.drag", self.datapoint_drag())
+        .on("mousedown", function(d){
+            if (self.selectCircle != null) {
+                //recolor/delect the previous circle
+    //self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;" moved to iGrow.js
+                Page.deselectCircle(0)
+            }
+            //Store the selected circle. it will be needed for the table in the dialog
+            self.selectCircle = this;
+            self.selectCircleData={
+                Baby: Page.getCurrName(),
+                Weeks:d[0],
+                Weight:d[1]
+            };
+            d3.select(this)
+                .style("stroke","red")
+                .attr("r",8)
+                .style("fill","orange");
+            })
+        .on("mouseover", function(d){
+            //show tooltip
+            d3.select(this)
+                .style("fill","blue");
+            tooltip.transition()
+                .duration(200)
+                .style("opacity", .9);
+            tooltip.html(function(){
+                //Show the date
+                var ind = graph.dataWeight.Weeks.indexOf(d[0])
+                var dateMDY = graph.dataWeight.Date[ind].split("/");
+                var date = dateMDY[0] + "/" + dateMDY[1] + "/" + dateMDY[2];
+                var string = "Date: " + date + "<br/>Age: ";
+                //Show the age
+                if (d[0] < 3) {
+                    string = string.concat(d[0] * 7 + " day");
+                    if (d[0]*7 > 1) string = string.concat("s");
+                } else if (d[0] < 20) {
+                    string = string.concat(Math.floor(d[0]) + " weeks");
+                } else {
+                    var birthdate = Page.getBirthdate();
+                    var yearsBDate = birthdate.substring(6,10);
+                    var yearsDate = date.substring(6,10);
+                    var monthsBDate = birthdate .substring(3,5);
+                    var monthsDate = date.substring(3,5);
+                    var months = monthsDate - monthsBDate + (yearsDate - yearsBDate) * 12;   //can be -1! must count year change
+                    var years = Math.floor(months / 12);
+                    var months = months % 12;
+                    if (d[0] * 7  > 364) {
+                    string = string.concat(years + " year");
+                    if (years>1) string = string.concat("s");
+                    }
+                    if (months > 0) {
+                    if (years > 0) string = string.concat(" and ");
+                    string = string.concat(months + " month");
+                    if (months>1) string = string.concat("s");
+                    }
+                }
+                //Show the weight
+                string = string.concat("<br/>Weight: "  + d[1] + " Kg");
+                //Show the data from WHO
+                var hmo = self.points[Math.round(d[0] * 7)];
+                string = string.concat("<br/>Average weight from WHO: " + Math.round(hmo.m*100)/100);
+                var quantile=""+Math.round(cdf(d[1],hmo.m,hmo.s)*100); //d[1] is weight
+                var ordinal = new String(2);
+                if ((quantile[1]=="1") && (quantile!="11")) ordinal="st";
+                else if ((quantile[1]=="2") && (quantile!="12")) ordinal="nd";
+                else ordinal="th";
+                string = string.concat("<br/>The weight is in the " + quantile + ordinal  + " quantile")
+    
+    
+                return  string;
+            })
+            .style("left", (d3.event.pageX) + "px")
+            .style("top", (d3.event.pageY - 28) + "px");
         })
-      .on("mouseover", function(d){
-          //show tooltip
-          d3.select(this)
-              .style("fill","blue");
-          tooltip.transition()
-              .duration(200)
-              .style("opacity", .9);
-          tooltip.html(function(){
-              //Show the date
-              var ind = graph.dataWeight.Weeks.indexOf(d[0])
-              var dateMDY = graph.dataWeight.Date[ind].split("/");
-              var date = dateMDY[0] + "/" + dateMDY[1] + "/" + dateMDY[2];
-              var string = "Date: " + date + "<br/>Age: ";
-              //Show the age
-              if (d[0] < 3) {
-            	  string = string.concat(d[0] * 7 + " day");
-                if (d[0]*7 > 1) string = string.concat("s");
-              } else if (d[0] < 20) {
-	              string = string.concat(Math.floor(d[0]) + " weeks");
-              } else {
-                  var birthdate = Page.getBirthdate();
-                  var yearsBDate = birthdate.substring(6,10);
-                  var yearsDate = date.substring(6,10);
-                  var monthsBDate = birthdate .substring(3,5);
-                  var monthsDate = date.substring(3,5);
-                  var months = monthsDate - monthsBDate + (yearsDate - yearsBDate) * 12;   //can be -1! must count year change
-                  var years = Math.floor(months / 12);
-                  var months = months % 12;
-                if (d[0] * 7  > 364) {
-                  string = string.concat(years + " year");
-                  if (years>1) string = string.concat("s");
-                }
-                if (months > 0) {
-                  if (years > 0) string = string.concat(" and ");
-                  string = string.concat(months + " month");
-                  if (months>1) string = string.concat("s");
-                }
-              }
-              //Show the weight
-              string = string.concat("<br/>Weight: "  + d[1] + " Kg");
-              //Show the data from WHO
-              var hmo = self.points[Math.round(d[0] * 7)];
-              string = string.concat("<br/>Average weight from WHO: " + Math.round(hmo.m*100)/100);
-              var quantile=""+Math.round(cdf(d[1],hmo.m,hmo.s)*100); //d[1] is weight
-              var ordinal = new String(2);
-              if ((quantile[1]=="1") && (quantile!="11")) ordinal="st";
-              else if ((quantile[1]=="2") && (quantile!="12")) ordinal="nd";
-              else ordinal="th";
-              string = string.concat("<br/>The weight is in the " + quantile + ordinal  + " quantile")
-
-
-              return  string;
-          })
-          .style("left", (d3.event.pageX) + "px")
-          .style("top", (d3.event.pageY - 28) + "px");
-      })
-      .on("mousemove", function(){
-          tooltip.style("top",(d3.event.pageY-10)+"px")
-                  .style("left",(d3.event.pageX+20)+"px");
-          })
-      .on("mouseout", function(d){
-          //reset current object
-          //currentObject = null;
-          //tooltip fades away
-          d3.select(this)
-              .style("fill","none");
-          tooltip.transition()
-              .duration(500)
-              .style("opacity", 0);
-      });
-
-  circle
-      .attr("class", function(d) { return d === self.selected ? "selected" : null; })
-      .attr("cx", function(d) { return self.x(d[0]); })
-      .attr("cy", function(d) { return self.y(d[1]); });
-
-  circle.exit().remove();
+        .on("mousemove", function(){
+            tooltip.style("top",(d3.event.pageY-10)+"px")
+                    .style("left",(d3.event.pageX+20)+"px");
+            })
+        .on("mouseout", function(d){
+            //reset current object
+            //currentObject = null;
+            //tooltip fades away
+            d3.select(this)
+                .style("fill","none");
+            tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
+    
+    circle
+        .attr("class", function(d) { return d === self.selected ? "selected" : null; })
+        .attr("cx", function(d) { return self.x(d[0]); })
+        .attr("cy", function(d) { return self.y(d[1]); });
+    
+    circle.exit().remove();
 
 
 //var vis = this.vis;
 d3.select("body")
-  .on("keydown", function() {
-    //exit if you have no circle selected
-    if (self.selectCircle == null) {
-      return false;
+    .on("keydown", function() {
+        //exit if you have no circle selected
+        if (self.selectCircle == null) {
+        return false;
+        }
+        //Catch keys delete and backspace
+        if ((d3.event.keyCode == 46) || (d3.event.keyCode == 8)) { //Delete or Backspace
+        var del = Page.deleteWeight(self.selectCircle.id);
+        if (del) {
+            Page.deselectCircle(1);
+        }
+        self.update();
+        tooltip.transition()
+                .duration(500)
+                .style("opacity", 0);
+        }
+    });
+    
+    if (d3.event && d3.event.keyCode) {
+        //The default action of the event will not be triggered:
+        d3.event.preventDefault();  //cancels
+        //Prevent the event from bubbling up the DOM tree, preventing any parent handlers from being notified of the event
+        d3.event.stopPropagation();
     }
-    //Catch keys delete and backspace
-    if ((d3.event.keyCode == 46) || (d3.event.keyCode == 8)) { //Delete or Backspace
-      var del = Page.deleteWeight(self.selectCircle.id);
-      if (del) {
-        Page.deselectCircle(1);
-      }
-      self.update();
-      tooltip.transition()
-              .duration(500)
-              .style("opacity", 0);
-    }
-  });
-
-  if (d3.event && d3.event.keyCode) {
-    //The default action of the event will not be triggered:
-    d3.event.preventDefault();  //cancels
-    //Prevent the event from bubbling up the DOM tree, preventing any parent handlers from being notified of the event
-    d3.event.stopPropagation();
-  }
 }
 
 //Remove lines
 Graph.prototype.removePathsInSVG = function() {
-  d3.selectAll(".line").remove();
+    d3.selectAll(".line").remove();
 }
 
 Graph.prototype.setCurrrentDataWeight = function(){
-  var index = Page.getCurrIndex();
-  //Plot males when no baby is defined
-  var dataWeight;
-  if (index == null) {
-    dataWeight = new Array();
-    dataWeight.Weeks=new Array();
-    dataWeight.Date=new Array();
-    dataWeight.Weight=new Array();
-  } else {
-
-    dataWeight = babies[index].Data;
-    dataWeight.Weeks=new Array();
-    dataWeight.Date=new Array();
-    dataWeight.Weight=new Array();
-    for (var i=0,length=dataWeight.length;i<length;i++){
-      dataWeight.Weeks.push( babies[index].Data[i]["Weeks"]);
-      dataWeight.Date.push(  babies[index].Data[i]["Date"]);
-      dataWeight.Weight.push(babies[index].Data[i]["Weight"]);
+    var index = Page.getCurrIndex();
+    //Plot males when no baby is defined
+    var dataWeight;
+    if (index == null) {
+        dataWeight = new Array();
+        dataWeight.Weeks=new Array();
+        dataWeight.Date=new Array();
+        dataWeight.Weight=new Array();
+    } else {
+    
+        dataWeight = babies[index].Data;
+        dataWeight.Weeks=new Array();
+        dataWeight.Date=new Array();
+        dataWeight.Weight=new Array();
+        for (var i=0,length=dataWeight.length;i<length;i++){
+        dataWeight.Weeks.push( babies[index].Data[i]["Weeks"]);
+        dataWeight.Date.push(  babies[index].Data[i]["Date"]);
+        dataWeight.Weight.push(babies[index].Data[i]["Weight"]);
+        }
     }
-  }
-  this.dataWeight=dataWeight;
+    this.dataWeight=dataWeight;
 }
 
 Graph.prototype.setTitle = function(){
-  // write the Chart Title
-  var self = this; // to do: useless
-  if (this.title) {
-    d3.select("#title")
-        .text(this.title);
-   }
+    // write the Chart Title
+    var self = this; // to do: useless
+    if (this.title) {
+        d3.select("#title")
+            .text(this.title);
+    }
 }
 
 
@@ -840,7 +839,8 @@ Graph.prototype.setAxisLabels = function(){
     }
     // add y-axis label
     if (this.options.ylabel) {
-        this.vis.append("g").append("text")
+        //this.vis.append("g").attr("id", "gylabel").append("text")
+        this.vis.append("text")
             .attr("class", "axis")
             .attr("id", "ylabel")
             .text(this.options.ylabel)
@@ -857,127 +857,127 @@ Graph.prototype.changeMeasure = function() {
 
 //set this.Points containing the data for the lines according to the current gender
 Graph.prototype.setPoints = function(){
-  var self = this;    //to do: not needed
-  switch (Page.getGender()) {
-  case 0:
-    this.points = this.options.pointsGirl;
-    break;
-  case 1:
-    this.points =  this.options.pointsBoy;
-    break;
-  case 2:
-    this.points =  this.options.pointsGirl;
-    break;
-  default:
-    throw "Error: unrecognized child's gender: " + Page.getGender();
-  }
+    var self = this;    //to do: not needed
+    switch (Page.getGender()) {
+    case 0:
+        this.points = this.options.pointsGirl;
+        break;
+    case 1:
+        this.points =  this.options.pointsBoy;
+        break;
+    case 2:
+        this.points =  this.options.pointsGirl;
+        break;
+    default:
+        throw "Error: unrecognized child's gender: " + Page.getGender();
+    }
 }
 
 Graph.prototype.mousemove = function() {
-  var self = this;
-  return function() {
-    var p = d3.mouse(self.vis[0][0]),
-        t = d3.event.changedTouches;
-    if (self.dragged) {
-      self.dragged.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
-      self.update();
-    };
-    if (!isNaN(self.downx)) {
-      d3.select('body').style("cursor", "ew-resize");
-      var rupx = self.x.invert(p[0]),
-          xaxis1 = self.x.domain()[0],
-          xaxis2 = self.x.domain()[1],
-          xextent = xaxis2 - xaxis1;
-      if (rupx != 0) {
-        var changex, new_domain;
-        changex = self.downx / rupx;
-        new_domain = [xaxis1, xaxis1 + (xextent * changex)];
-        self.x.domain(new_domain);
-        self.redraw()();
-      }
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    };
-    if (!isNaN(self.downy)) {
-      d3.select('body').style("cursor", "ns-resize");
-      var rupy = self.y.invert(p[1]),
-          yaxis1 = self.y.domain()[1],
-          yaxis2 = self.y.domain()[0],
-          yextent = yaxis2 - yaxis1;
-      if (rupy != 0) {
-        var changey, new_domain;
-        changey = self.downy / rupy;
-        new_domain = [yaxis1 + (yextent * changey), yaxis1];
-        self.y.domain(new_domain);
-        self.redraw()();
-      }
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
+    var self = this;
+    return function() {
+        var p = d3.mouse(self.vis[0][0]),
+            t = d3.event.changedTouches;
+        if (self.dragged) {
+        self.dragged.y = self.y.invert(Math.max(0, Math.min(self.height, p[1])));
+        self.update();
+        };
+        if (!isNaN(self.downx)) {
+        d3.select('body').style("cursor", "ew-resize");
+        var rupx = self.x.invert(p[0]),
+            xaxis1 = self.x.domain()[0],
+            xaxis2 = self.x.domain()[1],
+            xextent = xaxis2 - xaxis1;
+        if (rupx != 0) {
+            var changex, new_domain;
+            changex = self.downx / rupx;
+            new_domain = [xaxis1, xaxis1 + (xextent * changex)];
+            self.x.domain(new_domain);
+            self.redraw()();
+        }
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        };
+        if (!isNaN(self.downy)) {
+        d3.select('body').style("cursor", "ns-resize");
+        var rupy = self.y.invert(p[1]),
+            yaxis1 = self.y.domain()[1],
+            yaxis2 = self.y.domain()[0],
+            yextent = yaxis2 - yaxis1;
+        if (rupy != 0) {
+            var changey, new_domain;
+            changey = self.downy / rupy;
+            new_domain = [yaxis1 + (yextent * changey), yaxis1];
+            self.y.domain(new_domain);
+            self.redraw()();
+        }
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        }
     }
-  }
 };
 
 Graph.prototype.mouseup = function() {
-  var self = this;
-  return function() {
-    document.onselectstart = function() { return true; };
-    d3.select('body').style("cursor", "auto");
-    d3.select('body').style("cursor", "auto");
-    if (!isNaN(self.downx)) {
-      self.redraw()();
-      self.downx = Math.NaN;
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
-    };
-    if (!isNaN(self.downy)) {
-      self.redraw()();
-      self.downy = Math.NaN;
-      d3.event.preventDefault();
-      d3.event.stopPropagation();
+    var self = this;
+    return function() {
+        document.onselectstart = function() { return true; };
+        d3.select('body').style("cursor", "auto");
+        d3.select('body').style("cursor", "auto");
+        if (!isNaN(self.downx)) {
+        self.redraw()();
+        self.downx = Math.NaN;
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        };
+        if (!isNaN(self.downy)) {
+        self.redraw()();
+        self.downy = Math.NaN;
+        d3.event.preventDefault();
+        d3.event.stopPropagation();
+        }
+        if (self.dragged) {
+        self.dragged = null
+        }
     }
-    if (self.dragged) {
-      self.dragged = null
-    }
-  }
 }
 
 Graph.prototype.xaxis_drag = function() {
-  var self = this;
-  return function(d) {
-    document.onselectstart = function() { return false; };
-    var p = d3.mouse(self.vis[0][0]);
-    self.downx = self.x.invert(p[0]);
-  }
+    var self = this;
+    return function(d) {
+        document.onselectstart = function() { return false; };
+        var p = d3.mouse(self.vis[0][0]);
+        self.downx = self.x.invert(p[0]);
+    }
 };
 
 Graph.prototype.yaxis_drag = function(d) {
-  var self = this;
-  return function(d) {
-    document.onselectstart = function() { return false; };
-    var p = d3.mouse(self.vis[0][0]);
-    self.downy = self.y.invert(p[1]);
-  }
+    var self = this;
+    return function(d) {
+        document.onselectstart = function() { return false; };
+        var p = d3.mouse(self.vis[0][0]);
+        self.downy = self.y.invert(p[1]);
+    }
 };
 
 function cdf(x, mean, variance) {
-  return 0.5 * (1 + erf((x - mean) / (Math.sqrt(2 * variance))));
+    return 0.5 * (1 + erf((x - mean) / (Math.sqrt(2 * variance))));
 }
 
-function erf(x) {
-  // save the sign of x
-  var sign = (x >= 0) ? 1 : -1;
-  x = Math.abs(x);
-
-  // constants
-  var a1 =  0.254829592;
-  var a2 = -0.284496736;
-  var a3 =  1.421413741;
-  var a4 = -1.453152027;
-  var a5 =  1.061405429;
-  var p  =  0.3275911;
-
-  // A&S formula 7.1.26
-  var t = 1.0/(1.0 + p*x);
-  var y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
-  return sign * y; // erf(-x) = -erf(x);
+    function erf(x) {
+    // save the sign of x
+    var sign = (x >= 0) ? 1 : -1;
+    x = Math.abs(x);
+    
+    // constants
+    var a1 =  0.254829592;
+    var a2 = -0.284496736;
+    var a3 =  1.421413741;
+    var a4 = -1.453152027;
+    var a5 =  1.061405429;
+    var p  =  0.3275911;
+    
+    // A&S formula 7.1.26
+    var t = 1.0/(1.0 + p*x);
+    var y = 1.0 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+    return sign * y; // erf(-x) = -erf(x);
 }

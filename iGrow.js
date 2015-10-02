@@ -193,7 +193,7 @@ var Page = function() {
             var currentName = Page.getCurrName();
             graph.title = currentName;
             graph.setScale();
-            graph.regenerate();  //to do  move inside somewhere?
+            graph.regenerate();  //to do  move inside somewhere? 
             graph.redraw();
             graph.update();
             graph.setTitle();
