@@ -943,23 +943,14 @@ $(document).ready(function(){
 });
 
 
-
-
-updateDataAndGraphTest= function(){
-            graph.setPoints();
-            graph.setCurrrentDataWeight();
-            graph.title = Page.getCurrName();
-            graph.setScale();
-            graph.regenerate();  //to do  move inside somewhere? 
-            graph.redraw();
-            graph.update();
-            graph.setTitle();
-            graph.setAxisLabels();
-        }
         
 $(document).on("change", "#measureselect", function(e) {
+    lenBoy = [];
+    lenGirl = [];
+    weiBoy = [];
+    weiGirl = [];
     switch ($("#measureselect").val()) {
-    case "Length": 
+    case "Length":
         d3.tsv("lenanthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
@@ -971,11 +962,12 @@ $(document).on("change", "#measureselect", function(e) {
             s: +d.s,
             loh: d.loh
         };
-        },function(error, data) {    
+        },function(error, data) {
+console.log("lenGirl=",lenGirl)
             data.forEach(function(d, i) {
             data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
             });
-            
+console.log("lenGirl end=",lenGirl)
             graph.options={
                 "xmin": 0, "xmax": 200,
                 "ymin": 0, "ymax": 230, 
@@ -987,22 +979,11 @@ $(document).on("change", "#measureselect", function(e) {
             };
         graph.useOptions(graph.options); 
         graph.changeMeasure();
-        //Page.updateDataAndGraph();
-        //updateDataAndGraphTest();
-        /*graph.setPoints();
-            graph.setCurrrentDataWeight();
-            var currentName = Page.getCurrName();
-            graph.title = currentName;
-            graph.setScale();
-            graph.regenerate();
-            graph.redraw();
-            graph.update();
-            graph.setTitle();
-            graph.setAxisLabels();*/
-        
+        Page.updateDataAndGraph();        
         })
         break;
     case "Weight":
+console.log("weiGirl=",weiGirl)   
         d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
@@ -1017,7 +998,7 @@ $(document).on("change", "#measureselect", function(e) {
                 data.forEach(function(d, i) {
                 data[i].gender === 1 ? weiBoy.push(d) : weiGirl.push(d);
                 });
-        
+console.log("weiGirl end=",weiGirl)
                 graph.options={
                     "xmin": 0, "xmax": 200,
                     "ymin": 0, "ymax": 20, 
@@ -1029,7 +1010,7 @@ $(document).on("change", "#measureselect", function(e) {
                 };
             graph.useOptions(graph.options); 
             graph.changeMeasure();
-            //Page.updateDataAndGraph();
+            Page.updateDataAndGraph();
             //updateDataAndGraphTest()
             }
         );
