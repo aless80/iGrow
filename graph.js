@@ -597,9 +597,9 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
         var color = {"1":"cyan", "2":"magenta"};
         var weiGender = {"1":weiBoy, "2":weiGirl};
     
-        self.svg.append("path")
+    self.svg.append("path")
         .attr("class", "line")
-        .attr("id" , gender+"_"+n+"sigma")
+        .attr("id" , gender+"_"+n+"sigma")   // to do: when i replot line goes to beginning 
         //.classed("pathArea", true)
         .attr("d", this.line(weiGender[gender]))
         .style("stroke" , color[gender])
@@ -636,7 +636,7 @@ Graph.prototype.update = function() {
     //var lines = this.vis.selectAll("path").attr("d", this.line(this.points));
     //So I remove and replot the lines:
     this.removePathsInSVG();
-    this.plotLines(); //is this really needed? there it recreates all lines.
+    this.plotLines();
     var circle = this.vis.select("svg").selectAll("circle")
         .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
         .style("stroke","blue");

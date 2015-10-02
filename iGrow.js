@@ -943,6 +943,20 @@ $(document).ready(function(){
 });
 
 
+
+
+updateDataAndGraphTest= function(){
+            graph.setPoints();
+            graph.setCurrrentDataWeight();
+            graph.title = Page.getCurrName();
+            graph.setScale();
+            graph.regenerate();  //to do  move inside somewhere? 
+            graph.redraw();
+            graph.update();
+            graph.setTitle();
+            graph.setAxisLabels();
+        }
+        
 $(document).on("change", "#measureselect", function(e) {
     switch ($("#measureselect").val()) {
     case "Length": 
@@ -973,7 +987,8 @@ $(document).on("change", "#measureselect", function(e) {
             };
         graph.useOptions(graph.options); 
         graph.changeMeasure();
-        Page.updateDataAndGraph();        
+        //Page.updateDataAndGraph();
+        //updateDataAndGraphTest();
         /*graph.setPoints();
             graph.setCurrrentDataWeight();
             var currentName = Page.getCurrName();
@@ -1014,8 +1029,8 @@ $(document).on("change", "#measureselect", function(e) {
                 };
             graph.useOptions(graph.options); 
             graph.changeMeasure();
-            Page.updateDataAndGraph();
-
+            //Page.updateDataAndGraph();
+            //updateDataAndGraphTest()
             }
         );
         break;
