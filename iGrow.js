@@ -326,20 +326,20 @@ var Dialog = function(){
         var line=$("table .selected")[0].getAttribute("id");
         var date=$("table .selected td:first-child").text();
         var measure=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);      
-  //var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
-  var weight=NaN;
-  var length=NaN;
-  switch (Dialog.getMeasureType()){
-      case "Weight":
-      var weight=measure;
-      break;
-      case "Length":
-      var length=measure;
-      break;
-  }
+//var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
+var weight=NaN;
+var length=NaN;
+switch (Dialog.getMeasureType()){
+    case "Weight":
+    var weight=measure;
+    break;
+    case "Length":
+    var length=measure;
+    break;
+};
         var comment=$("table .selected td:nth-child(4)").text();
-        var quantile=$("table .selected td:nth-child(5)").text();
-        return {date:date, weight:weight, length:length, comment:comment, quantile:quantile, line:line}
+        var weightq=$("table .selected td:nth-child(5)").text();
+        return {date:date, weight:weight, length:length, weightq:weightq, comment:comment, line:line}
     },    
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
@@ -382,7 +382,7 @@ var Dialog = function(){
                     Weight:    Number(td.eq(2).text()),
  //Length:    Number(td.eq(3).text()),
                     Comment: td.eq(3).text(),
-                    Quantile: td.eq(4).text()
+                    WeightQ: td.eq(4).text()
                 }
             }).get();
     return data;
@@ -410,7 +410,7 @@ var Dialog = function(){
         //Create a tr line element
         var tr = document.createElement('tr');
         //Append td elements to the tr
- var fields=["Date","Weeks","Comment","Quantile"];
+ var fields=["Date","Weeks","Comment","WeightQ"];
  fields.push(Dialog.getMeasureType()); 
         for (var key in obj) {
 console.log("key,obj[key]=",key,obj[key]); 
@@ -502,8 +502,8 @@ console.log("key,obj[key]=",key,obj[key]);
                             Weeks:      babies[index]["Data"][ind]["Weeks"],
                             Weight:     babies[index]["Data"][ind]["Weight"],
                             Length:     babies[index]["Data"][ind]["Length"],
-                            Comment:    babies[index]["Data"][ind]["Comment"],
-                            Quantile:   babies[index]["Data"][ind]["Quantile"]
+                            WeightQ:   babies[index]["Data"][ind]["WeightQ"],
+                            Comment:    babies[index]["Data"][ind]["Comment"]
               }
               json.push(obj);
             }
@@ -564,6 +564,7 @@ $("#babydialog").dialog({
         Cancel: function() {
             $( this ).dialog("close");
             Page.enablePageButtons();
+            $(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
         },
         "Delete this baby" : {
             text : "Delete this baby",
@@ -574,7 +575,8 @@ $("#babydialog").dialog({
                 Page.removeBaby(text);  
                 Page.autocomplete();
                 if (babies.length===0) $("#dialogbutton").attr("disabled","true");
-                $( this ).dialog("close");
+                $(this).dialog("close");
+                $(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
             }
         }
     }
@@ -746,7 +748,7 @@ switch (Dialog.getMeasureType()){
         var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
         var comment = $("#commentarea").val();
         var hmo = graph.points[days];
-        var quantile=Math.round(cdf(weight,hmo.m,hmo.s)*100); //to do for length
+        var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100); //to do for length
         if (textButton==="Inse"){
   console.log("#addedittable click: length=",length)
             //Append data to the babies' data
@@ -756,7 +758,7 @@ switch (Dialog.getMeasureType()){
             "Weight" : weight.toFixed(1),
             "Length" : length.toFixed(1),
             "Comment": comment,
-            "Quantile": quantile
+            "WeightQ": weightq
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
@@ -945,8 +947,8 @@ $(document).ready(function(){
 
         
 $(document).on("change", "#measureselect", function(e) {
-    measBoy = [];
-    measGirl = [];
+    var measBoy = [],
+        measGirl = [];
     switch ($("#measureselect").val()) {
     case "Length":
         d3.tsv("lenanthro.txt", 
@@ -1032,8 +1034,8 @@ $(document).on("change", "#measureselect", function(e) {
 $(document).ready(function(){
     Page.autocomplete();  
     //Start plot
-    measBoy = [];
-    measGirl = [];
+    var measBoy = [],
+        measGirl = [];
     
     //http://www.who.int/childgrowth/en/
     d3.tsv("weianthro.txt", 
