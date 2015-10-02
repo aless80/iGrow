@@ -686,6 +686,7 @@ $(function() {
             $("table #"+sel.line + " :nth-child(2)").text(days)
             $("table #"+sel.line + " :nth-child(3)").text(weight)
             $("table #"+sel.line + " :nth-child(4)").text(comment)
+            $("table #"+sel.line + " :nth-child(5)").text(quantile)
         }
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
