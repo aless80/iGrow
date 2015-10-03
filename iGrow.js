@@ -266,7 +266,7 @@ var Page = function() {
             Dialog.enableSelection();
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
-            $("#weightSpinner").spinner("value", "4.0 Kg");
+            $("#weightSpinner").spinner("value", "4.0");
         }
     }
     
@@ -283,25 +283,44 @@ var Dialog = function(){
     getMeasureType: function(){
         return $("#measureselect").val();
     },
-    changeMeasurementType: function(){
-        var measurementType=$("#measureselect").val();    
-        document.getElementById('measurementspinnerlabel').innerHTML=measurementType;
-        //Change spinner's suffix and starting value
-        //var cells=Dialog.getSelectedFromTable();
+    getMeasureTypeDialog: function(){
+        return $("#measureselectdialog").val();
+    },
+    changeMeasurementTypeDialog: function(){ //to do think changeMeasurementTypeDialog vs changeMeasurementType
+        var measurementType=$("#measureselectdialog").val();
+        //Change spinner's suffix and value
+        var row=Dialog.getSelectedFromTable();
         switch (measurementType){
             case 'Weight':
-            var suffix=' Kg';
-            var start=4; // to do
-            break;
-            case 'Length':
-            var suffix=' cm';
-            var start=10; // to do. is this working?
-            break;
+                var suffixlabel=' [Kg]';
+                //to do: grab it from selection
+                var value=(row.weight)?(row.weight):(4);
+                var step=0.1;
+                break;
+            case 'Length':            
+                var suffixlabel=' [cm]';
+                var value=(row.length)?(row.length):(60);
+                var step=1;
+                break;
+            case 'BMI':            
+                var suffixlabel=' [Kg/m2]';
+                var value=(row.length)?(row.length):(15);
+                var step=1.1;
+                break;
+            default:            
+                var suffixlabel=' ';
+                var value="";
+                var step=1;
+                break;
         }
-        $("#weightSpinner").spinner("value", start+suffix);                
+        document.getElementById('measurementspinnerlabel').innerHTML=measurementType+suffixlabel;
+        $("#weightSpinner").spinner("option","step",step);
+        $("#weightSpinner").spinner("value", value);//to do cannot set decimals!                
     },
     showAccordion: function() {
         $("#datep").val(todayDMY);
+        $("#weightSpinner").spinner("option","disabled",true);
+        $("#measureselectdialog").val("Measure");
         $("#accordion").removeAttr("hidden");
         $("#dialogButtons").attr("hidden","true");
         $("#editmeasure").attr("disabled","true");
@@ -310,6 +329,8 @@ var Dialog = function(){
     },
     hideAccordion: function() {
         $("table .selected").removeClass("selected");
+        $("#weightSpinner").spinner("option","disabled",true);
+        $("#measureselectdialog").val("Measure");
         $("#accordion").attr("hidden","true");
         $("#dialogButtons").removeAttr("hidden");
         $("#editmeasure").attr("disabled","true");
@@ -350,15 +371,14 @@ var Dialog = function(){
         var measurementType=$("#measureselect").val();
         switch (measurementType){
             case 'Weight':
-                var suffix=" Kg";
+                //var suffix=" Kg";
                 break;
             case 'Length':
-                var suffix=" cm";
+                //var suffix=" cm";
                 break;
         }
-        $("#weightSpinner").spinner("value", cells.weight+suffix); //to do
-     //   $("#lengthspinnerdiv").val();
-     //   $("#lengthSpinner").spinner("value", cells.length+" cm"); //to do
+   console.log("fillAccordion: cells["+measurementType+"]=",cells[measurementType])
+        $("#weightSpinner").spinner("value", cells[measurementType]); //to do can be undefined
         $("#commentarea").val(cells.comment);
     },
 
@@ -394,7 +414,9 @@ var Dialog = function(){
                     WeightQ:    td.eq(3).text(),
                     Length:     Number(td.eq(4).text()),
                     LengthQ:    Number(td.eq(5).text()),
-                    Comment:    td.eq(6).text()
+                    Comment:    td.eq(6).text(),
+                    BMI:     Number(td.eq(7).text()),
+                    BMIQ:    Number(td.eq(8).text())
                 }
             }).get();
         return data;
@@ -423,7 +445,7 @@ var Dialog = function(){
         var tr = document.createElement('tr');
         //Append td elements to the tr
  var fields=["Date","Weeks","Weight","WeightQ","Length","LengthQ","Comment"];
- fields.push(Dialog.getMeasureType()); 
+ fields.push(Dialog.getMeasureTypeDialog()); 
         for (var key in obj) {
 //console.log("key,obj[key]=",key,obj[key]); 
             if (obj.hasOwnProperty(key)) {
@@ -624,8 +646,14 @@ $("#editbabybutton").click(function() {
     $("#babydialog").dialog("open");
 });
 
-$(document).on("change", "#measureselect", function(e) {
-    Dialog.changeMeasurementType();
+//track measurement type
+// $(document).on("change", "#measureselect", function(e) {
+//     Dialog.changeMeasurementType();
+// })
+
+$(document).on("change", "#measureselectdialog", function(e) {
+    $("#weightSpinner").spinner("option","disabled",false);
+    Dialog.changeMeasurementTypeDialog();
 })
     
 //Behavior when dropdown changes
@@ -673,19 +701,21 @@ $(function() {
     $("#birthdatep").datepicker({
         maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
     });
-    jQuery.widget( "ui.pcntspinner", jQuery.ui.spinner, {
-        _format: function( value ) { 
-            var suffix = this.options.suffix;
-            return value +" "+ suffix; 
-        },    
-        _parse: function(value) { return parseFloat(value); }
-    });
-    $("#weightSpinner").pcntspinner({ 
+    // jQuery.widget("ui.pcntspinner", jQuery.ui.spinner, {
+    //     _format: function( value ) { 
+    //         var suffix = this.options.suffix;
+    //         return value +" "+ suffix; 
+    //     },    
+    //     _parse: function(value) { return parseFloat(value); }
+    // });
+    // $("#weightSpinner").pcntspinner({ 
+    $("#weightSpinner").spinner({
         min: 1,
-        suffix:'Kg',
-        //start: 4.0,
+        suffix:'',
+        start: 4.0,
         max: 100,
         step: .1
+        //numberFormat: "n"
     });
 // $("#lengthSpinner").pcntspinner({ 
 //     min: 1,
@@ -726,19 +756,24 @@ $(function() {
         var textButton=$("#addedittable").text().substring(0,4);
         //First remove circle selection, if any
         Page.deselectCircle(1);
-        if ($("#weightSpinner").pcntspinner("isValid") == false) {
-            alert("Please insert a correct weight");
-            return False;
+        if ($("#weightSpinner").spinner("option","disabled")) {
+            alert("Please select a measurement in the drop down");
+            return false;
+        }
+        if ($("#weightSpinner").spinner("isValid") == false) {
+            alert("Please insert a correct value for the measurement");
+            return false;
         }
         //Get the data inserted by the user 
         var index=Page.getCurrIndex();
-        var measureType=Dialog.getMeasureType();
-        var measure=$("#weightSpinner").pcntspinner("value");
+        var measureType=Dialog.getMeasureTypeDialog();
+        //var measure=$("#weightSpinner").pcntspinner("value");
+        var measure=$("#weightSpinner").spinner("value");
         //Calculate the days
         var dateDMY = $("#datep").val();
         var birthdateYMD = new Date(Dialog.dateToYMD(Page.getBirthdate()));
         var date = new Date(Dialog.dateToYMD(dateDMY));
-        var days = Math.abs(date - birthdateYMD) / 3600 / 24000;
+        var days = Math.abs(date-birthdateYMD) / 3600 / 24000;
         
         //Get the value from the graph
         var hmo = graph.points[days];
@@ -758,6 +793,14 @@ $(function() {
                 var length=measure;
                 var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
                 break;
+            case "BMI":
+                var weight=(row.length)?(row.weight):(NaN);
+                var weightq=(row.length)?(row.weightq):(NaN);
+                var length=(row.length)?(row.length):(NaN);
+                var lengthq=(row.length)?(row.lengthq):(NaN);
+                var bmi=measure;
+                var bmiq=Math.round(cdf(bmi,hmo.m,hmo.s)*100);
+                break;
         }
         //Check if point already exists
         //to do Check if date already present!
@@ -766,24 +809,23 @@ $(function() {
         for (var ind=0,len=table.length; ind<len;ind++) {
             if (table[ind]["Date"]===dateDMY){
                 //Date exists in table! if current measure is identical return.    
-                if (table[ind][measureType]===measure)
-                                    //if ((table[ind]["Weight"]==weight) || (table[ind]["Length"]==length)){ //to do  check
+                if (table[ind][measureType]===measure){
                     Page.customAlert("This point already exists",1800);
-                else {
+                    return;  
+                } else {
                 //If other measures exist edit line in table, otherwise add normally
-                    var othermeasurementtypes=['Weight','Length'].pop(measureType);
+                    var othermeasurementtypes=[['Weight','Length','BMI'].pop(measureType)];
                     for (var i=0; i<othermeasurementtypes.length; i++) {
                         if (isNaN(table[ind][othermeasurementtypes[i]])){  //to do this works when empty measurements in .Data are NaN, not "". ok?
-                            //add normally
-                        }
-                        else {
                             //edit the right line ind
                             forceEdit=1;
                             var forceEditLine=ind+1;
                         }
+                        else {
+                            //add normally
+                        }
                     }                    
                 }
-            return;
             }
         }
         //Get the comment from the accordion
@@ -798,32 +840,41 @@ $(function() {
             "WeightQ": weightq,
             "Length" : length.toFixed(1),
             "LengthQ": lengthq,
+            "BMI" : bmi.toFixed(1),
+            "BMIQ": bmiq,
             "Comment": comment
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
         } else if ((textButton==="Edit")||(forceEdit===1)){
         //Edit data in tables
-            if (forceEdit===1)
+            if (forceEdit===1){
                 //simulate click on right line //to do: think if I want to edit the first or last occurrence
-$("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
-            
+                $("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
+                //Append comment to old one 
+                var newcomment=$("#tr1 > td:nth-child(7)").text();
+                if (newcomment) comment=newcomment+' - '+comment;
+            }
             var sel=Dialog.getSelectedFromTable();
-            forceEditLine
+            
             
             $("#"+sel.line+" :nth-child(1)").text(dateDMY)
             $("#"+sel.line+" :nth-child(2)").text(days)
 
-switch (Dialog.getMeasureType()){
-    case "Weight":
-        $("#"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
-        $("#"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
-    break;
-    case "Length":
-        $("table #"+sel.line + " :nth-child(5)").text(length.toFixed(1))
-        $("table #"+sel.line + " :nth-child(6)").text(lengthq.toFixed(1));
-    break;
-}
+            switch (Dialog.getMeasureTypeDialog()){
+                case "Weight":
+                    $("#"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
+                    $("#"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
+                break;
+                case "Length":
+                    $("table #"+sel.line + " :nth-child(5)").text(length.toFixed(1))
+                    $("table #"+sel.line + " :nth-child(6)").text(lengthq.toFixed(1));
+                break;
+                case "BMI":
+                    $("table #"+sel.line + " :nth-child(8)").text(bmi.toFixed(1))
+                    $("table #"+sel.line + " :nth-child(9)").text(bmiq.toFixed(1));
+                break;
+            }
             $("table #"+sel.line + " :nth-child(7)").text(comment)
         }
         //hide accordion, reveal dialog buttons
@@ -983,7 +1034,7 @@ $(document).ready(function(){
             for (var index in obj[i]) 
               if (obj[i].hasOwnProperty(index))
                 row += '' + obj[i][index] + ', ';
-            row.slice(0, row.length - 1);
+            row.slice(0, row.length-1);
             //add a line break after each row
             out += row + '\r\n';
         }
@@ -1009,36 +1060,6 @@ $(document).on("change", "#measureselect", function(e) {
     var measBoy = [],
         measGirl = [];
     switch ($("#measureselect").val()) {
-    case "Length":
-        d3.tsv("lenanthro.txt", 
-        //This function defines how "data" below will look like 
-        function(d) {
-        return {
-            gender: +d.sex,
-            age: +d.age / 7,
-            l: +d.l,
-            m: +d.m,
-            s: +d.s,
-            loh: d.loh
-        };
-        },function(error, data) {
-            data.forEach(function(d, i) {
-            data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
-            });
-            graph.options={
-                "xmin": 0, "xmax": 200,
-                "ymin": 0, "ymax": 230, 
-                "pointsBoy": measBoy,
-                "pointsGirl": measGirl,
-                "xlabel": "Age [Weeks]",
-                "ylabel": "Length [cm]",
-                "maxzoom": 2  
-            };
-        graph.useOptions(graph.options); 
-        graph.changeMeasure();
-        Page.updateDataAndGraph();        
-        })
-        break;
     case "Weight":   
         d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
@@ -1069,9 +1090,67 @@ $(document).on("change", "#measureselect", function(e) {
             }
         );
         break;
-    }
-            
-    
+        case "Length":
+            d3.tsv("lenanthro.txt", 
+            //This function defines how "data" below will look like 
+            function(d) {
+            return {
+                gender: +d.sex,
+                age: +d.age / 7,
+                l: +d.l,
+                m: +d.m,
+                s: +d.s,
+                loh: d.loh
+            };
+            },function(error, data) {
+                data.forEach(function(d, i) {
+                data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
+                });
+                graph.options={
+                    "xmin": 0, "xmax": 200,
+                    "ymin": 0, "ymax": 230, 
+                    "pointsBoy": measBoy,
+                    "pointsGirl": measGirl,
+                    "xlabel": "Age [Weeks]",
+                    "ylabel": "Length [cm]",
+                    "maxzoom": 2  
+                };
+            graph.useOptions(graph.options); 
+            graph.changeMeasure();
+            Page.updateDataAndGraph();        
+            })
+            break;
+        case "BMI":
+            d3.tsv("bmianthro.txt", 
+            //This function defines how "data" below will look like 
+            function(d) {
+            return {
+                gender: +d.sex,
+                age: +d.age / 7,
+                l: +d.l,
+                m: +d.m,
+                s: +d.s,
+                loh: d.loh
+            };
+            },function(error, data) {
+                data.forEach(function(d, i) {
+                data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
+                });
+                graph.options={
+                    "xmin": 0, "xmax": 200,
+                    "ymin": 0, "ymax": 20, 
+                    "pointsBoy": measBoy,
+                    "pointsGirl": measGirl,
+                    "xlabel": "Age [Weeks]",
+                    "ylabel": "BMI [Kg/m2]",
+                    "maxzoom": 2  
+                };
+                graph.useOptions(graph.options); 
+                graph.changeMeasure();
+                Page.updateDataAndGraph();        
+            })
+            break;
+    }    
     
     // //deselect any possible circle
     // Page.deselectCircle(1);
@@ -1082,20 +1161,12 @@ $(document).on("change", "#measureselect", function(e) {
 });
 
 
-
-//testing: click on 
-// $(document).ready(function(){
-//     $('#dialogbutton').trigger('click');
-//   }
-//)
-
 //Load the data from weianthro
 $(document).ready(function(){
     Page.autocomplete();  
     //Start plot
     var measBoy = [],
-        measGirl = [];
-    
+        measGirl = [];    
     //http://www.who.int/childgrowth/en/
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
@@ -1122,36 +1193,5 @@ $(document).ready(function(){
                 "maxzoom": 2  
             });
         }
-    );
-  
-  
-  
-    // d3.tsv("lenanthro.txt", 
-    //     //This function defines how "data" below will look like 
-    //     function(d) {
-    //     return {
-    //         gender: +d.sex,
-    //         age: +d.age / 7,
-    //         l: +d.l,
-    //         m: +d.m / 5,
-    //         s: +d.s,
-    //         loh: d.loh
-    //     };
-    //     },function(error, data) {    
-    //         data.forEach(function(d, i) {
-    //         data[i].gender === 1 ? lenBoy.push(d) : lenGirl.push(d);
-    //         });
-    // console.log("lenanthro")
-    //         graph2 = new Graph("chart1", {
-    //             "xmin": 0, "xmax": 200,
-    //             "ymin": 0, "ymax": 20, 
-    //             "pointsBoy": lenBoy,
-    //             "pointsGirl": lenGirl,
-    //             "xlabel": "Age [Weeks]",
-    //             "ylabel": "Length [??]",
-    //             "maxzoom": 2  
-    //         });
-    //     }
-    // );
-  
+    );  
 })

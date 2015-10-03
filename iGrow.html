@@ -38,31 +38,32 @@
                 <tr>
                 <td>
                     <div id="dropdowndiv">
-                    <select id="dropdown" style="text-align:center" value = "" title="List of babies" style="min-width: 97px; width: auto;"></select>
+                        <select id="dropdown" style="text-align:center" value = "" title="List of babies" style="min-width: 97px; width: auto;"></select>
                     </div>
                 </td>
                 <td>
                     <div id="editbabydiv">
-                    <button id="editbabybutton" title="Add, delete or edit a baby">Edit babies</button>
-                    <div id='custom-alert' class="custom-alert"></div>                  
+                        <button id="editbabybutton" title="Add, delete or edit a baby">Edit babies</button>
+                        <div id='custom-alert' class="custom-alert"></div>                  
                     </div>
                 </td>
                 <td>
                     <div id="dialogdiv">
-                    <button id="dialogbutton" title="">Edit Measures</button>   
+                        <button id="dialogbutton" title="">Edit Measures</button>   
                     </div>
                 </td>
                 <td>
                     <div>
-                    <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
-                        <option value="Weight">Weight</option>
-                        <option value="Length">Length</option>
-                    </select>   
+                        <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
+                            <option value="Weight">Weight</option>
+                            <option value="Length">Length</option>
+                            <option value="BMI">BMI</option>
+                        </select>   
                     </div>
                 </td>
                 <td>
                     <div id="helpdiv">
-                    <button id="helpbutton" title="">Help</button>   
+                        <button id="helpbutton" title="">Help</button>   
                     </div>
                 </td>
                 </tr>
@@ -98,9 +99,9 @@
             <thead>
                 <!--Instructions-->
                 <tr cellpadding="0";>
-                <th style="text-align:left">
-                    <p>Please add a baby's name, gender and birthdate</p>
-                </th>              
+                    <th style="text-align:left">
+                        <p>Please add a baby's name, gender and birthdate</p>
+                    </th>              
                 </tr>        
             </thead>
             <tbody>    
@@ -166,12 +167,14 @@
                             <th style="width:50px">Length</th>
                             <th style="width:50px">Quantile</th>
                             <th style="width:152px">Comment</th>
+                            <th style="width:50px">BMI</th>
+                            <th style="width:50px">Quantile</th>
                             </tr>                      
                         </tbody>
                         </table>
                     </div>
                     </td>
-                </tr>
+                    </tr>
                 </tbody>
             </table>
 <br>
@@ -180,33 +183,24 @@
                 <tbody>
                 <tr>
                     <td>
-                        <div>
-                        <select id="measureselectdialog" style="text-align:center" value="" title="Choose the measure" style="min-width: 97px; width: auto;">
-                            <option value="Length">Use this?</option>
-                            <option value="Weight">Weight</option>
-                            <option value="Length">Length</option>                        
-                        </select>   
-                    </div>
+                        <div id="addmeasurediv">
+                            <button id="addmeasure" title="Add a measurement to the table">Add a measure</button>
+                        </div>
+                        </td>
+                    <td>
+                        <div id="editmeasurediv">
+                            <button id="editmeasure" title="Select a line on the table and click on this button to edit it">Edit measure</button>
+                        </div>
                     </td>
                     <td>
-                    <div id="addmeasurediv">
-                        <button id="addmeasure" title="Add a measurement to the table">Add a measure</button>
-                    </div>
+                        <div id="deletemeasurediv">
+                            <button id="deletemeasure" title="Delete the seleted point from the table" disabled >Delete measure</button>   
+                        </div>
                     </td>
                     <td>
-                    <div id="editmeasurediv">
-                        <button id="editmeasure" title="Select a line on the table and click on this button to edit it">Edit measure</button>
-                    </div>
-                    </td>
-                    <td>
-                    <div id="deletemeasurediv">
-                        <button id="deletemeasure" title="Delete the seleted point from the table" disabled >Delete measure</button>   
-                    </div>
-                    </td>
-                    <td>
-                    <div id="exportdiv">
-                        <button id='export'>Export to file</button>
-                    </div>
+                        <div id="exportdiv">
+                            <button id='export'>Export to file</button>
+                        </div>
                     </td>
                 </tr>                              
                 </tbody>
@@ -219,62 +213,65 @@
                 <tbody>
                 <tr cellpadding="0">
                     <td>
-                    <div id="datelabeldiv">
-                        <label for="text">Date</label>
-                    </div>
+                        <div id="datelabeldiv">
+                            <label for="text">Date</label>
+                        </div>
                     </td>
                     <td>
-                    <div id="measurementspinnerlabeldiv">
-                        <label id="measurementspinnerlabel" for="spinner">Weight</label>
-                    </div>
+                        <div id="measurementtypelabeldiv">
+                            <label id="measurementtypelabel" for="text">Measurement</label>
+                        </div>
                     </td>
-                    <!--<td>
-                    <div id="lengthspinnerlabeldiv">
-                        <label for="spinner">Length</label>
-                    </div>
-                    </td>-->
                     <td>
-                    <div id="commentspinnerlabeldiv">
-                        <label>Comment</label>                  
-                    </div>
+                        <div id="measurementspinnerlabeldiv">
+                            <label id="measurementspinnerlabel" for="spinner"></label>
+                        </div>
+                    </td>
+                    <td>
+                        <div id="commentspinnerlabeldiv">
+                            <label>Comment</label>                  
+                        </div>
                     </td>
                 </tr>
                 <tr>
                     <td>
-                    <div id="datepdiv">             
-                        <input type="text" id="datep" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
-                    </div>
+                        <div id="datepdiv">             
+                            <input type="text" id="datep" title="Select a date" class="textinput" name="datep" style="height: 40px; width:89px;">
+                        </div>
+                    </td>
+                    <td>
+                        <div>
+                        <select id="measureselectdialog" style="text-align:center" value="" title="Choose the measure" style="min-width: 97px; width: auto;">
+                            <option value="Measure">Measure</option>
+                            <option value="Weight">Weight</option>
+                            <option value="Length">Length</option>                        
+                            <option value="BMI">BMI</option>
+                        </select>   
+                        </div>
                     </td>            
                     <td>
-                    <div class="weightspinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
-                        <input id="weightSpinner" name="value" style="height:40px; width:66px"> 
-                    </div>
+                        <div class="weightspinnerdiv" id="weightspinnerdiv" title="Select the baby's weight'">                  
+                            <input id="weightSpinner" name="value" style="height:40px; width:66px"> 
+                        </div>
                     </td>
-                    <!--
-                    <td>
-                    <div class="lengthspinnerdiv" id="lengthspinnerdiv" title="Select the baby's length'">                  
-                        <input id="lengthSpinner" name="value" style="height:40px; width:66px"> 
-                    </div>
-                    </td>
-                    -->
                     <td colspan="2">
-                    <div id="">
-                        <textarea id="commentarea" value="" rows="2" cols="17"></textarea>
-                    </div>
+                        <div id="">
+                            <textarea id="commentarea" value="" rows="2" cols="17"></textarea>
+                        </div>
                     </td>
                 </tr>
                 
                 <tr>
                     <td>
-                    <div id="addedittablediv">
-                        <button id="addedittable" title="Add a point to the graph with the baby's weight'" 
-                            disabled>Insert in table</button>
-                    </div>
+                        <div id="addedittablediv">
+                            <button id="addedittable" title="Add a point to the graph with the baby's weight'" 
+                                disabled>Insert in table</button>
+                        </div>
                     </td>
                     <td>
-                    <div id="cancelaccordiondiv">
-                        <button id="cancelaccordion" title="Cancel adding a weight">Cancel</button>
-                    </div>
+                        <div id="cancelaccordiondiv">
+                            <button id="cancelaccordion" title="Cancel adding a weight">Cancel</button>
+                        </div>
                     </td>
                 </tr>
                 </tbody>
@@ -294,17 +291,17 @@
                 -->
                 <td>
                     <div>
-                    <button id="savedialogbutton" title="Save and plot the data in the table">Save & Close</button>
+                        <button id="savedialogbutton" title="Save and plot the data in the table">Save & Close</button>
                     </div>
                 </td>
                 <td>
                     <div>
-                    <button id="canceldialogbutton" title="Discard the changes and close this dialog">Cancel</button>
+                        <button id="canceldialogbutton" title="Discard the changes and close this dialog">Cancel</button>
                     </div>
                 </td>
                 <td>
                     <div>
-                    <button id="helpdialogbutton" title="">Help</button>   
+                        <button id="helpdialogbutton" title="">Help</button>   
                     </div>
                 </td>              
                 </tr>            

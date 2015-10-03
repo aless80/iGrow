@@ -106,7 +106,6 @@ Graph = function(elemid, options) {
 
     // this.options.maxzoom = 1 / options.maxzoom || 0.2;
 
-
     this.padding = {
         "top":    42,
         "right":  30,
@@ -634,7 +633,7 @@ Graph.prototype.update = function() {
     this.removePathsInSVG();
     this.plotLines();
     var circle = this.vis.select("svg").selectAll("circle")
-        .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Weight]))
+        .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Measure]))
         .style("stroke","blue");
     
     //Define tooltips
@@ -792,17 +791,17 @@ Graph.prototype.setCurrrentDataWeight = function(){
         dataWeight = new Array();
         dataWeight.Weeks=new Array();
         dataWeight.Date=new Array();
-        dataWeight.Weight=new Array();
+        dataWeight.Measure=new Array();
     } else {
-    
+        var measuretype=Dialog.getMeasureType();
         dataWeight = babies[index].Data;
         dataWeight.Weeks=new Array();
         dataWeight.Date=new Array();
-        dataWeight.Weight=new Array();
-        for (var i=0,length=dataWeight.length;i<length;i++){
-        dataWeight.Weeks.push( babies[index].Data[i]["Weeks"]);
-        dataWeight.Date.push(  babies[index].Data[i]["Date"]);
-        dataWeight.Weight.push(babies[index].Data[i]["Weight"]);
+        dataWeight.Measure=new Array();
+        for (var i=0,len=dataWeight.length;i<len;i++){
+            dataWeight.Weeks.push(babies[index].Data[i]["Weeks"]);
+            dataWeight.Date.push(babies[index].Data[i]["Date"]);
+            dataWeight.Measure.push(babies[index].Data[i][measuretype]);
         }
     }
     this.dataWeight=dataWeight;
