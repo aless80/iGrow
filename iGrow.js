@@ -786,12 +786,16 @@ $(function() {
                 var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
                 var length=(row.length)?(row.length):(NaN);
                 var lengthq=(row.length)?(row.lengthq):(NaN);
+                var bmi=(row.length)?(row.bmi):(NaN);
+                var bmiq=(row.length)?(row.bmiq):(NaN);
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
                 var weightq=(row.length)?(row.weightq):(NaN);
                 var length=measure;
                 var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
+                var bmi=(row.length)?(row.bmi):(NaN);
+                var bmiq=(row.length)?(row.bmiq):(NaN);
                 break;
             case "BMI":
                 var weight=(row.length)?(row.weight):(NaN);
@@ -814,7 +818,7 @@ $(function() {
                     return;  
                 } else {
                 //If other measures exist edit line in table, otherwise add normally
-                    var othermeasurementtypes=[['Weight','Length','BMI'].pop(measureType)];
+                    var othermeasurementtypes=['Weight','Length','BMI'].filter(function(val) {return val!='measureType'});
                     for (var i=0; i<othermeasurementtypes.length; i++) {
                         if (isNaN(table[ind][othermeasurementtypes[i]])){  //to do this works when empty measurements in .Data are NaN, not "". ok?
                             //edit the right line ind
