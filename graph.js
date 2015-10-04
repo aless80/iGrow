@@ -654,11 +654,15 @@ Graph.prototype.update = function() {
         //.on("mousedown.drag",  self.datapoint_drag())
         //.on("touchstart.drag", self.datapoint_drag())
         .on("mousedown", function(d){
+console.log("update self.selectCircle=",self.selectCircle)
+console.log("this=",this)
             if (self.selectCircle != null) {
                 //recolor/delect the previous circle
     //self.selectCircle.style = "stroke: blue; cursor: ns-resize; fill: none;" moved to iGrow.js
+                console.log("Page.deselectCircle(0)")
                 Page.deselectCircle(0)
             }
+            //to do: this messes it up
             //Store the selected circle. it will be needed for the table in the dialog
             self.selectCircle = this;
             self.selectCircleData={
