@@ -302,11 +302,11 @@ var Dialog = function(){
                 var value=(row.length)?(row.length):(60);
                 var step=1;
                 break;
-            case 'BMI':            
-                var suffixlabel=' [Kg/m2]';
-                var value=(row.length)?(row.length):(15);
-                var step=1.1;
-                break;
+            // case 'BMI':            
+            //     var suffixlabel=' [Kg/m2]';
+            //     var value=(row.length)?(row.length):(15);
+            //     var step=1.1;
+            //     break;
             default:            
                 var suffixlabel=' ';
                 var value="";
@@ -345,24 +345,14 @@ var Dialog = function(){
         }
         var line=$("table .selected")[0].getAttribute("id");
         var date=$("table .selected td:first-child").text();
-// var measure=new Number($("table .selected td:nth-child(3)").text()).toFixed(1);      
-//var length=new Number($("table .selected td:nth-child(4)").text()).toFixed(1);
-//var weight=NaN;
-//var length=NaN;
-// switch (Dialog.getMeasureType()){
-//     case "Weight":
-//     var weight=measure;
-//     break;
-//     case "Length":
-//     var length=measure;
-//     break;
-// };
-        var weight=$("table .selected td:nth-child(3)").text();        
-        var weightq=$("table .selected td:nth-child(4)").text();
-        var length=$("table .selected td:nth-child(5)").text();
-        var lengthq=$("table .selected td:nth-child(6)").text();
-        var comment=$("table .selected td:nth-child(7)").text();
-        return {date:date, weight:weight, weightq:weightq, length:length, lengthq:lengthq, comment:comment, line:line}
+        var weight=Number($("table .selected td:nth-child(3)").text());        
+        var weightq=Number($("table .selected td:nth-child(4)").text());
+        var length=Number($("table .selected td:nth-child(5)").text());
+        var lengthq=Number($("table .selected td:nth-child(6)").text());
+        var bmi=Number($("table .selected td:nth-child(7)").text());
+        var bmiq=Number($("table .selected td:nth-child(8)").text());
+        var comment=$("table .selected td:nth-child(9)").text();
+        return {date:date, weight:weight, weightq:weightq, length:length, lengthq:lengthq, bmi:bmi, bmiq:bmiq, comment:comment, line:line}
     },    
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
@@ -377,7 +367,7 @@ var Dialog = function(){
                 //var suffix=" cm";
                 break;
         }
-   console.log("fillAccordion: cells["+measurementType+"]=",cells[measurementType])
+console.log("fillAccordion: cells["+measurementType+"]=",cells[measurementType])
         $("#weightSpinner").spinner("value", cells[measurementType]); //to do can be undefined
         $("#commentarea").val(cells.comment);
     },
@@ -400,7 +390,7 @@ var Dialog = function(){
     },
     //convert the table in the dialog to JSON
     tableToJSON: function() {
-        data = $('#table tr:has(td)').map(
+        var data = $('#table tr:has(td)').map( //to do: check, i added "var"
             function(ind, val) {
                 var td = $('td', this);
                 var index = Page.getCurrIndex();
@@ -411,12 +401,12 @@ var Dialog = function(){
                     Date:       td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
                     Weeks:      Number(td.eq(1).text()/7),
                     Weight:     Number(td.eq(2).text()),
-                    WeightQ:    td.eq(3).text(),
+                    WeightQ:    Number(td.eq(3).text()),
                     Length:     Number(td.eq(4).text()),
                     LengthQ:    Number(td.eq(5).text()),
-                    Comment:    td.eq(6).text(),
-                    BMI:     Number(td.eq(7).text()),
-                    BMIQ:    Number(td.eq(8).text())
+                    BMI:        Number(td.eq(6).text()),
+                    BMIQ:       Number(td.eq(7).text()),
+                    Comment:    td.eq(8).text()
                 }
             }).get();
         return data;
@@ -440,28 +430,30 @@ var Dialog = function(){
     },
     //Append a line to the table                        //to do  put as private method
     appendToTable: function(obj){
+//console.log("appendToTable obj=",obj);
         var tbdy = document.getElementById('tablebody');
         //Create a tr line element
         var tr = document.createElement('tr');
         //Append td elements to the tr
- var fields=["Date","Weeks","Weight","WeightQ","Length","LengthQ","Comment"];
- fields.push(Dialog.getMeasureTypeDialog()); 
+         var fields=["Date","Weeks","Weight","WeightQ","Length","LengthQ","BMI","BMIQ","Comment"];
+        fields.push(Dialog.getMeasureTypeDialog()); 
         for (var key in obj) {
 //console.log("key,obj[key]=",key,obj[key]); 
             if (obj.hasOwnProperty(key)) {
-  if (fields.indexOf(key)>-1){ //write only the selected measure to the table
-//console.log("key,obj[key]=",key,obj[key]);
-                var td = document.createElement('td');
-                if (key==="Weeks")
-                    var t = document.createTextNode(Math.round(obj[key]*7)); //days
-                else if (key==="Weight") //||(key==="Length")) //to do
-                    var t = document.createTextNode(Number(obj[key]).toFixed(1));
-                else 
-                    var t = document.createTextNode(obj[key]);
-
-                    td.appendChild(t);
-                    tr.appendChild(td);
-            }
+                if (fields.indexOf(key)>-1){ //write only the selected measure to the table
+//console.log(" key,obj[key]=",key,obj[key]);
+                    var td = document.createElement('td');
+                    if (key==="Weeks")
+                        var t = document.createTextNode(Math.round(obj[key]*7)); //days
+                    else if ((key==="Weight") ||(key==="BMI"))
+                        var t = document.createTextNode(Number(obj[key]).toFixed(1));
+                    else if (key==="Length")
+                        var t = document.createTextNode(Number(obj[key]));
+                    else 
+                        var t = document.createTextNode(obj[key]);
+                        td.appendChild(t);
+                        tr.appendChild(td);
+                }
             }        
         }
         //Append line
@@ -517,10 +509,10 @@ var Dialog = function(){
     babiesToJSON: function(){
                 var json=new Array();
                 for (var index=0,len=babies.length; index<len; index++) {
-                    console.log("len,index=",len,index)
+//console.log("len,index=",len,index)
                     var datalength=babies[index]["Data"].length;
                     if (datalength===0) {
-                                 console.log("if, index=",index)
+//console.log("if, index=",index)
                         json.push({
                                 Name:       babies[index].Name,
                                 BirthDate:  babies[index].BirthDate,
@@ -756,16 +748,18 @@ $(function() {
         var textButton=$("#addedittable").text().substring(0,4);
         //First remove circle selection, if any
         Page.deselectCircle(1);
+        //User must select a measurement
         if ($("#weightSpinner").spinner("option","disabled")) {
             alert("Please select a measurement in the drop down");
             return false;
         }
+        //Check if value typed in is valid
         if ($("#weightSpinner").spinner("isValid") == false) {
             alert("Please insert a correct value for the measurement");
             return false;
         }
         //Get the data inserted by the user 
-        var index=Page.getCurrIndex();
+//var index=Page.getCurrIndex();
         var measureType=Dialog.getMeasureTypeDialog();
         //var measure=$("#weightSpinner").pcntspinner("value");
         var measure=$("#weightSpinner").spinner("value");
@@ -786,28 +780,16 @@ $(function() {
                 var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
                 var length=(row.length)?(row.length):(NaN);
                 var lengthq=(row.length)?(row.lengthq):(NaN);
-                var bmi=(row.length)?(row.bmi):(NaN);
-                var bmiq=(row.length)?(row.bmiq):(NaN);
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
                 var weightq=(row.length)?(row.weightq):(NaN);
                 var length=measure;
                 var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
-                var bmi=(row.length)?(row.bmi):(NaN);
-                var bmiq=(row.length)?(row.bmiq):(NaN);
-                break;
-            case "BMI":
-                var weight=(row.length)?(row.weight):(NaN);
-                var weightq=(row.length)?(row.weightq):(NaN);
-                var length=(row.length)?(row.length):(NaN);
-                var lengthq=(row.length)?(row.lengthq):(NaN);
-                var bmi=measure;
-                var bmiq=Math.round(cdf(bmi,hmo.m,hmo.s)*100);
                 break;
         }
+        //Decide what to with the measurement: check if valid, append or merge it as a line to table
         //Check if point already exists
-        //to do Check if date already present!
         var forceEdit=0;
         var table=Dialog.tableToJSON();
         for (var ind=0,len=table.length; ind<len;ind++) {
@@ -817,16 +799,13 @@ $(function() {
                     Page.customAlert("This point already exists",1800);
                     return;  
                 } else {
-                //If other measures exist edit line in table, otherwise add normally
-                    var othermeasurementtypes=['Weight','Length','BMI'].filter(function(val) {return val!='measureType'});
+                //Edit line if other measures exist edit line in table, otherwise add normally
+                    var othermeasurementtypes=['Weight','Length'].filter(function(val) {return val!='measureType'});
                     for (var i=0; i<othermeasurementtypes.length; i++) {
                         if (isNaN(table[ind][othermeasurementtypes[i]])){  //to do this works when empty measurements in .Data are NaN, not "". ok?
                             //edit the right line ind
                             forceEdit=1;
                             var forceEditLine=ind+1;
-                        }
-                        else {
-                            //add normally
                         }
                     }                    
                 }
@@ -834,36 +813,37 @@ $(function() {
         }
         //Get the comment from the accordion
         var comment = $("#commentarea").val();
-        
+        //Calculate the BMI
+        var bmi=weight/Math.sqrt(length); //to do. any good?
+        var bmiq=666; //Math.round(cdf(bmi,hmo.m,hmo.s)*100);
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
             var obj = {
-            "Date" : dateDMY,
-            "Weeks" : days / 7,
-            "Weight" : weight.toFixed(1),
-            "WeightQ": weightq,
-            "Length" : length.toFixed(1),
-            "LengthQ": lengthq,
-            "BMI" : bmi.toFixed(1),
-            "BMIQ": bmiq,
-            "Comment": comment
+                "Date" : dateDMY,
+                "Weeks" : days / 7,
+                "Weight" : weight.toFixed(1),
+                "WeightQ": weightq,
+                "Length" : length.toFixed(1),
+                "LengthQ": lengthq,
+                "BMI" : bmi.toFixed(1),
+                "BMIQ": bmiq,
+                "Comment": comment
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
         } else if ((textButton==="Edit")||(forceEdit===1)){
-        //Edit data in tables
+            //Edit data in tables
             if (forceEdit===1){
                 //simulate click on right line //to do: think if I want to edit the first or last occurrence
                 $("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
                 //Append comment to old one 
-                var newcomment=$("#tr1 > td:nth-child(7)").text();
-                if (newcomment) comment=newcomment+' - '+comment;
+                var newcomment=$("#tr1 > td:nth-child(9)").text();
+                if (newcomment && (comment!=newcomment)) comment=newcomment+' - '+comment;
             }
             var sel=Dialog.getSelectedFromTable();
-            
-            
-            $("#"+sel.line+" :nth-child(1)").text(dateDMY)
-            $("#"+sel.line+" :nth-child(2)").text(days)
+            //Edit the line   to do: use appendLine to table?
+            $("#"+sel.line+" :nth-child(1)").text(dateDMY);
+            $("#"+sel.line+" :nth-child(2)").text(days);
 
             switch (Dialog.getMeasureTypeDialog()){
                 case "Weight":
@@ -871,15 +851,15 @@ $(function() {
                     $("#"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
                 break;
                 case "Length":
-                    $("table #"+sel.line + " :nth-child(5)").text(length.toFixed(1))
-                    $("table #"+sel.line + " :nth-child(6)").text(lengthq.toFixed(1));
-                break;
-                case "BMI":
-                    $("table #"+sel.line + " :nth-child(8)").text(bmi.toFixed(1))
-                    $("table #"+sel.line + " :nth-child(9)").text(bmiq.toFixed(1));
+                    $("table #"+sel.line + " :nth-child(5)").text(length);
+                    $("table #"+sel.line + " :nth-child(6)").text(lengthq);
                 break;
             }
-            $("table #"+sel.line + " :nth-child(7)").text(comment)
+            //BMI
+            $("table #"+sel.line + " :nth-child(7)").text(bmi.toFixed(1));
+            $("table #"+sel.line + " :nth-child(8)").text(bmiq.toFixed(1));
+            //Comment
+            $("table #"+sel.line + " :nth-child(9)").text(comment);
         }
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
