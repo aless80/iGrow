@@ -108,14 +108,14 @@ var Page = function() {
             //empty() removes all child nodes
             $("#dropdown").empty();
         },
-            //Deselect circles: nullify is set circle to null (delete?)
+        //Deselect circles: nullify is set circle to null (~delete)
         deselectCircle: function(nullify) {
             if (graph.selectCircle) {
                 document.getElementById(graph.selectCircle.id).setAttribute("r",6);
                 document.getElementById(graph.selectCircle.id).style.stroke = "blue"; 
                 if (nullify) {
                     graph.selectCircle = null;
-                    graph.selectCircleData=null;
+//graph.selectCircleData=null;
                     $('#deletemeasure').attr("disabled", "true");
                 }
             }
@@ -266,7 +266,6 @@ var Page = function() {
             Dialog.enableSelection();
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
-            $("#weightSpinner").spinner("value", "4.0");
         }
     }
     
@@ -337,6 +336,7 @@ var Dialog = function(){
         $("#deletemeasure").attr("disabled","true");
         $("#export").removeAttr("disabled");
         $("#addmeasure").removeAttr("disabled");
+        $("#weightSpinner").spinner("value", "");
     },
     //Get the line and data from the selected row on the table
     getSelectedFromTable: function(){
@@ -473,7 +473,7 @@ var Dialog = function(){
     DMYToDate: function(dmy){
 	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
     },
-    calculateBMIQ: function(days,bmi){
+    calculateQ: function(days,bmi,measuretype){
         // Check for the various File API support.
         if (window.File && window.FileReader && window.FileList && window.Blob){}
         // Great success! All the File APIs are supported.
@@ -491,7 +491,19 @@ var Dialog = function(){
         var bmidata
         var reader = new FileReader();
         
-        
+        var file;
+        switch (measuretype){
+            case "weight":
+                file ="weianthro.txt"; //to do: watch out loh in weight
+                break;
+            case "length":
+                file ="lenanthro.txt";
+                break;
+            case "bmi":
+                file ="weianthro.txt";
+                break;
+        }
+        var file=measuretype
         d3.tsv("bmianthro.txt", 
             //This function defines how "data" below will look like 
             function(d) {
@@ -824,11 +836,13 @@ $(function() {
                 var weight=measure;
                 var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
                 var length=(row.length)?(row.length):(NaN);
-                var lengthq=(row.length)?(row.lengthq):(NaN);
+                //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
+                var lengthq=Dialog.calculateQ(days,length,"length");
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
-                var weightq=(row.length)?(row.weightq):(NaN);
+                //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
+                var weightq=Dialog.calculateQ(days,weight,"weight");
                 var length=measure;
                 var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
                 break;
@@ -860,7 +874,7 @@ $(function() {
         var comment = $("#commentarea").val();
         //Calculate the BMI
         var bmi=weight/Math.sqrt(length); //to do. any good?
-        var bmiq=Dialog.calculateBMIQ(days,bmi);
+        var bmiq=Dialog.calculateQ(days,bmi,"bmi");
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
             var obj = {
@@ -1209,6 +1223,7 @@ $(document).ready(function(){
             l: +d.l,
             m: +d.m,
             s: +d.s,
+            loh: d.loh //to do: this does not hurt it so group all d3.tsv together
         };
         },function(error, data) {    
             data.forEach(function(d, i) {
