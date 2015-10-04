@@ -367,8 +367,8 @@ var Dialog = function(){
                 //var suffix=" cm";
                 break;
         }
-console.log("fillAccordion: cells["+measurementType+"]=",cells[measurementType])
-        $("#weightSpinner").spinner("value", cells[measurementType]); //to do can be undefined
+//console.log("fillAccordion: cells["+measurementType.toLowerCase()+"]=",cells[measurementType.toLowerCase()])
+        $("#weightSpinner").spinner("value", cells[measurementType.toLowerCase()]); //to do can be undefined
         $("#commentarea").val(cells.comment);
     },
 
@@ -470,8 +470,53 @@ console.log("fillAccordion: cells["+measurementType+"]=",cells[measurementType])
         return mdy.substring(3,5) + "/" + mdy.substring(0,2) + "/" + mdy.substring(6,10)
     },
     //Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
-    DMYToDate: function(dmy) {
+    DMYToDate: function(dmy){
 	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
+    },
+    calculateBMIQ: function(days,bmi){
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob){}
+        // Great success! All the File APIs are supported.
+        else alert('The File APIs are not fully supported in this browser.');
+        
+        // fs.readFile('bmianthro.txt', function (err, data) {
+        //     if (err) throw err;
+        //     console.log(" ",data)
+        //     if(data.indexOf('bmi') < 0){
+        //         console.log(data)
+        //     }
+        // });
+        var currGender=Page.getCurrGender();
+        console.log("days=",days)
+        var bmidata
+        var reader = new FileReader();
+        
+        
+        d3.tsv("bmianthro.txt", 
+            //This function defines how "data" below will look like 
+            function(d) {
+                return {
+                    gender: +d.sex,
+                    age: +d.age,
+                    l: +d.l,
+                    m: +d.m,
+                    s: +d.s,
+                    loh: d.loh
+                };
+            },function(error, data) {
+                data.forEach(function(d, i) {
+                    if ((currGender===d.gender)&&(days===d.age)){
+                        console.log(d)
+                        bmidata={aver:d.m, stdev:d.s};
+                    }
+                //data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
+                });                        
+            })
+
+        console.log("bmidata",bmidata)
+        
+        //Math.round(cdf(bmi,hmo.m,hmo.s)*100);
+        return 666;
     },
     //Clear the graph from lines
     removePathsInSVG: function() {
@@ -815,7 +860,7 @@ $(function() {
         var comment = $("#commentarea").val();
         //Calculate the BMI
         var bmi=weight/Math.sqrt(length); //to do. any good?
-        var bmiq=666; //Math.round(cdf(bmi,hmo.m,hmo.s)*100);
+        var bmiq=Dialog.calculateBMIQ(days,bmi);
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
             var obj = {
@@ -978,6 +1023,9 @@ $('#dialog').on('dialogopen', function(event) {
 //Select the whole row when clicking, populate and open accordion
 $("#table").on("click", "tr", function(event) {
   event.preventDefault();
+  //Ignore clicking on the header
+  if (this.id==="tr0") return;
+  //Select the row in the table  
   if ($(this).hasClass('selected')) {
     $(this).removeClass('selected');
     $("#deletemeasure").attr("disabled","true");
