@@ -801,6 +801,9 @@ $('#dialog').on('dialogopen', function(event) {
 //Select the whole row when clicking, populate and open accordion
 $("#table").on("click", "tr", function(event) {
     event.preventDefault();
+    //Ignore clicking on the header
+    if (this.id==="tr0") return;
+    //Select the row in the table
     if ($(this).hasClass('selected')) {
         $(this).removeClass('selected');
         $("#deletemeasure").attr("disabled","true");
