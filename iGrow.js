@@ -203,7 +203,7 @@ var Page = function() {
         deleteWeight: function(id){
             var indCircle = id.split("_").pop();
             var index = Page.getCurrIndex();
-            var string = "Weight was "+babies[index].Data["Weight"][indCircle]+"Kg on "+babies[index].Data["Date"][indCircle]
+            var string = "Weight was "+babies[index].Data[indCircle]["Weight"]+"Kg on "+babies[index].Data[indCircle]["Date"]
             var conf = confirm("Do you really want to remove this point from the data?\nasdadsadThis action cannot be undone\n"+string);
             if (conf){
                 babies[index].Data.splice(indCircle, 1);
