@@ -53,23 +53,46 @@
                     </div>
                 </td>
                 <td>
-                    <div id="measureselect2">
-                        <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
+                    <div id="measureselect3">
+                        <!--<input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
                         <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>
                         <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
-                        <!--<span id="horizon-bands">
+                        <span id="horizon-bands">
                             <span id="horizon-bands-value">1</span> 
                             <button class="first">&#x2212;</button>
                             <button class="last">+</button>
                         </span>-->
                     </div>
-                    <div>                        
+                    
+                    <form>
+                        <label id="measureselect2">
+                            <!--<span>Name</span>-->
+                            <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
+                        </label>
+                        <label>
+                            <!--<span>Email</span>-->
+                            <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>                        
+                        </label>
+                        <label>
+                            <!--<span>Password</span>-->
+                            <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
+                        </label>
+                    </form>
+                    <form action="demo_form.asp">
+                        First name: <input type="text" name="FirstName" value="Mickey"><br>
+                        Last name: <input type="text" name="LastName" value="Mouse"><br>
+                    <input type="submit" value="Submit">
+                    </form>
+                    
+                    
+<!--                    <div>                        
                         <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
                             <option value="Weight">Weight</option>
                             <option value="Length">Length</option>
                             <option value="BMI">BMI</option>
                         </select>   
                     </div>
+                    -->
                 </td>
                 <td>
                     <div id="helpdiv">

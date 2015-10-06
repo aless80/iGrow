@@ -226,6 +226,44 @@ Graph = function(elemid, options) {
         });
     self.rect.call(this.zoom)
 
+
+/////////////////
+// var form = d3.select("body").append("form");
+// var shapeData = ["Weight", "Length", "BMI"], 
+//     j = 0; 
+// var labelEnter = form.selectAll("span")
+//     .data(shapeData)
+//     .enter().append("span");
+
+// labelEnter.append("input")
+//     .attr({
+//         type: "radio",
+//         class: "shape",
+//         id: "hey",
+//         name: "mode",
+//         value: function(d, i) {return i;}
+//     })
+//     .property("checked", function(d, i) {
+//         console.log(i,j)
+//         return (i===j); 
+//     });
+
+// labelEnter.append("label").text(function(d) {return d;});
+
+
+// d3.selectAll("#measureselect2 input[name=mode]").on("change", function() {
+//     //svg.call(chart.duration(0).mode(this.value));
+//     console.log(this.value)
+//     //readTSV(this.value)
+// });
+// d3.selectAll("#hey").on("change", function() {
+//     //svg.call(chart.duration(0).mode(this.value));
+//     console.log(this.value)
+// });
+
+///////////////////
+
+
     this.redraw()();
 };
 

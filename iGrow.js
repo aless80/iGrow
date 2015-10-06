@@ -270,9 +270,62 @@ var Page = function() {
             Dialog.enableSelection();
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
+        },
+        //Read the files and change graph
+        readTSV: function(measuretype){
+            var filename, ylabel, ymax;
+            switch (measuretype){
+            case ("Weight"||0):
+                filename="weianthro.txt"
+                ylabel="Weight [Kg]",
+                ymax=20;
+                break;
+            case ("Length"||1):
+                filename="lenanthro.txt",
+                ylabel="Length [cm]",
+                ymax=130;
+                break;
+            case ("BMI"||2):
+                filename="bmianthro.txt",
+                ylabel="BMI [Kg/m2]",
+                ymax=20;
+                break;
+            };
+            //Read the file
+            var measBoy = [],
+                measGirl = [];            
+            d3.tsv(filename, 
+                //This function defines how "data" below will look like 
+                function(d) {
+                return {
+                    gender: +d.sex,
+                    age: +d.age / 7,
+                    l: +d.l,
+                    m: +d.m,
+                    s: +d.s,
+                    loh: d.loh
+                };
+                },function(error, data) {
+                    data.forEach(function(d, i) {
+                    data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
+                    });
+                    //change the graph options
+                    graph.options={
+                        "xmin": 0, "xmax": 200,
+                        "ymin": 0, "ymax": ymax, 
+                        "pointsBoy": measBoy,
+                        "pointsGirl": measGirl,
+                        "xlabel": "Age [Weeks]",
+                        "ylabel": ylabel,
+                        "maxzoom": 2  
+                    };
+                    //Display the new dataset
+                    graph.useOptions(graph.options); 
+                    graph.changeMeasure();
+                    Page.updateDataAndGraph();        
+            })
         }
     }
-    
 }();//end Page
 
 //Container object for many methods related to the dialog
@@ -1084,111 +1137,11 @@ $(document).ready(function(){
     });
 });
 
-
-        
-$(document).on("change", "#measureselect2", function(e) {
-    var measBoy = [],
-        measGirl = [];
-    switch ($("#measureselect2").val()) {
-    case "Weight":   
-        d3.tsv("weianthro.txt", 
-        //This function defines how "data" below will look like 
-        function(d) {
-            return {
-                gender: +d.sex,
-                age: +d.age / 7,   //weeks!
-                l: +d.l,
-                m: +d.m,
-                s: +d.s,
-            };
-            },function(error, data) {    
-                data.forEach(function(d, i) {
-                data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
-                });
-                graph.options={
-                    "xmin": 0, "xmax": 200,
-                    "ymin": 0, "ymax": 20, 
-                    "pointsBoy": measBoy,
-                    "pointsGirl": measGirl,
-                    "xlabel": "Age [Weeks]",
-                    "ylabel": "Weight [Kg]",
-                    "maxzoom": 2  
-                };
-            graph.useOptions(graph.options); 
-            graph.changeMeasure();
-            Page.updateDataAndGraph();
-            }
-        );
-        break;
-        case "Length":
-            d3.tsv("lenanthro.txt", 
-            //This function defines how "data" below will look like 
-            function(d) {
-            return {
-                gender: +d.sex,
-                age: +d.age / 7,
-                l: +d.l,
-                m: +d.m,
-                s: +d.s,
-                loh: d.loh
-            };
-            },function(error, data) {
-                data.forEach(function(d, i) {
-                data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
-                });
-                graph.options={
-                    "xmin": 0, "xmax": 200,
-                    "ymin": 0, "ymax": 230, 
-                    "pointsBoy": measBoy,
-                    "pointsGirl": measGirl,
-                    "xlabel": "Age [Weeks]",
-                    "ylabel": "Length [cm]",
-                    "maxzoom": 2  
-                };
-            graph.useOptions(graph.options); 
-            graph.changeMeasure();
-            Page.updateDataAndGraph();        
-            })
-            break;
-        case "BMI":
-            d3.tsv("bmianthro.txt", 
-            //This function defines how "data" below will look like 
-            function(d) {
-            return {
-                gender: +d.sex,
-                age: +d.age / 7,
-                l: +d.l,
-                m: +d.m,
-                s: +d.s,
-                loh: d.loh
-            };
-            },function(error, data) {
-                data.forEach(function(d, i) {
-                data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
-                });
-                graph.options={
-                    "xmin": 0, "xmax": 200,
-                    "ymin": 0, "ymax": 20, 
-                    "pointsBoy": measBoy,
-                    "pointsGirl": measGirl,
-                    "xlabel": "Age [Weeks]",
-                    "ylabel": "BMI [Kg/m2]",
-                    "maxzoom": 2  
-                };
-                graph.useOptions(graph.options); 
-                graph.changeMeasure();
-                Page.updateDataAndGraph();        
-            })
-            break;
-    }    
-    
-    // //deselect any possible circle
-    // Page.deselectCircle(1);
-    // //Update the lines, circles, title
-    // var currentName = this.options[e.target.selectedIndex].text;
-    // Page.updateDataAndGraph();
-    
+$(document).on("change", "#measureselect2 input[name=mode]",function() {
+    //console.log(this.value)
+    Page.readTSV(this.value)
 });
+
 
 
 //Load the data from weianthro
@@ -1196,7 +1149,7 @@ $(document).ready(function(){
     Page.autocomplete();  
     //Start plot
     var measBoy = [],
-        measGirl = [];    
+        measGirl = [];
     //http://www.who.int/childgrowth/en/
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
