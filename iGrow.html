@@ -33,7 +33,7 @@
     <tr style="vertical-align:top;">
         <td style="padding-bottom:8px;">
         <div>
-            <table class="group" cellspacing="10" cellpadding="2">
+            <table>
             <tbody>             
                 <tr>
                 <td>
@@ -53,37 +53,66 @@
                     </div>
                 </td>
                 <td>
-                    <div id="measureselect3">
-                        <!--<input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
+                    <div>
+                        <table class="group" id="measureselect2" cellspacing="1" cellpadding="2">
+                            <tbody>             
+                                <tr>
+                                    <td>
+                                        <label >
+                                            <!--<span>Name</span>-->
+                                            <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked>
+                                            <label for="horizon-mode-mirror"> Weight</label>
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <!--<span>Email</span>-->
+                                            <input name="mode" type="radio" value="Length" id="horizon-mode-offset">
+                                            <label for="horizon-mode-offset"> Length</label>                        
+                                        </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <label>
+                                            <!--<span>Password</span>-->
+                                            <input name="mode" type="radio" value="BMI" id="horizon-mode-offset">
+                                            <font size="2"><label for="horizon-mode-offset"> BMI</label></font>
+                                        </label>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    
+                    
+                    
+                    
+<!--                    <div id="measureselect3">
+                        -<input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
                         <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>
                         <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
                         <span id="horizon-bands">
                             <span id="horizon-bands-value">1</span> 
                             <button class="first">&#x2212;</button>
                             <button class="last">+</button>
-                        </span>-->
+                        </span>
                     </div>
-                    
+                    -->
+                    <!--
                     <form>
                         <label id="measureselect2">
-                            <!--<span>Name</span>-->
                             <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
                         </label>
                         <label>
-                            <!--<span>Email</span>-->
                             <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>                        
                         </label>
                         <label>
-                            <!--<span>Password</span>-->
                             <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
                         </label>
                     </form>
-                    <form action="demo_form.asp">
-                        First name: <input type="text" name="FirstName" value="Mickey"><br>
-                        Last name: <input type="text" name="LastName" value="Mouse"><br>
-                    <input type="submit" value="Submit">
-                    </form>
-                    
+                    -->
                     
 <!--                    <div>                        
                         <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
@@ -92,13 +121,20 @@
                             <option value="BMI">BMI</option>
                         </select>   
                     </div>
-                    -->
-                </td>
+                    
+                </td> 
+                <form action="demo_form.asp">
+                        <input type="radio" id="horizon-mode-mirror" name="FirstName" value="Mickey"></input> <label for="horizon-mode-mirror"> Weight</label>
+                        <input type="radio" id="horizon-mode-offset" name="LastName" value="Mouse"></input> <label for="horizon-mode-offset"> Length</label>
+                    </form>
+                    --> 
+                
                 <td>
                     <div id="helpdiv">
                         <button id="helpbutton" title="">Help</button>   
                     </div>
                 </td>
+                                         
                 </tr>
             </tbody>
             </table>
@@ -352,7 +388,7 @@
     
     <!--do the quantiles
         Look what Loh is in the WHO files!
-        
+        put radio buttons on top of grahp, but how? see http://bl.ocks.org/mbostock/1483226
         good: "NaN": it's ok because I have toFixed..
         good: i can add line, then select table and delete line. that snot bad, but can i screw it up? No
     -->

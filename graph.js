@@ -68,16 +68,6 @@ Baby = function(name, birthdate, gender){
       this.Data = new Array();
 };
 
-//Data class
-// Datum = function(date, weeks, weight, length, comment){
-//     this.Date = date;
-//     this.Weeks = weeks;
-//     this.Weight = weight;
-//     this.Length = length;
-//     this.WeightQ = (typeof quantile === "undefined")?"N/A":quantile;
-//     this.Comment=(typeof comment === "undefined")?"":comment;
-// }
-
 Graph = function(elemid, options) {
     var self = this;
     this.selectCircle = null;
