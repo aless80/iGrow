@@ -53,7 +53,17 @@
                     </div>
                 </td>
                 <td>
-                    <div>
+                    <div id="measureselect2">
+                        <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
+                        <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>
+                        <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
+                        <!--<span id="horizon-bands">
+                            <span id="horizon-bands-value">1</span> 
+                            <button class="first">&#x2212;</button>
+                            <button class="last">+</button>
+                        </span>-->
+                    </div>
+                    <div>                        
                         <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
                             <option value="Weight">Weight</option>
                             <option value="Length">Length</option>

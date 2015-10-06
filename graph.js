@@ -709,17 +709,18 @@ Graph.prototype.update = function() {
                     if (months>1) string = string.concat("s");
                     }
                 }
-                //Show the weight
-                string = string.concat("<br/>Weight: "  + d[1] + " Kg");
+                //Show the measure
+                var measuretype=Page.getMeasureType();
+                string = string.concat("<br/>"+measuretype+": "  + d[1] + " Kg");
                 //Show the data from WHO
                 var hmo = self.points[Math.round(d[0] * 7)];
-                string = string.concat("<br/>Average weight from WHO: " + Math.round(hmo.m*100)/100);
+                string = string.concat("<br/>Average "+measuretype.toLowerCase()+" from WHO: " + Math.round(hmo.m*100)/100);
                 var quantile=""+Math.round(cdf(d[1],hmo.m,hmo.s)*100); //d[1] is weight
                 var ordinal = new String(2);
                 if ((quantile[1]=="1") && (quantile!="11")) ordinal="st";
                 else if ((quantile[1]=="2") && (quantile!="12")) ordinal="nd";
                 else ordinal="th";
-                string = string.concat("<br/>The weight is in the " + quantile + ordinal  + " quantile")
+                string = string.concat("<br/>The "+measuretype.toLowerCase()+" is in the " + quantile + ordinal  + " quantile")
     
     
                 return  string;
@@ -793,7 +794,7 @@ Graph.prototype.setCurrrentDataWeight = function(){
         dataWeight.Date=new Array();
         dataWeight.Measure=new Array();
     } else {
-        var measuretype=Dialog.getMeasureType();
+        var measuretype=Page.getMeasureType();
         dataWeight = babies[index].Data;
         dataWeight.Weeks=new Array();
         dataWeight.Date=new Array();

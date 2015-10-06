@@ -40,6 +40,10 @@ var Page = function() {
     
     return {
         //Functions about retrieving data related to the babies object from DOM or babies itself 
+        //Get the currently plotted measurement
+        getMeasureType: function(){
+            return $("#measureselect2").val();
+        },
         //Get the baby's name from the dropdown
         getCurrName: function(){
             var value = $("#dropdown").val();
@@ -242,13 +246,13 @@ var Page = function() {
             $("#dropdown").removeAttr("disabled");
             $("#editbabybutton").removeAttr("disabled");
             $("#dialogbutton").removeAttr("disabled");
-            $("#measureselect").removeAttr("disabled");            
+            $("#measureselect2").removeAttr("disabled");            
         },
         disablePageButtons: function(){
             $("#dropdown").attr("disabled","true");
             $("#editbabybutton").attr("disabled","true");
             $("#dialogbutton").attr("disabled","true");
-            $("#measureselect").attr("disabled","true");
+            $("#measureselect2").attr("disabled","true");
         },
         //Work with the cache 
         writeToCache: function(){
@@ -278,10 +282,6 @@ var Dialog = function(){
     
     //return public Methods in the Dialog "module"
     return {
-        //Private method
-    getMeasureType: function(){
-        return $("#measureselect").val();
-    },
     getMeasureTypeDialog: function(){
         return $("#measureselectdialog").val();
     },
@@ -358,7 +358,7 @@ var Dialog = function(){
         var cells=Dialog.getSelectedFromTable();
         $("#datep").val(cells.date);    
         //$("#weightspinnerdiv").val(); //to do I commented this out, ok?
-        var measurementType=$("#measureselect").val();
+        var measurementType=$("#measureselect2").val();
         switch (measurementType){
             case 'Weight':
                 //var suffix=" Kg";
@@ -696,7 +696,7 @@ $("#editbabybutton").click(function() {
 });
 
 //track measurement type
-// $(document).on("change", "#measureselect", function(e) {
+// $(document).on("change", "#measureselect2", function(e) {
 //     Dialog.changeMeasurementType();
 // })
 
@@ -749,30 +749,14 @@ $(function() {
     });
     $("#birthdatep").datepicker({
         maxDate: 0, numberOfMonths: 2, dateFormat: "dd/mm/yy"
-    });
-    // jQuery.widget("ui.pcntspinner", jQuery.ui.spinner, {
-    //     _format: function( value ) { 
-    //         var suffix = this.options.suffix;
-    //         return value +" "+ suffix; 
-    //     },    
-    //     _parse: function(value) { return parseFloat(value); }
-    // });
-    // $("#weightSpinner").pcntspinner({ 
+    }); 
     $("#weightSpinner").spinner({
         min: 1,
         suffix:'',
         start: 4.0,
         max: 100,
         step: .1
-        //numberFormat: "n"
     });
-// $("#lengthSpinner").pcntspinner({ 
-//     min: 1,
-//     suffix:'??',
-//     //start: 4.0,
-//     max: 100,
-//     step: .1
-// });
 });
 
 //Custom alert
@@ -1102,10 +1086,10 @@ $(document).ready(function(){
 
 
         
-$(document).on("change", "#measureselect", function(e) {
+$(document).on("change", "#measureselect2", function(e) {
     var measBoy = [],
         measGirl = [];
-    switch ($("#measureselect").val()) {
+    switch ($("#measureselect2").val()) {
     case "Weight":   
         d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
