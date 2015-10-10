@@ -271,7 +271,7 @@ var Page = function() {
             //Set date picker to today and weight spinner to 4.0 Kg
             $("#datep").val(todayDMY);
         },
-        //Read the files and change graph
+        //Read the txt files
         readTSV: function(measuretype){
             var filename, ylabel, ymax;
             switch (measuretype){
@@ -319,11 +319,18 @@ var Page = function() {
                         "ylabel": ylabel,
                         "maxzoom": 2  
                     };
-                    //Display the new dataset
-                    graph.useOptions(graph.options); 
-                    graph.changeMeasure();
-                    Page.updateDataAndGraph();        
             })
+        },
+        //Read the files and change graph
+        changeGraph: function(){
+            //Display the new dataset
+            graph.useOptions(graph.options); 
+            graph.changeMeasure();
+            Page.updateDataAndGraph();        
+
+        },
+        getCurrMeasure: function(){
+            return $("#measureselect2 input[name=mode]").val();
         }
     }
 }();//end Page
@@ -346,12 +353,12 @@ var Dialog = function(){
             case 'Weight':
                 var suffixlabel=' [Kg]';
                 //to do: grab it from selection
-                var value=(row.weight)?(row.weight):(4);
+                var value=(row["weight"])?(row["weight"]):(4);
                 var step=0.1;
                 break;
             case 'Length':            
                 var suffixlabel=' [cm]';
-                var value=(row.length)?(row.length):(60);
+                var value=(row["length"])?(row["length"]):(60);
                 var step=1;
                 break;
             // case 'BMI':            
@@ -483,7 +490,6 @@ var Dialog = function(){
     },
     //Append a line to the table                        //to do  put as private method
     appendToTable: function(obj){
-//console.log("appendToTable obj=",obj);
         var tbdy = document.getElementById('tablebody');
         //Create a tr line element
         var tr = document.createElement('tr');
@@ -526,63 +532,78 @@ var Dialog = function(){
     DMYToDate: function(dmy){
 	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
     },
-    calculateQ: function(days,bmi,measuretype){
+    
+    
+    
+    
+    
+    calculateQ: function(days,measure,measuretype){
+        if (isNaN(measure)) return NaN;
         // Check for the various File API support.
-        if (window.File && window.FileReader && window.FileList && window.Blob){}
-        // Great success! All the File APIs are supported.
-        else alert('The File APIs are not fully supported in this browser.');
-        
-        // fs.readFile('bmianthro.txt', function (err, data) {
-        //     if (err) throw err;
-        //     console.log(" ",data)
-        //     if(data.indexOf('bmi') < 0){
-        //         console.log(data)
-        //     }
-        // });
-        var currGender=Page.getCurrGender();
-        console.log("days=",days)
-        var bmidata
-        var reader = new FileReader();
-        
-        var file;
+        if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
+            } else alert('The File APIs are not fully supported in this browser.');
+        var str=";"+Page.getCurrGender()+","+days+",";
+        //var currGender=Page.getCurrGender();
+        console.log("str=",str)        
+        var url;
         switch (measuretype){
             case "weight":
-                file ="weianthro.txt"; //to do: watch out loh in weight
+                url ="weianthro.txt"; //to do: watch out loh in weight
                 break;
             case "length":
-                file ="lenanthro.txt";
+                url ="lenanthro.txt";
                 break;
             case "bmi":
-                file ="weianthro.txt";
+                url ="bmianthro.txt";
                 break;
-        }
-        var file=measuretype
-        d3.tsv("bmianthro.txt", 
-            //This function defines how "data" below will look like 
-            function(d) {
-                return {
-                    gender: +d.sex,
-                    age: +d.age,
-                    l: +d.l,
-                    m: +d.m,
-                    s: +d.s,
-                    loh: d.loh
-                };
-            },function(error, data) {
-                data.forEach(function(d, i) {
-                    if ((currGender===d.gender)&&(days===d.age)){
-                        console.log(d)
-                        bmidata={aver:d.m, stdev:d.s};
-                    }
-                //data[i].gender === 1 ? measBoy.push(d) : measGirl.push(d);
-                });                        
-            })
-
-        console.log("bmidata",bmidata)
+        };
+        console.log("days,measure,measuretype=",days,measure,measuretype);
+        console.log("line=Dialog.loadDoc(\""+url+"\",Dialog.findValues)");
         
-        //Math.round(cdf(bmi,hmo.m,hmo.s)*100);
-        return 666;
+        var myCallBackWithVar = function () {
+            Dialog.findValues(xhttp,str);
+        };
+        Dialog.loadDoc(url, myCallBackWithVar);
+
+        //var line=Dialog.loadDoc(url,Dialog.findValues); //to do: can I say this.loadDoc?
+        //console.log("line=",line);
+        var array = line.split(",").map(Number);
+        var meam=array[3];
+        var std=array[4];
+        var quantile=Math.round(cdf(measure,meam,std)*100);
+        return quantile;
     },
+    
+    loadDoc: function(url, cfunc) {
+        var xhttp=new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+            cfunc(xhttp);
+            }
+        }
+        xhttp.overrideMimeType('text/plain');
+        xhttp.open("GET", url, true);
+        xhttp.send();
+    },
+    
+    //Find string with the desired data in txt file. str should begin with ";" eg ";1,3,"
+    findValues: function(xhttp,str) {
+        var data=xhttp.responseText;
+        data=data.replace(/\n/g, ';').replace(/\t/g, ',');
+        console.log("data=",data);
+        // console.log("this.response:");
+        // console.log(this.response);
+        var start=data.indexOf(str)+1;
+        var end=data.indexOf(";",start);
+        var line=data.substring(start,end);    
+        return line;
+    },
+
+    //Dialog.calculateQ(39,0.514,"bmi")
+    
+    
+
+
     //Clear the graph from lines
     removePathsInSVG: function() {
      //d3.select("svg").selectAll("*").remove(); //all children
@@ -853,9 +874,7 @@ $(function() {
             return false;
         }
         //Get the data inserted by the user 
-//var index=Page.getCurrIndex();
         var measureType=Dialog.getMeasureTypeDialog();
-        //var measure=$("#weightSpinner").pcntspinner("value");
         var measure=$("#weightSpinner").spinner("value");
         //Calculate the days
         var dateDMY = $("#datep").val();
@@ -863,32 +882,12 @@ $(function() {
         var date = new Date(Dialog.dateToYMD(dateDMY));
         var days = Math.abs(date-birthdateYMD) / 3600 / 24000;
         
-        //Get the value from the graph
-        var hmo = graph.points[days];
-        //Get data from the table        
-        var row=Dialog.getSelectedFromTable();
-        //Get the measurements and quantiles
-        switch (measureType){
-            case "Weight":
-                var weight=measure;
-                var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
-                var length=(row.length)?(row.length):(NaN);
-                //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
-                var lengthq=Dialog.calculateQ(days,length,"length");
-                break;
-            case "Length":
-                var weight=(row.length)?(row.weight):(NaN);
-                //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
-                var weightq=Dialog.calculateQ(days,weight,"weight");
-                var length=measure;
-                var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
-                break;
-        }
+        
         //Decide what to with the measurement: check if valid, append or merge it as a line to table
         //Check if point already exists
         var forceEdit=0;
         var table=Dialog.tableToJSON();
-        for (var ind=0,len=table.length; ind<len;ind++) {
+        for (var ind=0,len=table.length; ind<len; ind++) {
             if (table[ind]["Date"]===dateDMY){
                 //Date exists in table! if current measure is identical return.    
                 if (table[ind][measureType]===measure){
@@ -907,11 +906,34 @@ $(function() {
                 }
             }
         }
+        
+        
+        //Get data from the table        
+        var row=Dialog.getSelectedFromTable();
+        //Get the currently plotted measure
+        var hmo = graph.points[days];
+        switch (measureType){
+            case "Weight":
+                var weight=measure;
+                var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
+                var length=(row.length)?(row.length):(NaN);
+                //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
+                var lengthq=Dialog.calculateQ(days,length,"length");
+                break;
+            case "Length":
+                var weight=(row.length)?(row.weight):(NaN);
+                //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
+                var weightq=Dialog.calculateQ(days,weight,"weight");
+                var length=measure;
+                var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
+                break;
+        };
+        
         //Get the comment from the accordion
         var comment = $("#commentarea").val();
-        //Calculate the BMI
-        var bmi=weight/Math.sqrt(length); //to do. any good?
-        var bmiq=Dialog.calculateQ(days,bmi,"bmi");
+        // //Calculate the BMI //to do: this has to be done later, when i decide whether i merge length and weight or not. here the nor current measure is NaN
+        // var bmi=weight/Math.sqrt(length); //to do. any good?
+        // var bmiq=Dialog.calculateQ(days,bmi,"bmi");
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
             var obj = {
@@ -921,42 +943,51 @@ $(function() {
                 "WeightQ": weightq,
                 "Length" : length.toFixed(1),
                 "LengthQ": lengthq,
-                "BMI" : bmi.toFixed(1),
-                "BMIQ": bmiq,
+                "BMI" : NaN,//bmi.toFixed(1),
+                "BMIQ": NaN,//bmiq,
                 "Comment": comment
             };
             Dialog.appendToTable(obj);
             $("#addmeasure").removeAttr("disabled");
         } else if ((textButton==="Edit")||(forceEdit===1)){
             //Edit data in tables
-            if (forceEdit===1){
+            if ((textButton!=="Edit")&&(forceEdit===1)){
                 //simulate click on right line //to do: think if I want to edit the first or last occurrence
                 $("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
                 //Append comment to old one 
                 var newcomment=$("#tr1 > td:nth-child(9)").text();
                 if (newcomment && (comment!=newcomment)) comment=newcomment+' - '+comment;
-            }
+            };
             var sel=Dialog.getSelectedFromTable();
             //Edit the line   to do: use appendLine to table?
             $("#"+sel.line+" :nth-child(1)").text(dateDMY);
             $("#"+sel.line+" :nth-child(2)").text(days);
 
-            switch (Dialog.getMeasureTypeDialog()){
+            switch (measureType){
                 case "Weight":
                     $("#"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
                     $("#"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
+                    length=Number($("#"+sel.line + " :nth-child(5)").text());
                 break;
                 case "Length":
                     $("table #"+sel.line + " :nth-child(5)").text(length);
                     $("table #"+sel.line + " :nth-child(6)").text(lengthq);
+                    weight=Number($("#"+sel.line + " :nth-child(3)").text());
                 break;
-            }
+            };
+            //Calculate the BMI
+            var bmi=weight/Math.sqrt(length); //to do. any good?
+            var bmiq=666
+            //to do NOT WORKING YET 
+   console.log("Dialog.calculateQ("+days+","+bmi+",\"bmi\")")
+            var bmiq=Dialog.calculateQ(days,bmi,"bmi");
+            
             //BMI
             $("table #"+sel.line + " :nth-child(7)").text(bmi.toFixed(1));
             $("table #"+sel.line + " :nth-child(8)").text(bmiq.toFixed(1));
             //Comment
             $("table #"+sel.line + " :nth-child(9)").text(comment);
-        }
+        };
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
         return true;       
@@ -1138,9 +1169,76 @@ $(document).ready(function(){
 });
 
 $(document).on("change", "#measureselect2 input[name=mode]",function() {
-    //console.log(this.value)
-    Page.readTSV(this.value)
+    Page.readTSV(this.value);
+    Page.changeGraph();
 });
+
+
+// function readSingleFile(evt) {
+    // //Retrieve the first (and only!) File from the FileList object
+    // var f = evt.target.files[0]; 
+
+    // if (f) {
+    //   var r = new FileReader();
+    //   r.onload = function(e) { 
+	//       var contents = e.target.result;
+    //     alert( "Got the file.n" 
+    //           +"name: " + f.name + "n"
+    //           +"type: " + f.type + "n"
+    //           +"size: " + f.size + " bytesn"
+    //           + "starts with: " + contents.substr(1, contents.indexOf("n"))
+    //     );  
+    //   }
+    //   r.readAsText(f);
+    // } else { 
+    //   alert("Failed to load file");
+    // }
+  // }
+
+  // document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
+
+// //works but i need whole path
+// function readTextFile(file)
+// {
+//     var rawFile = new XMLHttpRequest();
+//     rawFile.open("GET", file, false);
+//     rawFile.onreadystatechange = function ()
+//     {
+//         if(rawFile.readyState === 4)
+//         {
+//             if(rawFile.status === 200 || rawFile.status == 0)
+//             {
+//                 var allText = rawFile.responseText;
+//                 alert(allText);
+//             }
+//         }
+//     }
+//     rawFile.send(null);
+// }
+// readTextFile("file:////home/amarin/VSCode/iGrow/bmianthro.txt");
+
+
+
+// //Not working
+// $.get( "bmianthro.txt", function( data ) {
+//   alert( "Data Loaded: " + data );
+// });
+
+// var xhr;
+// if (window.XMLHttpRequest) {
+//     xhr = new XMLHttpRequest();
+// } else if (window.ActiveXObject) {
+//     xhr = new ActiveXObject("Microsoft.XMLHTTP");
+// }
+
+// xhr.onreadystatechange = function(){
+//     alert(xhr.readyState)
+//     alert(xhr.responseText);
+//     };
+// xhr.open("GET","bmianthro.txt"); //assuming kgr.bss is plaintext
+// xhr.send();
+
+
 
 
 
