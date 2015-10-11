@@ -450,22 +450,19 @@ var Dialog = function(){
     },
     //convert the table in the dialog to JSON
     tableToJSON: function() {
-        var data = $('#table tr:has(td)').map( //to do: check, i added "var"
+        var data = $('#table tr:has(td)').map(
             function(ind, val) {
                 var td = $('td', this);
                 var index = Page.getCurrIndex();
                 return {
-                    ///Name:         babies[index].Name,
-                    //BirthDate: babies[index].BirthDate,
-                    //Gender: babies[index].Gender,
                     Date:       td.eq(0).text(), //.eq: Reduce the set of matched elements to the one at the specified index
                     Weeks:      Number(td.eq(1).text()/7),
-                    Weight:     Number(td.eq(2).text()),
-                    WeightQ:    Number(td.eq(3).text()),
-                    Length:     Number(td.eq(4).text()),
-                    LengthQ:    Number(td.eq(5).text()),
-                    BMI:        Number(td.eq(6).text()),
-                    BMIQ:       Number(td.eq(7).text()),
+                    Weight:     function (){var text=td.eq(2).text(); return (text==="")?"":Number(text)}(),
+                    WeightQ:    function (){var text=td.eq(3).text(); return (text==="")?"":Number(text)}(),//Number(td.eq(3).text()),
+                    Length:     function (){var text=td.eq(4).text(); return (text==="")?"":Number(text)}(),//Number(td.eq(4).text()),
+                    LengthQ:    function (){var text=td.eq(5).text(); return (text==="")?"":Number(text)}(),//Number(td.eq(5).text()),
+                    BMI:        function (){var text=td.eq(6).text(); return (text==="")?"":Number(text)}(),//Number(td.eq(6).text()),
+                    BMIQ:       function (){var text=td.eq(7).text(); return (text==="")?"":Number(text)}(),//Number(td.eq(7).text()),
                     Comment:    td.eq(8).text()
                 }
             }).get();
@@ -502,14 +499,18 @@ var Dialog = function(){
                 if (fields.indexOf(key)>-1){ //write only the selected measure to the table
 //console.log(" key,obj[key]=",key,obj[key]);
                     var td = document.createElement('td');
-                    if (key==="Weeks")
-                        var t = document.createTextNode(Math.round(obj[key]*7)); //days
-                    else if ((key==="Weight") ||(key==="BMI"))
-                        var t = document.createTextNode(Number(obj[key]).toFixed(1));
-                    else if (key==="Length")
-                        var t = document.createTextNode(Number(obj[key]));
-                    else 
-                        var t = document.createTextNode(obj[key]);
+                    if (obj[key] !== null){
+                        if (key==="Weeks")
+                            var t = document.createTextNode(Math.round(obj[key]*7)); //days
+                        // else if ((key==="Weight") || (key==="BMI"))
+                        //     var t = document.createTextNode(Number(obj[key]).toFixed(1));
+                        else if ((key==="Weight") || (key==="BMI") || (key==="Length")){
+                            var text=(obj[key]==="")?"":Number(obj[key]);
+                            var t = document.createTextNode(text);
+                            }
+                        else 
+                            var t = document.createTextNode(obj[key]);
+                    }
                         td.appendChild(t);
                         tr.appendChild(td);
                 }
@@ -533,18 +534,14 @@ var Dialog = function(){
 	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
     },
     
-    
-    
-    
+
     
     calculateQ: function(days,measure,measuretype){
         if (isNaN(measure)) return NaN;
         // Check for the various File API support.
         if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
             } else alert('The File APIs are not fully supported in this browser.');
-        var str=";"+Page.getCurrGender()+","+days+",";
-        //var currGender=Page.getCurrGender();
-        console.log("str=",str)        
+        this.str=";"+Page.getCurrGender()+","+days+",";        
         var url;
         switch (measuretype){
             case "weight":
@@ -557,20 +554,24 @@ var Dialog = function(){
                 url ="bmianthro.txt";
                 break;
         };
-        console.log("days,measure,measuretype=",days,measure,measuretype);
-        console.log("line=Dialog.loadDoc(\""+url+"\",Dialog.findValues)");
+        console.log("calculateQ: days,measure,measuretype=",days,measure,measuretype);
         
-        var myCallBackWithVar = function () {
-            Dialog.findValues(xhttp,str);
-        };
-        Dialog.loadDoc(url, myCallBackWithVar);
-
-        //var line=Dialog.loadDoc(url,Dialog.findValues); //to do: can I say this.loadDoc?
-        //console.log("line=",line);
-        var array = line.split(",").map(Number);
-        var meam=array[3];
+        this.line="hey"; //to do: not perfect solution
+        // var cb = function (data){
+        //     Dialog.line = Dialog.getLine(data);
+        // };
+        // Dialog.loadDoc(url, cb);
+        Dialog.loadDoc(url, Dialog.getLine);
+        console.log("calculateQ: this.line=",this.line);
+        var c=0
+        while ((this.line==="hey")&&c<1000) {
+            
+        }
+        if (this.line==="hey") console.log("  this.line has not been set in the callback!!")
+        var array = this.line.split(",").map(Number);
+        var mean=array[3];
         var std=array[4];
-        var quantile=Math.round(cdf(measure,meam,std)*100);
+        var quantile=Math.round(cdf(measure,mean,std)*100);
         return quantile;
     },
     
@@ -578,7 +579,7 @@ var Dialog = function(){
         var xhttp=new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-            cfunc(xhttp);
+            cfunc(xhttp.responseText);
             }
         }
         xhttp.overrideMimeType('text/plain');
@@ -587,22 +588,17 @@ var Dialog = function(){
     },
     
     //Find string with the desired data in txt file. str should begin with ";" eg ";1,3,"
-    findValues: function(xhttp,str) {
-        var data=xhttp.responseText;
-        data=data.replace(/\n/g, ';').replace(/\t/g, ',');
-        console.log("data=",data);
-        // console.log("this.response:");
-        // console.log(this.response);
-        var start=data.indexOf(str)+1;
-        var end=data.indexOf(";",start);
-        var line=data.substring(start,end);    
-        return line;
+    getLine: function(resp) {
+        if (resp){
+            resp=resp.replace(/\n/g, ';').replace(/\t/g, ',');
+            var start=resp.indexOf(Dialog.str)+1;
+            if (start==-1) console.log("getLine: str not found. Dialog.str=",Dialog.str);
+            var end=resp.indexOf(";",start);
+            Dialog.line=resp.substring(start,end);
+            console.log("getLine: Dialog.line=",Dialog.line);
+            return Dialog.line;
+        }
     },
-
-    //Dialog.calculateQ(39,0.514,"bmi")
-    
-    
-
 
     //Clear the graph from lines
     removePathsInSVG: function() {
@@ -882,40 +878,41 @@ $(function() {
         var date = new Date(Dialog.dateToYMD(dateDMY));
         var days = Math.abs(date-birthdateYMD) / 3600 / 24000;
         
-        
-        //Decide what to with the measurement: check if valid, append or merge it as a line to table
-        //Check if point already exists
+        //to do: skip all this if I am in edit mode! forceEdit
         var forceEdit=0;
-        var table=Dialog.tableToJSON();
-        for (var ind=0,len=table.length; ind<len; ind++) {
-            if (table[ind]["Date"]===dateDMY){
-                //Date exists in table! if current measure is identical return.    
-                if (table[ind][measureType]===measure){
-                    Page.customAlert("This point already exists",1800);
-                    return;  
-                } else {
-                //Edit line if other measures exist edit line in table, otherwise add normally
-                    var othermeasurementtypes=['Weight','Length'].filter(function(val) {return val!='measureType'});
-                    for (var i=0; i<othermeasurementtypes.length; i++) {
-                        if (isNaN(table[ind][othermeasurementtypes[i]])){  //to do this works when empty measurements in .Data are NaN, not "". ok?
-                            //edit the right line ind
-                            forceEdit=1;
-                            var forceEditLine=ind+1;
-                        }
-                    }                    
+        if (textButton==="Inse") {
+            //Decide what to with the measurement: check if valid, append or merge it as a line to table
+            //Check if point already exists
+            var table=Dialog.tableToJSON();
+            for (var ind=0,len=table.length; ind<len; ind++) {
+                if (table[ind]["Date"]===dateDMY){
+                    //Date exists in table! if current measure is identical return.    
+                    if (table[ind][measureType]===measure){
+                        Page.customAlert("This point already exists",1800);
+                        return;  
+                    } else {
+                    //Edit line if other measures exist edit line in table, otherwise add normally
+                        var othermeasurementtypes=['Weight','Length'].filter(function(val) {return val!='measureType'});
+                        for (var i=0; i<othermeasurementtypes.length; i++) {
+                            if (table[ind][othermeasurementtypes[i]]===""){  //to do: NB this works when empty measurements in .Data are "", not NaN
+                                //edit the right line ind
+                                forceEdit=1;
+                                var forceEditLine=ind+1;
+                            }
+                        }                    
+                    }
                 }
             }
         }
         
-        
         //Get data from the table        
         var row=Dialog.getSelectedFromTable();
         //Get the currently plotted measure
-        var hmo = graph.points[days];
+        //var hmo = graph.points[days]; //THIS WAS WRONG! IF PLOT HAS DIFFERENT MEASURE I HAVE TO TAKE IT FROM FILE!
         switch (measureType){
             case "Weight":
                 var weight=measure;
-                var weightq=Math.round(cdf(weight,hmo.m,hmo.s)*100);
+                var weightq=Dialog.calculateQ(days,weight,"weight"); //Math.round(cdf(weight,hmo.m,hmo.s)*100);
                 var length=(row.length)?(row.length):(NaN);
                 //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
                 var lengthq=Dialog.calculateQ(days,length,"length");
@@ -925,26 +922,25 @@ $(function() {
                 //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
                 var weightq=Dialog.calculateQ(days,weight,"weight");
                 var length=measure;
-                var lengthq=Math.round(cdf(length,hmo.m,hmo.s)*100);
+                var lengthq=Dialog.calculateQ(days,length,"length");
+                //Math.round(cdf(length,hmo.m,hmo.s)*100);
                 break;
         };
         
         //Get the comment from the accordion
         var comment = $("#commentarea").val();
         // //Calculate the BMI //to do: this has to be done later, when i decide whether i merge length and weight or not. here the nor current measure is NaN
-        // var bmi=weight/Math.sqrt(length); //to do. any good?
-        // var bmiq=Dialog.calculateQ(days,bmi,"bmi");
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
             var obj = {
                 "Date" : dateDMY,
                 "Weeks" : days / 7,
-                "Weight" : weight.toFixed(1),
-                "WeightQ": weightq,
-                "Length" : length.toFixed(1),
-                "LengthQ": lengthq,
-                "BMI" : NaN,//bmi.toFixed(1),
-                "BMIQ": NaN,//bmiq,
+                "Weight" : isNaN(weight)?(""):weight.toFixed(1),
+                "WeightQ": isNaN(weight)?(""):weightq,
+                "Length" : isNaN(length)?(""):length.toFixed(1),
+                "LengthQ": isNaN(lengthq)?(""):lengthq,
+                "BMI" : "",//bmi.toFixed(1),
+                "BMIQ": "",//bmiq,
                 "Comment": comment
             };
             Dialog.appendToTable(obj);
@@ -965,26 +961,30 @@ $(function() {
 
             switch (measureType){
                 case "Weight":
-                    $("#"+sel.line + " :nth-child(3)").text(weight.toFixed(1));
-                    $("#"+sel.line + " :nth-child(4)").text(weightq.toFixed(1));
+                    var text=isNaN(weight)?(""):weight.toFixed(1);
+                    $("#"+sel.line + " :nth-child(3)").text(text);
+                    text=isNaN(weightq)?(""):weightq.toFixed(1);
+                    $("#"+sel.line + " :nth-child(4)").text(text);
                     length=Number($("#"+sel.line + " :nth-child(5)").text());
                 break;
                 case "Length":
-                    $("table #"+sel.line + " :nth-child(5)").text(length);
-                    $("table #"+sel.line + " :nth-child(6)").text(lengthq);
+                    var text=isNaN(length)?(""):length.toFixed(1);
+                    $("table #"+sel.line + " :nth-child(5)").text(text);
+                    text=isNaN(lengthq)?(""):lengthq.toFixed(1);
+                    $("table #"+sel.line + " :nth-child(6)").text(text);
                     weight=Number($("#"+sel.line + " :nth-child(3)").text());
                 break;
             };
             //Calculate the BMI
             var bmi=weight/Math.sqrt(length); //to do. any good?
-            var bmiq=666
-            //to do NOT WORKING YET 
-   console.log("Dialog.calculateQ("+days+","+bmi+",\"bmi\")")
+//   console.log("Dialog.calculateQ("+days+","+bmi+",\"bmi\")")
             var bmiq=Dialog.calculateQ(days,bmi,"bmi");
-            
+   console.log("bmiq",bmiq)
             //BMI
-            $("table #"+sel.line + " :nth-child(7)").text(bmi.toFixed(1));
-            $("table #"+sel.line + " :nth-child(8)").text(bmiq.toFixed(1));
+            var text=isNaN(bmi)?(""):bmi.toFixed(1);
+            $("table #"+sel.line + " :nth-child(7)").text(text);
+            text=isNaN(bmiq)?(""):bmiq.toFixed(1);
+            $("table #"+sel.line + " :nth-child(8)").text(text);
             //Comment
             $("table #"+sel.line + " :nth-child(9)").text(comment);
         };
