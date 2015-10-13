@@ -738,7 +738,7 @@ Graph.prototype.update = function() {
                     }
                 }
                 //Show the measure
-                var measuretype=Page.getMeasureType();
+                var measuretype=Page.getCurrMeasure();
                 string = string.concat("<br/>"+measuretype+": "  + d[1] + " Kg");
                 //Show the data from WHO
                 var hmo = self.points[Math.round(d[0] * 7)];
@@ -822,7 +822,7 @@ Graph.prototype.setCurrrentDataWeight = function(){
         dataWeight.Date=new Array();
         dataWeight.Measure=new Array();
     } else {
-        var measuretype=Page.getMeasureType();
+        var measuretype=Page.getCurrMeasure();
         dataWeight = babies[index].Data;
         dataWeight.Weeks=new Array();
         dataWeight.Date=new Array();

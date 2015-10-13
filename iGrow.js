@@ -40,10 +40,10 @@ var Page = function() {
     
     return {
         //Functions about retrieving data related to the babies object from DOM or babies itself 
-        //Get the currently plotted measurement
-        getMeasureType: function(){
-            return $("#measureselect2").val();
-        },
+        // //Get the currently plotted measurement
+        // getMeasureType: function(){
+        //     return $("#measureselect2").val();
+        // },
         //Get the baby's name from the dropdown
         getCurrName: function(){
             var value = $("#dropdown").val();
@@ -330,7 +330,7 @@ var Page = function() {
 
         },
         getCurrMeasure: function(){
-            return $("#measureselect2 input[name=mode]").val();
+            return $("#measureselect2 input[name='mode']:checked").val();
         }
     }
 }();//end Page
@@ -518,9 +518,11 @@ var Dialog = function(){
         }
         //Append line
         var ind=$('#tablebody tr:last-child')[0].id.split("tr")[1]
-        tr.setAttribute('id','tr'+(Number(ind)+1));
+        var ind=(Number(ind)+1);
+        tr.setAttribute('id','tr'+ind);
         tr.setAttribute('align','center');
         tbdy.appendChild(tr);
+        return ind;
     },    
     //Convert date string from DMY (dd/mm/yyyy) to YMD string (yyyy/mm/dd)
     dateToYMD: function(dmy) {
@@ -537,7 +539,6 @@ var Dialog = function(){
 
     
     calculateQ: function(days,measure,measuretype){
-        if (isNaN(measure)) return NaN;
         // Check for the various File API support.
         if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
             } else alert('The File APIs are not fully supported in this browser.');
@@ -554,32 +555,40 @@ var Dialog = function(){
                 url ="bmianthro.txt";
                 break;
         };
+        if (isNaN(measure)) $("#"+url.split(".")[0]).text(NaN);
         console.log("calculateQ: days,measure,measuretype=",days,measure,measuretype);
         
-        this.line="hey"; //to do: not perfect solution
+        // this.line="hey"; //to do: not perfect solution
         // var cb = function (data){
         //     Dialog.line = Dialog.getLine(data);
         // };
         // Dialog.loadDoc(url, cb);
+        var measure=$("#"+url.split(".")[0]).text(measure);
         Dialog.loadDoc(url, Dialog.getLine);
-        console.log("calculateQ: this.line=",this.line);
-        var c=0
-        while ((this.line==="hey")&&c<1000) {
+        // console.log("calculateQ: this.line=",this.line);
+        // var c=0
+        // while ((this.line==="hey")&&c<10000) {
+        //     c+=1;
+        //     setTimeout(function(){console.log(c,this.line); return false},1000)
             
-        }
-        if (this.line==="hey") console.log("  this.line has not been set in the callback!!")
-        var array = this.line.split(",").map(Number);
-        var mean=array[3];
-        var std=array[4];
-        var quantile=Math.round(cdf(measure,mean,std)*100);
-        return quantile;
+        // }
+        // console.log(c)
+        // if (this.line==="hey") console.log("  this.line has not been set in the callback!!")
+        // var array = this.line.split(",").map(Number);
+        // console.log("calculateQ: $(#+url.split(.)[0]).text()",$("#"+url.split(".")[0]).text())
+    //     var array = $("#"+url.split(".")[0]).text().split(",").map(Number);
+   // console.log("calculateQ: array",array)
+    //     var mean=array[3];
+    //     var std=array[4];
+    //     var quantile=Math.round(cdf(measure,mean,std)*100);
+    //     return quantile; //does not work
     },
     
     loadDoc: function(url, cfunc) {
         var xhttp=new XMLHttpRequest();
         xhttp.onreadystatechange = function() {
             if (xhttp.readyState == 4 && xhttp.status == 200) {
-            cfunc(xhttp.responseText);
+            cfunc(xhttp.responseText,url);
             }
         }
         xhttp.overrideMimeType('text/plain');
@@ -588,15 +597,30 @@ var Dialog = function(){
     },
     
     //Find string with the desired data in txt file. str should begin with ";" eg ";1,3,"
-    getLine: function(resp) {
+    getLine: function(resp,url) {
         if (resp){
+            console.log("getLine: url=",url);
             resp=resp.replace(/\n/g, ';').replace(/\t/g, ',');
             var start=resp.indexOf(Dialog.str)+1;
             if (start==-1) console.log("getLine: str not found. Dialog.str=",Dialog.str);
             var end=resp.indexOf(";",start);
-            Dialog.line=resp.substring(start,end);
-            console.log("getLine: Dialog.line=",Dialog.line);
-            return Dialog.line;
+            // Dialog.line=resp.substring(start,end);
+            // console.log("getLine: Dialog.line=",Dialog.line);
+            // Dialog.line.split(",").map(Number);
+            var array = resp.substring(start,end).split(",").map(Number);
+            var measure=$("#"+url.split(".")[0]).text();
+            var mean=array[3];
+            var std=array[4];
+            var quantile=Math.round(cdf(measure,mean,std)*100);    
+            $("#"+url.split(".")[0]).text(quantile);
+            
+    //                    console.log("calculateQ: $(#+url.split(.)[0]).text()",$("#"+url.split(".")[0]).text())
+            // var array = $("#"+url.split(".")[0]).text().split(",").map(Number);
+        // console.log("calculateQ: array",array)
+                // return quantile;
+
+            
+            return Dialog.line; //does not work
         }
     },
 
@@ -912,38 +936,57 @@ $(function() {
         switch (measureType){
             case "Weight":
                 var weight=measure;
-                var weightq=Dialog.calculateQ(days,weight,"weight"); //Math.round(cdf(weight,hmo.m,hmo.s)*100);
+  //              var weightq=Dialog.calculateQ(days,weight,"weight"); //Math.round(cdf(weight,hmo.m,hmo.s)*100);
+  //              var weightq=Number($("#weianthro").text());
                 var length=(row.length)?(row.length):(NaN);
                 //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
-                var lengthq=Dialog.calculateQ(days,length,"length");
+   //             var lengthq=Dialog.calculateQ(days,length,"length");
+  //              var lengthq=Number($("#lenanthro").text());
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
                 //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
-                var weightq=Dialog.calculateQ(days,weight,"weight");
+  //              var weightq=Dialog.calculateQ(days,weight,"weight");
+  //              var weightq=Number($("#weianthro").text());
+                
+                console.log("in lenanthro: ",$("#lenanthro").text())
                 var length=measure;
                 var lengthq=Dialog.calculateQ(days,length,"length");
+                var lengthq=Number($("#lenanthro").text());
                 //Math.round(cdf(length,hmo.m,hmo.s)*100);
                 break;
         };
+ //       console.log("weight,weightq",weight,weightq)
+  //      console.log("length,lengthq",length,lengthq)
+  //      $("#lenanthro").text("");
+  //      $("#weianthro").text("");
         
         //Get the comment from the accordion
         var comment = $("#commentarea").val();
         // //Calculate the BMI //to do: this has to be done later, when i decide whether i merge length and weight or not. here the nor current measure is NaN
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
+            
+  var lengthq="";
+  var weightq="";
             var obj = {
                 "Date" : dateDMY,
                 "Weeks" : days / 7,
                 "Weight" : isNaN(weight)?(""):weight.toFixed(1),
-                "WeightQ": isNaN(weight)?(""):weightq,
+                "WeightQ": isNaN(weightq)?(""):weightq,
                 "Length" : isNaN(length)?(""):length.toFixed(1),
                 "LengthQ": isNaN(lengthq)?(""):lengthq,
                 "BMI" : "",//bmi.toFixed(1),
                 "BMIQ": "",//bmiq,
                 "Comment": comment
             };
-            Dialog.appendToTable(obj);
+            var newindex=Dialog.appendToTable(obj);
+                 
+            $("#tr"+newindex+" > td:nth-child(1)").trigger("click");
+            var sel=Dialog.getSelectedFromTable();
+            
+            
+            
             $("#addmeasure").removeAttr("disabled");
         } else if ((textButton==="Edit")||(forceEdit===1)){
             //Edit data in tables
@@ -963,36 +1006,140 @@ $(function() {
                 case "Weight":
                     var text=isNaN(weight)?(""):weight.toFixed(1);
                     $("#"+sel.line + " :nth-child(3)").text(text);
-                    text=isNaN(weightq)?(""):weightq.toFixed(1);
-                    $("#"+sel.line + " :nth-child(4)").text(text);
+   //                 text=isNaN(weightq)?(""):weightq.toFixed(1);
+    //                $("#"+sel.line + " :nth-child(4)").text(text);
                     length=Number($("#"+sel.line + " :nth-child(5)").text());
                 break;
                 case "Length":
                     var text=isNaN(length)?(""):length.toFixed(1);
                     $("table #"+sel.line + " :nth-child(5)").text(text);
-                    text=isNaN(lengthq)?(""):lengthq.toFixed(1);
-                    $("table #"+sel.line + " :nth-child(6)").text(text);
+     //               text=isNaN(lengthq)?(""):lengthq.toFixed(1);
+      //              $("table #"+sel.line + " :nth-child(6)").text(text);
                     weight=Number($("#"+sel.line + " :nth-child(3)").text());
                 break;
             };
             //Calculate the BMI
-            var bmi=weight/Math.sqrt(length); //to do. any good?
-//   console.log("Dialog.calculateQ("+days+","+bmi+",\"bmi\")")
+            var bmi=weight/Math.sqrt(length);
             var bmiq=Dialog.calculateQ(days,bmi,"bmi");
-   console.log("bmiq",bmiq)
+            var bmiq=Number($("#bmianthro").text());
+
             //BMI
-            var text=isNaN(bmi)?(""):bmi.toFixed(1);
+            var text=isNaN(bmi)?(""):bmi.toFixed(2);
             $("table #"+sel.line + " :nth-child(7)").text(text);
-            text=isNaN(bmiq)?(""):bmiq.toFixed(1);
-            $("table #"+sel.line + " :nth-child(8)").text(text);
+   //         text=isNaN(bmiq)?(""):bmiq.toFixed(1);//.toFixed(1); to do
+   //         $("table #"+sel.line + " :nth-child(8)").text(text);
             //Comment
             $("table #"+sel.line + " :nth-child(9)").text(comment);
         };
+        
+        
+        
+        
+        
+        // switch (measureType){
+        //     case "Weight":
+        //         //var weight=measure;
+        //         var weightq=Dialog.calculateQ(days,weight,"weight"); //Math.round(cdf(weight,hmo.m,hmo.s)*100);
+        //         var weightq=Number($("#weianthro").text());
+        //         //var length=(row.length)?(row.length):(NaN);
+        //         //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
+        //         var lengthq=Dialog.calculateQ(days,length,"length");
+        //         var lengthq=Number($("#lenanthro").text());
+        //         break;
+        //     case "Length":
+        //         //var weight=(row.length)?(row.weight):(NaN);
+        //         //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
+        //         var weightq=Dialog.calculateQ(days,weight,"weight");
+        //         var weightq=Number($("#weianthro").text());
+                
+        //         console.log("in lenanthro: ",$("#lenanthro").text())
+        //         //var length=measure;
+        //         var lengthq=Dialog.calculateQ(days,length,"length");
+        //         var lengthq=Number($("#lenanthro").text());
+        //         //Math.round(cdf(length,hmo.m,hmo.s)*100);
+        //         break;
+        // };
+        
+        if (!isNaN(weight)) calculateQ2(days,weight,"weight",sel.line); //to do: bummer, this overwrites the existing one
+        if (!isNaN(length)) calculateQ2(days,length,"length",sel.line);
+        if ((typeof bmi !== 'undefined') && !isNaN(bmi)) calculateQ2(days,bmi,"bmi",sel.line);
+        
+        
+        
+        
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
         return true;       
     });
  });
+ 
+ function calculateQ2(days,measure,measuretype,selLine){ 
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
+            } else alert('The File APIs are not fully supported in this browser.');        
+        var url;
+        var cellNum;
+        switch (measuretype){
+            case "weight":
+                url ="weianthro.txt"; //to do: watch out loh in weight
+                cellNum = 4;
+                break;
+            case "length":
+                url ="lenanthro.txt";
+                cellNum = 6;
+                break;
+            case "bmi":
+                url ="bmianthro.txt";
+                cellNum = 8;
+                break;
+        };
+        
+        var str=";"+Page.getCurrGender()+","+days+",";
+        console.log("calculateQ2: days,measure,measuretype,str=",days,measure,measuretype,str);
+        
+        var stuff={selLine:selLine,measure:measure,str:str,cellNum:cellNum};
+        // var cb = function (resp){
+        //     writeQ(resp);
+        // };
+        // loadDoc2(url, stuff, cb);
+        loadDoc2(url, stuff, writeQ);
+}
+
+function loadDoc2(url, stuff, cfunc) {
+        var xhttp=new XMLHttpRequest();
+        xhttp.onreadystatechange = function() {
+            if (xhttp.readyState == 4 && xhttp.status == 200) {
+                cfunc(xhttp.responseText,url,stuff);
+            }
+        }
+        xhttp.overrideMimeType('text/plain');
+        xhttp.open("GET", url, true);
+        xhttp.send();
+}
+
+function writeQ(resp,url,stuff) {
+        if (resp){
+            var str=stuff.str;            
+            //Find the string str in the data
+            resp=resp.replace(/\n/g, ';').replace(/\t/g, ',');
+            var start=resp.indexOf(str)+1;
+            if (start==-1) console.log("writeQ: str not found. str=",str);
+            var end=resp.indexOf(";",start);
+            //Calculate the quantile
+            var array = resp.substring(start,end).split(",").map(Number);
+            var measure=stuff.measure;
+            var mean=array[3];
+            var std=array[4];
+            var quantile=Math.round(cdf(measure,mean,std)*100);    
+            //Write the quantile
+            var text=isNaN(quantile)?(""):quantile.toFixed(1);
+            $("table #"+stuff.selLine+" :nth-child("+stuff.cellNum+")").text(text);
+        }
+    }
+ 
+ 
+ 
+ 
 //Delete point button
 $(function() {
     $("#deletemeasure").click(function() {
