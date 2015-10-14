@@ -319,16 +319,14 @@ var Page = function() {
                         "ylabel": ylabel,
                         "maxzoom": 2  
                     };
-            })
+                    //Read the files and change graph
+                    //Display the new dataset
+                    graph.useOptions(graph.options); 
+                    graph.changeMeasure();
+                    Page.updateDataAndGraph();
+                })
         },
-        //Read the files and change graph
-        changeGraph: function(){
-            //Display the new dataset
-            graph.useOptions(graph.options); 
-            graph.changeMeasure();
-            Page.updateDataAndGraph();        
-
-        },
+        
         getCurrMeasure: function(){
             return $("#measureselect2 input[name='mode']:checked").val();
         }
@@ -1317,7 +1315,7 @@ $(document).ready(function(){
 
 $(document).on("change", "#measureselect2 input[name=mode]",function() {
     Page.readTSV(this.value);
-    Page.changeGraph();
+    //Page.changeGraph();
 });
 
 
