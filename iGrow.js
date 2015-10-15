@@ -219,9 +219,9 @@ var Page = function() {
         },
         //Remove a baby
         removeBaby: function(name){
-        var index=Page.getIndexFromName(name);
-        if (index == -1) {
-            alert(name+" was not found");
+            var index=Page.getIndexFromName(name);
+            if (index == -1) {
+                alert(name+" was not found");
             } else {
                 var conf = confirm("Do you really want to proceed with removing this baby and all its data?");
                 if (conf){
@@ -230,15 +230,15 @@ var Page = function() {
                     Page.emptyDropdown();
                     if (babies.length > 0) {
                         Page.populateDropdown(babies);
-                        //Update only if current baby was removed
-                        if (redrawLater) Page.updateDataAndGraph();
                         //enable Selections
                         Dialog.enableSelection(true);
-                        Page.writeToCache();
                     } else {
                         //disable Selections if baby is empty
                         Dialog.enableSelection(false);
                     }
+                    //Update only if current baby was removed
+                    if (redrawLater) Page.updateDataAndGraph();
+                    Page.writeToCache();
                 }
             }
         },
