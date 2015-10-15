@@ -356,7 +356,7 @@ var Dialog = function(){
                 break;
             case 'Length':            
                 var suffixlabel=' [cm]';
-                var value=(row["length"])?(row["length"]):(60);
+                var value=(row["length"])?(row["length"]):(50);
                 var step=1;
                 break;
             // case 'BMI':            
@@ -1017,7 +1017,7 @@ $(function() {
                 break;
             };
             //Calculate the BMI
-            var bmi=weight/Math.sqrt(length);
+            var bmi=weight/Math.pow(length/100,2); //to do: see precise formula
             var bmiq=Dialog.calculateQ(days,bmi,"bmi");
             var bmiq=Number($("#bmianthro").text());
 
@@ -1394,6 +1394,7 @@ $(document).ready(function(){
     var measBoy = [],
         measGirl = [];
     //http://www.who.int/childgrowth/en/
+    //www.who.int/childgrowth/standards/velocity/tr3chap_6.pdf
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
