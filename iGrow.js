@@ -1398,13 +1398,12 @@ $(document).ready(function(){
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
-            console.log(+d.age,+d.age/7)
         return {
             gender: +d.sex,
             age: +d.age / 7,   //weeks!
             l: +d.l,
             m: +d.m,
-            s: Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
+            s: +d.s, //Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
             loh: d.loh //to do: this does not hurt it so group all d3.tsv together
         };
         },function(error, data) {    
