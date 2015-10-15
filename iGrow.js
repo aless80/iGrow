@@ -302,7 +302,7 @@ var Page = function() {
                     age: +d.age / 7,
                     l: +d.l,
                     m: +d.m,
-                    s: +d.s,
+                    s: Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
                     loh: d.loh
                 };
                 },function(error, data) {
@@ -1402,7 +1402,7 @@ $(document).ready(function(){
             age: +d.age / 7,   //weeks!
             l: +d.l,
             m: +d.m,
-            s: +d.s,
+            s: Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
             loh: d.loh //to do: this does not hurt it so group all d3.tsv together
         };
         },function(error, data) {    
