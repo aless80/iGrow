@@ -1398,6 +1398,7 @@ $(document).ready(function(){
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
+            console.log(+d.age,+d.age/7)
         return {
             gender: +d.sex,
             age: +d.age / 7,   //weeks!
