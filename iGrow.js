@@ -404,7 +404,7 @@ var Dialog = function(){
         }
         var line=$("table .selected")[0].getAttribute("id");
         var date=$("table .selected td:first-child").text();
-        var weight=Number($("table .selected td:nth-child(3)").text());        
+        var weight=Number($("table .selected td:nth-child(3)").text());
         var weightq=Number($("table .selected td:nth-child(4)").text());
         var length=Number($("table .selected td:nth-child(5)").text());
         var lengthq=Number($("table .selected td:nth-child(6)").text());
@@ -980,8 +980,9 @@ $(function() {
                 "Comment": comment
             };
             var newindex=Dialog.appendToTable(obj);
-                 
-            $("#tr"+newindex+" > td:nth-child(1)").trigger("click");
+            //simulate click on right line 
+            $("#tr"+newindex).addClass('selected'); //to do: or > td:nth-child(1) ? 
+            //$("#tr"+newindex+" > td:nth-child(1)").trigger("click");
             var sel=Dialog.getSelectedFromTable();
             
             
@@ -991,7 +992,8 @@ $(function() {
             //Edit data in tables
             if ((textButton!=="Edit")&&(forceEdit===1)){
                 //simulate click on right line //to do: think if I want to edit the first or last occurrence
-                $("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
+                //$("#tr"+forceEditLine+" > td:nth-child(1)").trigger("click");
+                $("#tr"+forceEditLine).addClass('selected');   //no > td ! 
                 //Append comment to old one 
                 var newcomment=$("#tr1 > td:nth-child(9)").text();
                 if (newcomment && (comment!=newcomment)) comment=newcomment+' - '+comment;
@@ -1007,14 +1009,16 @@ $(function() {
                     $("#"+sel.line + " :nth-child(3)").text(text);
    //                 text=isNaN(weightq)?(""):weightq.toFixed(1);
     //                $("#"+sel.line + " :nth-child(4)").text(text);
-                    length=Number($("#"+sel.line + " :nth-child(5)").text());
+                    length=$("#"+sel.line + " :nth-child(5)").text();
+                    length=length?Number(length):NaN;
                 break;
                 case "Length":
                     var text=isNaN(length)?(""):length.toFixed(1);
                     $("table #"+sel.line + " :nth-child(5)").text(text);
      //               text=isNaN(lengthq)?(""):lengthq.toFixed(1);
       //              $("table #"+sel.line + " :nth-child(6)").text(text);
-                    weight=Number($("#"+sel.line + " :nth-child(3)").text());
+                    weight=$("#"+sel.line + " :nth-child(3)").text();
+                    weight=weight?Number(weight):NaN;
                 break;
             };
             //Calculate the BMI
@@ -1255,10 +1259,10 @@ $("#table").on("click", "tr", function(event) {
   //Ignore clicking on the header
   if (this.id==="tr0") return;
   //Ignore clicking when accordion is open and you are adding a measure    to do this created problems with quantiles where I select a line
-  // if ((!$("#accordion").attr("hidden"))&&(!$("#addmeasure").attr("disabled"))){
-    //   console.log("ignore")
-    //   return;} 
-  //Select the row in the table  
+  if ((!$("#accordion").attr("hidden"))&&(!$("#addmeasure").attr("disabled"))){
+      console.log("ignore")
+      return;} 
+  //Select the row in the table
   if ($(this).hasClass('selected')) {
     $(this).removeClass('selected');
     $("#deletemeasure").attr("disabled","true");
