@@ -81,21 +81,6 @@ Graph = function(elemid, options) {
     this.title = Page.getCurrName();
 
     this.useOptions(options || {});
-    // this.options = options || {};
-    // this.setPoints();
-    // //this.points =  this.options.pointsBoy;
-    // var xrange=d3.extent(this.points, function(d) { return d.age; });
-    // var yrange=[d3.min(this.points, function(d) { return Math.floor(d.m - 3 * d.s); }),
-    //             d3.max(this.points, function(d) { return Math.ceil(d.m); }) ];
-
-
-    // this.options.xmin = ((typeof options.xmin == "undefined") ? xrange[0] : options.xmin);
-    // this.options.xmax = ((typeof options.xmax == "undefined") ? xrange[1] : options.xmax);
-    // this.options.ymax = ((typeof options.ymax == "undefined") ? yrange[1] : options.ymax);
-    // this.options.ymin = ((typeof options.ymin == "undefined") ? yrange[0] : options.ymin);
-
-    // this.options.maxzoom = 1 / options.maxzoom || 0.2;
-
     this.padding = {
         "top":    42,
         "right":  30,
@@ -106,17 +91,6 @@ Graph = function(elemid, options) {
     this.width = this.cx - this.padding.left - this.padding.right;
     this.height = this.cy - this.padding.top  - this.padding.bottom;
 
-    // // x-scale
-    // this.x = d3.scale.linear()
-    //     .domain([this.options.xmin, this.options.xmax])
-    //     .range([0, this.width]);
-
-    // // y-scale (inverted domain)
-    // this.y = d3.scale.linear()
-    //     .domain([this.options.ymax, this.options.ymin])
-    //     .nice()
-    //     .range([0, this.height])
-    //     .nice();
     this.setScale();
 
 
@@ -173,26 +147,6 @@ Graph = function(elemid, options) {
             .style("text-anchor","middle");
     }
 
-    // // Add the x-axis label
-    // if (this.options.xlabel) {
-    //     this.vis.append("text")
-    //         .attr("class", "axis")
-    //         .attr("id", "xlabel")
-    //         .text(this.options.xlabel)
-    //         .attr("x", this.width/2)
-    //         .attr("y", this.height)
-    //         .attr("dy","2.4em")
-    //         .style("text-anchor","middle");
-    // }
-    // // add y-axis label
-    // if (this.options.ylabel) {
-    //     this.vis.append("g").append("text")
-    //         .attr("class", "axis")
-    //         .attr("id", "ylabel")
-    //         .text(this.options.ylabel)
-    //         .style("text-anchor","middle")
-    //         .attr("transform","translate(" + -40 + " " + this.height/2+") rotate(-90)");
-    // }
     this.setAxisLabels();
 
 
@@ -215,44 +169,6 @@ Graph = function(elemid, options) {
             self.zoomHandler()
         });
     self.rect.call(this.zoom)
-
-
-/////////////////
-// var form = d3.select("body").append("form");
-// var shapeData = ["Weight", "Length", "BMI"], 
-//     j = 0; 
-// var labelEnter = form.selectAll("span")
-//     .data(shapeData)
-//     .enter().append("span");
-
-// labelEnter.append("input")
-//     .attr({
-//         type: "radio",
-//         class: "shape",
-//         id: "hey",
-//         name: "mode",
-//         value: function(d, i) {return i;}
-//     })
-//     .property("checked", function(d, i) {
-//         console.log(i,j)
-//         return (i===j); 
-//     });
-
-// labelEnter.append("label").text(function(d) {return d;});
-
-
-// d3.selectAll("#measureselect2 input[name=mode]").on("change", function() {
-//     //svg.call(chart.duration(0).mode(this.value));
-//     console.log(this.value)
-//     //readTSV(this.value)
-// });
-// d3.selectAll("#hey").on("change", function() {
-//     //svg.call(chart.duration(0).mode(this.value));
-//     console.log(this.value)
-// });
-
-///////////////////
-
 
     this.redraw()();
 };
@@ -404,86 +320,6 @@ Graph.prototype.zoomHandler = function() {
 
 
     self.regenerate();
-    // var tx = function(d) {
-    //   return "translate(" + self.x(d)  + ",0)";
-    // },
-    // ty = function(d) {
-    //   return "translate(0," + self.y(d)  + ")";
-    // };
-    // var stroke = function(d) {
-    //   return d ? "#ccc" : "#666";
-    // };
-    // var fx = self.x.tickFormat(10),
-    // fy = self.y.tickFormat(10);
-
-    // // Regenerate x-ticks…
-    // var gx = self.vis.selectAll("g.x")
-    // //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
-    //     .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
-    //     .attr("transform", tx);
-    // gx.select("text")
-    //     .text(fx);
-
-    // var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
-    //     .attr("class", "x")
-    //     .attr("transform", tx);
-    // //Vertical grid
-    // gxe.append("line")
-    //     .attr("stroke", stroke)
-    //     .attr("y1", 0)
-    //     .attr("y2", self.height);
-
-    // gxe.append("text")
-    //     .attr("class", "axis label")
-    //     .attr("y", self.height)
-    //     .attr("dy", "1em")
-    //     .attr("text-anchor", "middle")
-    //     .text(fx)
-    //     .style("cursor", "ew-resize")
-    //     .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-    //     .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-    //     .on("mousedown.drag",  self.xaxis_drag())
-    //     .on("touchstart.drag", self.xaxis_drag());
-    // gx.exit().remove();
-
-    // //Change comma to dot: but have to change "axis" from title and axis labels
-    // jQuery(".axis.label").each(function( index ) {
-    // 	var elem = jQuery(this);
-    // 	elem.text(elem.text().replace(",",""))
-    // 	});
-
-    // // Regenerate y-ticks…
-    // var gy = self.vis.selectAll("g.y")
-    //     .data(self.y.ticks(10), String)
-    //     .attr("transform", ty);
-
-    // gy.select("text")
-    //     .text(fy);
-
-    // var gye = gy.enter().insert("g", ".svg")
-    //     .attr("class", "y")
-    //     .attr("transform", ty)
-    //     .attr("background-fill", "#FFEEB6");
-
-    // gye.append("line")
-    //     .attr("stroke", stroke)
-    //     .attr("x1", 0)
-    //     .attr("x2", self.width);
-
-    // gye.append("text")
-    //     .attr("class", "axis label")
-    //     .attr("x", -3)
-    //     .attr("dy", ".35em")
-    //     .attr("text-anchor", "end")
-    //     .text(fy)
-    //     .style("cursor", "ns-resize")
-    //     .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-    //     .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-    //     .on("mousedown.drag",  self.yaxis_drag())
-    //     .on("touchstart.drag", self.yaxis_drag());
-
-    // gy.exit().remove();
-
     self.update();
 }
 
@@ -511,89 +347,7 @@ Graph.prototype.redraw = function(zoom) {
                 return false;
             }
         }
-
-    //     var tx = function(d) {
-    //         return "translate(" + self.x(d) + ",0)";
-    //     },
-    //     ty = function(d) {
-    //         return "translate(0," + self.y(d) + ")";
-    //     },
-    //     stroke = function(d) {
-    //         return d ? "#ccc" : "#666";
-    //     },
-    //     fx = self.x.tickFormat(10),
-    //     fy = self.y.tickFormat(10);
-
-    //     // Regenerate x-ticks…
-    //     var gx = self.vis.selectAll("g.x")
-    //     //linear.ticks([count]) Returns approximately count representative values from the scale's input domain.
-    //         .data(self.x.ticks(10).map(self.x.tickFormat(2, ".1")), String)     //how many ticks on the x axis
-    //         .attr("transform", tx);
-    //     gx.select("text")
-    //         .text(fx);
-
-    //     var gxe = gx.enter().insert("g", ".svg")   //Inserts a new element with the specified name before the element matching the specified before selector,
-    //         .attr("class", "x")
-    //         .attr("transform", tx);
-    //     //Vertical grid
-    //     gxe.append("line")
-    //         .attr("stroke", stroke)
-    //         .attr("y1", 0)
-    //         .attr("y2", self.height);
-
-    //     gxe.append("text")
-    //         .attr("class", "axis label")
-    //         .attr("y", self.height)
-    //         .attr("dy", "1em")
-    //         .attr("text-anchor", "middle")
-    //         .text(fx)
-    //         .style("cursor", "ew-resize")
-    //         .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-    //         .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-    //         .on("mousedown.drag",  self.xaxis_drag())
-    //         .on("touchstart.drag", self.xaxis_drag());
-    //     gx.exit().remove();
-
-    //     //Change comma to dot: but have to change "axis" from title and axis labels
-    //     jQuery(".axis.label").each(function( index ) {
-    //         var elem = jQuery(this);
-    //         elem.text(elem.text().replace(",",""))
-    //         });
-    // console.log("// Regenerate y-ticks…")
-
-    //     // Regenerate y-ticks…
-    //     var gy = self.vis.selectAll("g.y")
-    //         .data(self.y.ticks(10), String)
-    //         .attr("transform", ty);
-
-    //     gy.select("text")
-    //         .text(fy);
-
-    //     var gye = gy.enter().insert("g", ".svg")
-    //         .attr("class", "y")
-    //         .attr("transform", ty)
-    //         .attr("background-fill", "#FFEEB6");
-
-    //     gye.append("line")
-    //         .attr("stroke", stroke)
-    //         .attr("x1", 0)
-    //         .attr("x2", self.width);
-
-    //     gye.append("text")
-    //         .attr("class", "axis label")
-    //         .attr("x", -3)
-    //         .attr("dy", ".35em")
-    //         .attr("text-anchor", "end")
-    //         .text(fy)
-    //         .style("cursor", "ns-resize")
-    //         .on("mouseover", function(d) { d3.select(this).style("font-weight", "bold");})
-    //         .on("mouseout",  function(d) { d3.select(this).style("font-weight", "normal");})
-    //         .on("mousedown.drag",  self.yaxis_drag())
-    //         .on("touchstart.drag", self.yaxis_drag());
-
-    //     gy.exit().remove();
         self.regenerate();
-
         self.update();
     }
 }
@@ -635,7 +389,7 @@ Graph.prototype.plotNSigmaLine = function(n, gender){
         .attr("class", "line")
         .attr("id" ,"area_"+n)
         .attr("d" , this.area(self.points))
-        .style("opacity" ,1 - Math.abs(n/3))
+        .style("opacity" ,1 - Math.abs(n))
         .style("fill" , color);
     }
 }
@@ -645,10 +399,10 @@ Graph.prototype.plotLines = function() {
     this.plotNSigmaLine(0, gender);
     this.plotNSigmaLine(0.674, gender);
     this.plotNSigmaLine(-0.674, gender);
-    this.plotNSigmaLine(3, gender);
-    this.plotNSigmaLine(-3, gender);
-    this.plotNSigmaLine(2, gender);
-    this.plotNSigmaLine(-2, gender);
+    // this.plotNSigmaLine(3, gender);
+    // this.plotNSigmaLine(-3, gender);
+    // this.plotNSigmaLine(2, gender);
+    // this.plotNSigmaLine(-2, gender);
 }
 
 //Update the lines and the circles
@@ -687,11 +441,6 @@ Graph.prototype.update = function() {
             } else {
             //Store the selected circle. it will be needed for the table in the dialog
             self.selectCircle = this;
-// self.selectCircleData={
-//     Baby: Page.getCurrName(),
-//     Weeks:d[0],
-//     Weight:d[1]
-// };
             d3.select(this)
                 .style("stroke","red")
                 .attr("r",8)

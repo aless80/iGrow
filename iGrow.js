@@ -297,13 +297,12 @@ var Page = function() {
             d3.tsv(filename, 
                 //This function defines how "data" below will look like 
                 function(d) {
-                    console.log(Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)))
                 return {
                     gender: +d.sex,
                     age: +d.age / 7,
                     l: +d.l,
                     m: +d.m,
-                    s: +d.s, //Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
+                    s: +d.s*+d.m, //Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
                     loh: d.loh
                 };
                 },function(error, data) {
@@ -557,30 +556,8 @@ var Dialog = function(){
         if (isNaN(measure)) $("#"+url.split(".")[0]).text(NaN);
         console.log("calculateQ: days,measure,measuretype=",days,measure,measuretype);
         
-        // this.line="hey"; //to do: not perfect solution
-        // var cb = function (data){
-        //     Dialog.line = Dialog.getLine(data);
-        // };
-        // Dialog.loadDoc(url, cb);
         var measure=$("#"+url.split(".")[0]).text(measure);
         Dialog.loadDoc(url, Dialog.getLine);
-        // console.log("calculateQ: this.line=",this.line);
-        // var c=0
-        // while ((this.line==="hey")&&c<10000) {
-        //     c+=1;
-        //     setTimeout(function(){console.log(c,this.line); return false},1000)
-            
-        // }
-        // console.log(c)
-        // if (this.line==="hey") console.log("  this.line has not been set in the callback!!")
-        // var array = this.line.split(",").map(Number);
-        // console.log("calculateQ: $(#+url.split(.)[0]).text()",$("#"+url.split(".")[0]).text())
-    //     var array = $("#"+url.split(".")[0]).text().split(",").map(Number);
-   // console.log("calculateQ: array",array)
-    //     var mean=array[3];
-    //     var std=array[4];
-    //     var quantile=Math.round(cdf(measure,mean,std)*100);
-    //     return quantile; //does not work
     },
     
     loadDoc: function(url, cfunc) {
@@ -944,9 +921,6 @@ $(function() {
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
-                //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
-  //              var weightq=Dialog.calculateQ(days,weight,"weight");
-  //              var weightq=Number($("#weianthro").text());
                 
                 console.log("in lenanthro: ",$("#lenanthro").text())
                 var length=measure;
@@ -955,10 +929,6 @@ $(function() {
                 //Math.round(cdf(length,hmo.m,hmo.s)*100);
                 break;
         };
- //       console.log("weight,weightq",weight,weightq)
-  //      console.log("length,lengthq",length,lengthq)
-  //      $("#lenanthro").text("");
-  //      $("#weianthro").text("");
         
         //Get the comment from the accordion
         var comment = $("#commentarea").val();
@@ -1035,33 +1005,6 @@ $(function() {
             $("table #"+sel.line + " :nth-child(9)").text(comment);
         };
         
-        
-        
-        
-        
-        // switch (measureType){
-        //     case "Weight":
-        //         //var weight=measure;
-        //         var weightq=Dialog.calculateQ(days,weight,"weight"); //Math.round(cdf(weight,hmo.m,hmo.s)*100);
-        //         var weightq=Number($("#weianthro").text());
-        //         //var length=(row.length)?(row.length):(NaN);
-        //         //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
-        //         var lengthq=Dialog.calculateQ(days,length,"length");
-        //         var lengthq=Number($("#lenanthro").text());
-        //         break;
-        //     case "Length":
-        //         //var weight=(row.length)?(row.weight):(NaN);
-        //         //var weightq=(row.length)?(row.weightq):(NaN); //this works only if length is the current measure
-        //         var weightq=Dialog.calculateQ(days,weight,"weight");
-        //         var weightq=Number($("#weianthro").text());
-                
-        //         console.log("in lenanthro: ",$("#lenanthro").text())
-        //         //var length=measure;
-        //         var lengthq=Dialog.calculateQ(days,length,"length");
-        //         var lengthq=Number($("#lenanthro").text());
-        //         //Math.round(cdf(length,hmo.m,hmo.s)*100);
-        //         break;
-        // };
         console.log(sel.line)
         if (!isNaN(weight)) calculateQ2(days,weight,"weight",sel.line); //to do: bummer, this overwrites the existing one
         //to do problem: i think that sel.line is not defined when I add a measure
@@ -1408,13 +1351,12 @@ $(document).ready(function(){
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
-            console.log(Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)))
         return {
             gender: +d.sex,
             age: +d.age / 7,   //weeks!
             l: +d.l,
             m: +d.m,
-            s: +d.s, //Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
+            s: +d.s*+d.m, //Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
             loh: d.loh //to do: this does not hurt it so group all d3.tsv together
         };
         },function(error, data) {    
