@@ -193,7 +193,7 @@ var Page = function() {
         //update the data and graph
         updateDataAndGraph: function(){
             graph.setPoints();
-            graph.setCurrrentDataWeight();
+            graph.setCurrrentData();
             var currentName = Page.getCurrName();
             graph.title = currentName;
             graph.setScale();
@@ -212,7 +212,7 @@ var Page = function() {
             if (conf){
                 babies[index].Data.splice(indCircle, 1);
                 //Update the circles and the scatterplot
-                graph.setCurrrentDataWeight();
+                graph.setCurrrentData();
                 return true;
             }
             return false;
@@ -297,12 +297,13 @@ var Page = function() {
             d3.tsv(filename, 
                 //This function defines how "data" below will look like 
                 function(d) {
+                    console.log(Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)))
                 return {
                     gender: +d.sex,
                     age: +d.age / 7,
                     l: +d.l,
                     m: +d.m,
-                    s: Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
+                    s: +d.s, //Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)), //+d.s,
                     loh: d.loh
                 };
                 },function(error, data) {
@@ -1057,8 +1058,9 @@ $(function() {
         //         //Math.round(cdf(length,hmo.m,hmo.s)*100);
         //         break;
         // };
-        
+        console.log(sel.line)
         if (!isNaN(weight)) calculateQ2(days,weight,"weight",sel.line); //to do: bummer, this overwrites the existing one
+        //to do problem: i think that sel.line is not defined when I add a measure
         if (!isNaN(length)) calculateQ2(days,length,"length",sel.line);
         if ((typeof bmi !== 'undefined') && !isNaN(bmi)) calculateQ2(days,bmi,"bmi",sel.line);
         
@@ -1252,6 +1254,10 @@ $("#table").on("click", "tr", function(event) {
   event.preventDefault();
   //Ignore clicking on the header
   if (this.id==="tr0") return;
+  //Ignore clicking when accordion is open and you are adding a measure    to do this created problems with quantiles where I select a line
+  // if ((!$("#accordion").attr("hidden"))&&(!$("#addmeasure").attr("disabled"))){
+    //   console.log("ignore")
+    //   return;} 
   //Select the row in the table  
   if ($(this).hasClass('selected')) {
     $(this).removeClass('selected');
@@ -1398,6 +1404,7 @@ $(document).ready(function(){
     d3.tsv("weianthro.txt", 
         //This function defines how "data" below will look like 
         function(d) {
+            console.log(Math.pow(+d.m*(+d.l*+d.s +1), (1/+d.l)))
         return {
             gender: +d.sex,
             age: +d.age / 7,   //weeks!

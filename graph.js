@@ -73,7 +73,7 @@ Graph = function(elemid, options) {
     this.selectCircle = null;
     //this.selectCircleData=null;
 
-    this.setCurrrentDataWeight();
+    this.setCurrrentData();
     this.chart = document.getElementById(elemid);
     this.cx = this.chart.clientWidth;
     this.cy = this.chart.clientHeight;
@@ -660,7 +660,7 @@ Graph.prototype.update = function() {
     this.removePathsInSVG();
     this.plotLines();
     var circle = this.vis.select("svg").selectAll("circle")
-        .data(d3.transpose([this.dataWeight.Weeks, this.dataWeight.Measure]))
+        .data(d3.transpose([this.data.Weeks, this.data.Measure]))
         .style("stroke","blue");
     
     //Define tooltips
@@ -707,8 +707,8 @@ Graph.prototype.update = function() {
                 .style("opacity", .9);
             tooltip.html(function(){
                 //Show the date
-                var ind = graph.dataWeight.Weeks.indexOf(d[0])
-                var dateMDY = graph.dataWeight.Date[ind].split("/");
+                var ind = graph.data.Weeks.indexOf(d[0])
+                var dateMDY = graph.data.Date[ind].split("/");
                 var date = dateMDY[0] + "/" + dateMDY[1] + "/" + dateMDY[2];
                 var string = "Date: " + date + "<br/>Age: ";
                 //Show the age
@@ -811,28 +811,29 @@ Graph.prototype.removePathsInSVG = function() {
     d3.selectAll(".line").remove();
 }
 
-Graph.prototype.setCurrrentDataWeight = function(){
+Graph.prototype.setCurrrentData = function(){
     var index = Page.getCurrIndex();
     //Plot males when no baby is defined
-    var dataWeight;
+    var data;
     if (index == null) {
-        dataWeight = new Array();
-        dataWeight.Weeks=new Array();
-        dataWeight.Date=new Array();
-        dataWeight.Measure=new Array();
+        data = new Array();
+        data.Weeks=new Array();
+        data.Date=new Array();
+        data.Measure=new Array();
     } else {
         var measuretype=Page.getCurrMeasure();
-        dataWeight = babies[index].Data;
-        dataWeight.Weeks=new Array();
-        dataWeight.Date=new Array();
-        dataWeight.Measure=new Array();
-        for (var i=0,len=dataWeight.length;i<len;i++){
-            dataWeight.Weeks.push(babies[index].Data[i]["Weeks"]);
-            dataWeight.Date.push(babies[index].Data[i]["Date"]);
-            dataWeight.Measure.push(babies[index].Data[i][measuretype]);
+        data = babies[index].Data;
+        data.Weeks=new Array();
+        data.Date=new Array();
+        data.Measure=new Array();
+        for (var i=0,len=data.length;i<len;i++){
+            data.Weeks.push(babies[index].Data[i]["Weeks"]);
+            data.Date.push(babies[index].Data[i]["Date"]);
+            var meas=babies[index].Data[i][measuretype];
+            if(meas){data.Measure.push(meas);}
         }
     }
-    this.dataWeight=dataWeight;
+    this.data=data;
 }
 
 Graph.prototype.setTitle = function(){
