@@ -487,7 +487,19 @@ Graph.prototype.update = function() {
                 }
                 //Show the measure
                 var measuretype=Page.getCurrMeasure();
-                string = string.concat("<br/>"+measuretype+": "  + d[1] + " Kg");
+                var units;
+                switch (measuretype){
+                    case "Weight": 
+                    units=" Kg";
+                    break;
+                    case "Length": 
+                    units=" cm";
+                    break;
+                    case "BMI": 
+                    units=" Kg/m2";
+                    break;
+                }
+                string = string.concat("<br/>"+measuretype+": "  + d[1] + units);
                 //Show the data from WHO
                 var hmo = self.points[Math.round(d[0] * 7)];
                 string = string.concat("<br/>Average "+measuretype.toLowerCase()+" from WHO: " + Math.round(hmo.m*100)/100);

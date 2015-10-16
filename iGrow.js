@@ -375,7 +375,6 @@ var Dialog = function(){
         $("#weightSpinner").spinner("value", value);//to do cannot set decimals!                
     },
     showAccordion: function() {
-        $("#datep").val(todayDMY);
         $("#weightSpinner").spinner("option","disabled",true);
         $("#measureselectdialog").val("Measure");
         $("#accordion").removeAttr("hidden");
@@ -414,18 +413,14 @@ var Dialog = function(){
     },    
     fillAccordion: function() {
         var cells=Dialog.getSelectedFromTable();
-        $("#datep").val(cells.date);    
-        //$("#weightspinnerdiv").val(); //to do I commented this out, ok?
+        $("#datep").val(cells.date);
         var measurementType=$("#measureselect2").val();
         switch (measurementType){
             case 'Weight':
-                //var suffix=" Kg";
                 break;
             case 'Length':
-                //var suffix=" cm";
                 break;
         }
-//console.log("fillAccordion: cells["+measurementType.toLowerCase()+"]=",cells[measurementType.toLowerCase()])
         $("#weightSpinner").spinner("value", cells[measurementType.toLowerCase()]); //to do can be undefined
         $("#commentarea").val(cells.comment);
     },
@@ -491,11 +486,9 @@ var Dialog = function(){
         //Append td elements to the tr
          var fields=["Date","Weeks","Weight","WeightQ","Length","LengthQ","BMI","BMIQ","Comment"];
         fields.push(Dialog.getMeasureTypeDialog()); 
-        for (var key in obj) {
-//console.log("key,obj[key]=",key,obj[key]); 
+        for (var key in obj) { 
             if (obj.hasOwnProperty(key)) {
                 if (fields.indexOf(key)>-1){ //write only the selected measure to the table
-//console.log(" key,obj[key]=",key,obj[key]);
                     var td = document.createElement('td');
                     if (obj[key] !== null){
                         if (key==="Weeks")
@@ -536,29 +529,29 @@ var Dialog = function(){
     
 
     
-    calculateQ: function(days,measure,measuretype){
-        // Check for the various File API support.
-        if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
-            } else alert('The File APIs are not fully supported in this browser.');
-        this.str=";"+Page.getCurrGender()+","+days+",";        
-        var url;
-        switch (measuretype){
-            case "weight":
-                url ="weianthro.txt"; //to do: watch out loh in weight
-                break;
-            case "length":
-                url ="lenanthro.txt";
-                break;
-            case "bmi":
-                url ="bmianthro.txt";
-                break;
-        };
-        if (isNaN(measure)) $("#"+url.split(".")[0]).text(NaN);
-        console.log("calculateQ: days,measure,measuretype=",days,measure,measuretype);
+    // calculateQ: function(days,measure,measuretype){
+    //     // Check for the various File API support.
+    //     if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
+    //         } else alert('The File APIs are not fully supported in this browser.');
+    //     this.str=";"+Page.getCurrGender()+","+days+",";        
+    //     var url;
+    //     switch (measuretype){
+    //         case "weight":
+    //             url ="weianthro.txt"; //to do: watch out loh in weight
+    //             break;
+    //         case "length":
+    //             url ="lenanthro.txt";
+    //             break;
+    //         case "bmi":
+    //             url ="bmianthro.txt";
+    //             break;
+    //     };
+    //     if (isNaN(measure)) $("#"+url.split(".")[0]).text(NaN);
+    //     console.log("calculateQ: days,measure,measuretype=",days,measure,measuretype);
         
-        var measure=$("#"+url.split(".")[0]).text(measure);
-        Dialog.loadDoc(url, Dialog.getLine);
-    },
+    //     var measure=$("#"+url.split(".")[0]).text(measure);
+    //     Dialog.loadDoc(url, Dialog.getLine);
+    // },
     
     loadDoc: function(url, cfunc) {
         var xhttp=new XMLHttpRequest();
@@ -708,7 +701,6 @@ $("#babydialog").dialog({
             click : function() {
                 var ok = Page.addToDropdown(); 
                 Page.autocomplete();
-                //$("#datep").val(Page.todayDMY);  //to do
                 Dialog.enableSelection();
                 if (ok) $( this ).dialog("close");
                 Page.enablePageButtons();
@@ -908,25 +900,18 @@ $(function() {
         //Get data from the table        
         var row=Dialog.getSelectedFromTable();
         //Get the currently plotted measure
-        //var hmo = graph.points[days]; //THIS WAS WRONG! IF PLOT HAS DIFFERENT MEASURE I HAVE TO TAKE IT FROM FILE!
         switch (measureType){
             case "Weight":
                 var weight=measure;
-  //              var weightq=Dialog.calculateQ(days,weight,"weight"); //Math.round(cdf(weight,hmo.m,hmo.s)*100);
-  //              var weightq=Number($("#weianthro").text());
                 var length=(row.length)?(row.length):(NaN);
-                //var lengthq=(row.length)?(row.lengthq):(NaN); //this works only if length is the current measure
-   //             var lengthq=Dialog.calculateQ(days,length,"length");
-  //              var lengthq=Number($("#lenanthro").text());
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
                 
                 console.log("in lenanthro: ",$("#lenanthro").text())
                 var length=measure;
-                var lengthq=Dialog.calculateQ(days,length,"length");
+                var lengthq=calculateQ2(days,length,"length",row.line); //to do  It was calculateQ(days,length,"length");
                 var lengthq=Number($("#lenanthro").text());
-                //Math.round(cdf(length,hmo.m,hmo.s)*100);
                 break;
         };
         
@@ -993,14 +978,12 @@ $(function() {
             };
             //Calculate the BMI
             var bmi=weight/Math.pow(length/100,2); //to do: see precise formula
-            var bmiq=Dialog.calculateQ(days,bmi,"bmi");
+            var bmiq=calculateQ2(days,bmi,"bmi",sel.line); //to do it was calculateQ(days,bmi,"bmi");
             var bmiq=Number($("#bmianthro").text());
 
             //BMI
             var text=isNaN(bmi)?(""):bmi.toFixed(2);
             $("table #"+sel.line + " :nth-child(7)").text(text);
-   //         text=isNaN(bmiq)?(""):bmiq.toFixed(1);//.toFixed(1); to do
-   //         $("table #"+sel.line + " :nth-child(8)").text(text);
             //Comment
             $("table #"+sel.line + " :nth-child(9)").text(comment);
         };
@@ -1214,8 +1197,7 @@ $("#table").on("click", "tr", function(event) {
   } else {
     $(this).addClass('selected')
         .siblings().removeClass('selected');    
-    //populate and open accordion    
-    Dialog.fillAccordion();    
+    //populate accordion        
     $("#editmeasure").removeAttr("disabled");
     $("#addmeasure").attr("disabled","true");
     
