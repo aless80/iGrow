@@ -11,13 +11,43 @@
 </head>
 <body>
 
-<div id="horizon-controls">
-  <input name="mode" type="radio" value="mirror" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Mirror</label>
-  <input name="mode" type="radio" value="offset" id="horizon-mode-offset"><label for="horizon-mode-offset"> Offset</label>
-  <span id="horizon-bands"><span id="horizon-bands-value">1</span> <button class="first">&#x2212;</button><button class="last">+</button></span>
-</div>
+</style>
+
+<div id="plot-controls">
+    <table class="group" id="measureselect2" cellspacing="1" cellpadding="2">
+        <tbody>             
+            <tr>
+                <td>
+                    <label >
+                        <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked>
+                        <label for="horizon-mode-mirror"> Weight</label>
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input name="mode" type="radio" value="Length" id="horizon-mode-offset">
+                        <label for="horizon-mode-offset"> Length</label>                        
+                    </label>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <label>
+                        <input name="mode" type="radio" value="BMI" id="horizon-mode-offset">
+                        <font size="2"><label for="horizon-mode-offset"> BMI</label></font>
+                    </label>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+                    </div>
+
+
 
 <!--Plot-->
+<table>
     <tr style="vertical-align:top;" position: absolute; top: 0;>
         <td style="padding-bottom:8px;">
         <div >
@@ -41,36 +71,16 @@
             <tbody>             
                 <tr>
                     <td>
-                        <div>
-                            <table class="group" id="measureselect2" cellspacing="1" cellpadding="2">
-                                <tbody>             
-                                    <tr>
-                                        <td>
-                                            <label >
-                                                <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked>
-                                                <label for="horizon-mode-mirror"> Weight</label>
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label>
-                                                <input name="mode" type="radio" value="Length" id="horizon-mode-offset">
-                                                <label for="horizon-mode-offset"> Length</label>                        
-                                            </label>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <td>
-                                            <label>
-                                                <input name="mode" type="radio" value="BMI" id="horizon-mode-offset">
-                                                <font size="2"><label for="horizon-mode-offset"> BMI</label></font>
-                                            </label>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
+
+
+
+
+
+
+
+
+
+
                     </td>
                     <td>
                         <div id="dropdowndiv">
@@ -100,7 +110,7 @@
         </div>
         </td>
     </tr>
-
+</table>
 <!--Help-->
     <div id="helpmainpage" title="Help dialog" hidden>
         <p>The graph shows the average weight in Kg of a baby between 0 and 200 weeks of age. The data was downloaded 
@@ -120,6 +130,7 @@
     </div>
     
     <!--Add baby dialog-->
+<table>
     <tr style="vertical-align:top;">
         <td style="padding-bottom:8px;">
         <div id="babydialog" title="Add a baby">
@@ -332,6 +343,7 @@
         </div>
         </td>
     </tr>
+</table>
 <input type="file" id="fileinput" hidden/>
     <script src="http://code.jquery.com/jquery-1.10.2.js"></script>
     <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.js"></script>

@@ -1,6 +1,16 @@
- select {
+select {
       width: 120px;
     }
+
+#plot-controls {
+  position: absolute;
+  width: 200px;
+  padding-left: 80px;
+  padding-top: 55px;
+  z-index: 1;
+}
+
+
 body { 
 	font: 13px sans-serif; 
 	}
