@@ -459,13 +459,13 @@ Graph.prototype.update = function() {
                 var ind = graph.data.Weeks.indexOf(d[0])
                 var dateMDY = graph.data.Date[ind].split("/");
                 var date = dateMDY[0] + "/" + dateMDY[1] + "/" + dateMDY[2];
-                var string = "Date: " + date + "<br/>Age: ";
+                var strng = "Date: " + date + "<br/>Age: ";
                 //Show the age
                 if (d[0] < 3) {
-                    string = string.concat(d[0] * 7 + " day");
-                    if (d[0]*7 > 1) string = string.concat("s");
+                    strng = strng.concat(d[0] * 7 + " day");
+                    if (d[0]*7 > 1) strng = strng.concat("s");
                 } else if (d[0] < 20) {
-                    string = string.concat(Math.floor(d[0]) + " weeks");
+                    strng = strng.concat(Math.floor(d[0]) + " weeks");
                 } else {
                     var birthdate = Page.getBirthdate();
                     var yearsBDate = birthdate.substring(6,10);
@@ -476,13 +476,13 @@ Graph.prototype.update = function() {
                     var years = Math.floor(months / 12);
                     var months = months % 12;
                     if (d[0] * 7  > 364) {
-                    string = string.concat(years + " year");
-                    if (years>1) string = string.concat("s");
+                    strng = strng.concat(years + " year");
+                    if (years>1) strng = strng.concat("s");
                     }
                     if (months > 0) {
-                    if (years > 0) string = string.concat(" and ");
-                    string = string.concat(months + " month");
-                    if (months>1) string = string.concat("s");
+                    if (years > 0) strng = strng.concat(" and ");
+                    strng = strng.concat(months + " month");
+                    if (months>1) strng = strng.concat("s");
                     }
                 }
                 //Show the measure
@@ -499,19 +499,19 @@ Graph.prototype.update = function() {
                     units=" Kg/m2";
                     break;
                 }
-                string = string.concat("<br/>"+measuretype+": "  + d[1] + units);
+                strng = strng.concat("<br/>"+measuretype+": "  + d[1] + units);
                 //Show the data from WHO
                 var hmo = self.points[Math.round(d[0] * 7)];
-                string = string.concat("<br/>Average "+measuretype.toLowerCase()+" from WHO: " + Math.round(hmo.m*100)/100);
-                var quantile=""+Math.round(cdf(d[1],hmo.m,hmo.s)*100); //d[1] is weight
+                strng = strng.concat("<br/>Average "+measuretype.toLowerCase()+" from WHO: " + Math.round(hmo.m*100)/100);
+                console.log("tooltip: d[1],hmo.m,hmo.s=",d[1],hmo.m,hmo.s)
+                var quantile=""+Math.round(cdf(d[1],hmo.m,hmo.s)*100); //d[1] is currrent measure
                 var ordinal = new String(2);
                 if ((quantile[1]=="1") && (quantile!="11")) ordinal="st";
                 else if ((quantile[1]=="2") && (quantile!="12")) ordinal="nd";
                 else ordinal="th";
-                string = string.concat("<br/>The "+measuretype.toLowerCase()+" is in the " + quantile + ordinal  + " quantile")
+                strng = strng.concat("<br/>The "+measuretype.toLowerCase()+" is in the " + quantile + ordinal  + " quantile") 
     
-    
-                return  string;
+                return  strng;
             })
             .style("left", (d3.event.pageX) + "px")
             .style("top", (d3.event.pageY - 28) + "px");

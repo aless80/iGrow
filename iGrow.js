@@ -384,6 +384,7 @@ var Dialog = function(){
         $("#export").attr("disabled","true");
     },
     hideAccordion: function() {
+        //$("#datep").val(todayDMY); //to do: is this working?
         $("table .selected").removeClass("selected");
         $("#weightSpinner").spinner("option","disabled",true);
         $("#measureselectdialog").val("Measure");
@@ -527,8 +528,68 @@ var Dialog = function(){
 	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
     },
     
-
+     
+    calculateQ2: function(days,measure,measuretype,selLine){
+        // Check for the various File API support.
+        if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
+            } else alert('The File APIs are not fully supported in this browser.');        
+        var url;
+        var cellNum;
+        switch (measuretype){
+            case "weight":
+                url ="weianthro.txt"; //to do: watch out loh in weight
+                cellNum = 4;
+                break;
+            case "length":
+                url ="lenanthro.txt";
+                cellNum = 6;
+                break;
+            case "bmi":
+                url ="bmianthro.txt";
+                cellNum = 8;
+                break;
+        }
+        var str=";"+Page.getCurrGender()+","+days+",";
+            console.log("calculateQ2: days,measure,measuretype,str=",days,measure,measuretype,str);
+            
+            var stuff={selLine:selLine,measure:measure,str:str,cellNum:cellNum};
+            Dialog.loadDoc2(url, stuff, Dialog.writeQ);
+    },
     
+    loadDoc2: function(url, stuff, cfunc) {
+            var xhttp=new XMLHttpRequest();
+            xhttp.onreadystatechange = function() {
+                if (xhttp.readyState == 4 && xhttp.status == 200) {
+                    cfunc(xhttp.responseText,url,stuff);
+                }
+            }
+            xhttp.overrideMimeType('text/plain');
+            xhttp.open("GET", url, true);
+            xhttp.send();
+    },
+    
+    writeQ: function(resp,url,stuff) {
+            if (resp){
+                var str=stuff.str;            
+                //Find the string str in the data
+                resp=resp.replace(/\n/g, ';').replace(/\t/g, ',');
+                var start=resp.indexOf(str)+1;
+                if (start==-1) console.log("writeQ: str not found. str=",str);
+                var end=resp.indexOf(";",start);
+                //Calculate the quantile
+                var array = resp.substring(start,end).split(",").map(Number);
+                var measure=stuff.measure;
+                var mean=array[3];
+                var std=array[4]*mean;
+console.log("  mean,std=",mean,std);
+console.log("  array=",array);
+                var quantile=Math.round(cdf(measure,mean,std)*100);    
+                //Write the quantile
+                var text=isNaN(quantile)?(""):quantile.toFixed(1);
+                $("table #"+stuff.selLine+" :nth-child("+stuff.cellNum+")").text(text);
+            }
+        },
+
     // calculateQ: function(days,measure,measuretype){
     //     // Check for the various File API support.
     //     if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
@@ -907,11 +968,9 @@ $(function() {
                 break;
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
-                
-                console.log("in lenanthro: ",$("#lenanthro").text())
                 var length=measure;
-                var lengthq=calculateQ2(days,length,"length",row.line); //to do  It was calculateQ(days,length,"length");
-                var lengthq=Number($("#lenanthro").text());
+                //var lengthq=Dialog.calculateQ2(days,length,"length",row.line); //to do  It was calculateQ(days,length,"length");
+                //var lengthq=Number($("#lenanthro").text());
                 break;
         };
         
@@ -920,9 +979,8 @@ $(function() {
         // //Calculate the BMI //to do: this has to be done later, when i decide whether i merge length and weight or not. here the nor current measure is NaN
         if ((textButton==="Inse")&&(forceEdit===0)){
             //Append data to the babies' data
-            
-  var lengthq="";
-  var weightq="";
+            var lengthq="";
+            var weightq="";
             var obj = {
                 "Date" : dateDMY,
                 "Weeks" : days / 7,
@@ -939,7 +997,6 @@ $(function() {
             $("#tr"+newindex).addClass('selected'); //to do: or > td:nth-child(1) ? 
             //$("#tr"+newindex+" > td:nth-child(1)").trigger("click");
             var sel=Dialog.getSelectedFromTable();
-            
             
             
             $("#addmeasure").removeAttr("disabled");
@@ -962,24 +1019,18 @@ $(function() {
                 case "Weight":
                     var text=isNaN(weight)?(""):weight.toFixed(1);
                     $("#"+sel.line + " :nth-child(3)").text(text);
-   //                 text=isNaN(weightq)?(""):weightq.toFixed(1);
-    //                $("#"+sel.line + " :nth-child(4)").text(text);
                     length=$("#"+sel.line + " :nth-child(5)").text();
                     length=length?Number(length):NaN;
                 break;
                 case "Length":
                     var text=isNaN(length)?(""):length.toFixed(1);
                     $("table #"+sel.line + " :nth-child(5)").text(text);
-     //               text=isNaN(lengthq)?(""):lengthq.toFixed(1);
-      //              $("table #"+sel.line + " :nth-child(6)").text(text);
                     weight=$("#"+sel.line + " :nth-child(3)").text();
                     weight=weight?Number(weight):NaN;
                 break;
             };
             //Calculate the BMI
             var bmi=weight/Math.pow(length/100,2); //to do: see precise formula
-            var bmiq=calculateQ2(days,bmi,"bmi",sel.line); //to do it was calculateQ(days,bmi,"bmi");
-            var bmiq=Number($("#bmianthro").text());
 
             //BMI
             var text=isNaN(bmi)?(""):bmi.toFixed(2);
@@ -988,85 +1039,16 @@ $(function() {
             $("table #"+sel.line + " :nth-child(9)").text(comment);
         };
         
-        console.log(sel.line)
-        if (!isNaN(weight)) calculateQ2(days,weight,"weight",sel.line); //to do: bummer, this overwrites the existing one
-        //to do problem: i think that sel.line is not defined when I add a measure
-        if (!isNaN(length)) calculateQ2(days,length,"length",sel.line);
-        if ((typeof bmi !== 'undefined') && !isNaN(bmi)) calculateQ2(days,bmi,"bmi",sel.line);
-        
-        
-        
+        //Calculate and set all the quantiles (recalculate because date could change)
+        if (!isNaN(weight)) Dialog.calculateQ2(days,weight,"weight",sel.line);
+        if (!isNaN(length)) Dialog.calculateQ2(days,length,"length",sel.line);
+        if ((typeof bmi !== 'undefined') && !isNaN(bmi)) Dialog.calculateQ2(days,bmi,"bmi",sel.line);        
         
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
         return true;       
     });
- });
- 
- function calculateQ2(days,measure,measuretype,selLine){ 
-        // Check for the various File API support.
-        if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
-            } else alert('The File APIs are not fully supported in this browser.');        
-        var url;
-        var cellNum;
-        switch (measuretype){
-            case "weight":
-                url ="weianthro.txt"; //to do: watch out loh in weight
-                cellNum = 4;
-                break;
-            case "length":
-                url ="lenanthro.txt";
-                cellNum = 6;
-                break;
-            case "bmi":
-                url ="bmianthro.txt";
-                cellNum = 8;
-                break;
-        };
-        
-        var str=";"+Page.getCurrGender()+","+days+",";
-        console.log("calculateQ2: days,measure,measuretype,str=",days,measure,measuretype,str);
-        
-        var stuff={selLine:selLine,measure:measure,str:str,cellNum:cellNum};
-        // var cb = function (resp){
-        //     writeQ(resp);
-        // };
-        // loadDoc2(url, stuff, cb);
-        loadDoc2(url, stuff, writeQ);
-}
-
-function loadDoc2(url, stuff, cfunc) {
-        var xhttp=new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-                cfunc(xhttp.responseText,url,stuff);
-            }
-        }
-        xhttp.overrideMimeType('text/plain');
-        xhttp.open("GET", url, true);
-        xhttp.send();
-}
-
-function writeQ(resp,url,stuff) {
-        if (resp){
-            var str=stuff.str;            
-            //Find the string str in the data
-            resp=resp.replace(/\n/g, ';').replace(/\t/g, ',');
-            var start=resp.indexOf(str)+1;
-            if (start==-1) console.log("writeQ: str not found. str=",str);
-            var end=resp.indexOf(";",start);
-            //Calculate the quantile
-            var array = resp.substring(start,end).split(",").map(Number);
-            var measure=stuff.measure;
-            var mean=array[3];
-            var std=array[4];
-            var quantile=Math.round(cdf(measure,mean,std)*100);    
-            //Write the quantile
-            var text=isNaN(quantile)?(""):quantile.toFixed(1);
-            $("table #"+stuff.selLine+" :nth-child("+stuff.cellNum+")").text(text);
-        }
-    }
- 
+ }); 
  
  
  
@@ -1133,15 +1115,7 @@ $(function() {
     })
     //cancelaccordiondiv closes the accordion
     $("#cancelaccordion").click(function(){
-        $("#accordion").attr("hidden","true");
-        $("#dialogButtons").removeAttr("hidden");
-        $("#editmeasure").removeAttr("disabled");
-        $("#addmeasure").removeAttr("disabled");
-        $("#editmeasure").attr("disabled","true");
-        $("#deletemeasure").attr("disabled","true");
-        $("#export").removeAttr("disabled");
-        //Deselect line from table
-        $("table .selected").removeClass("selected");
+        Dialog.hideAccordion();
     })
     //Dialog buttons
     $("#savedialogbutton").click(function() {
