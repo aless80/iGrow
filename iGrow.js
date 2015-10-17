@@ -633,7 +633,7 @@ var Dialog = function(){
     babiesToJSON: function(){
                 var json=new Array();
                 for (var index=0,len=babies.length; index<len; index++) {
-                    var datalength=babies[index]["Data"].length;
+                    var datalength=babies[index]["Data"].length; //
                     if (datalength===0) {
                         json.push({
                                 Name:       babies[index].Name,
@@ -641,7 +641,7 @@ var Dialog = function(){
                                 Gender:     babies[index].Gender
                         });
                     } else {
-                        for (var ind=0,len=datalength; ind<len; ind++) {
+                        for (var ind=0,len2=datalength; ind<len2; ind++) {
                             var obj={
                             Name:       babies[index].Name,
                             BirthDate:  babies[index].BirthDate,
@@ -652,6 +652,8 @@ var Dialog = function(){
                             WeightQ:   babies[index]["Data"][ind]["WeightQ"],
                             Length:     babies[index]["Data"][ind]["Length"],
                             LengthQ:     babies[index]["Data"][ind]["LengthQ"],
+                            BMI:     babies[index]["Data"][ind]["BMI"],
+                            BMIQ:     babies[index]["Data"][ind]["BMIQ"],
                             Comment:    babies[index]["Data"][ind]["Comment"]
               }
               json.push(obj);
@@ -720,7 +722,10 @@ $("#babydialog").dialog({
                 var text = $("#inputfordropdown").val();
                 Page.removeBaby(text);  
                 Page.autocomplete();
-                if (babies.length===0) $("#dialogbutton").attr("disabled","true");
+                if (babies.length===0) {
+                    $("#dialogbutton").attr("disabled","true");
+                    
+                }
                 $(this).dialog("close");
                 $(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
             }
@@ -1111,12 +1116,20 @@ $(document).ready(function(){
           return;
       var data=Dialog.babiesToJSON();
       JSONToCSVConvertor(data);
-      //function to 
+      //function to export JSON to excel
       function JSONToCSVConvertor(obj){
         var out = '';
+        //Write the headers
+        var row = "";
+        for (var index in obj[0])
+            if (obj[0].hasOwnProperty(index))
+                row += '' + index + ', '; 
+            row.slice(0, row.length-1);
+            //add a line break
+            out += row + '\r\n';
         //1st loop is to extract each row
         for (var i = 0, len=obj.length; i < len; i++) {
-            var row = "";        
+            var row = "";
             //2nd loop will extract each column and convert it in string comma-seprated
             for (var index in obj[i]) 
               if (obj[i].hasOwnProperty(index))
