@@ -84,47 +84,6 @@
                             <button id="dialogbutton" title="">Edit Measures</button>   
                         </div>
                     </td>                  
-                    
-<!--                    <div id="measureselect3">
-                        -<input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
-                        <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>
-                        <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
-                        <span id="horizon-bands">
-                            <span id="horizon-bands-value">1</span> 
-                            <button class="first">&#x2212;</button>
-                            <button class="last">+</button>
-                        </span>
-                    </div>
-                    -->
-                    <!--
-                    <form>
-                        <label id="measureselect2">
-                            <input name="mode" type="radio" value="Weight" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Weight</label>
-                        </label>
-                        <label>
-                            <input name="mode" type="radio" value="Length" id="horizon-mode-offset"><label for="horizon-mode-offset"> Length</label>                        
-                        </label>
-                        <label>
-                            <input name="mode" type="radio" value="BMI" id="horizon-mode-offset"><label for="horizon-mode-offset"> BMI</label>
-                        </label>
-                    </form>
-                    -->
-                    
-<!--                    <div>                        
-                        <select id="measureselect" style="text-align:center" value="" title="Change plotted measures" style="min-width: 97px; width: auto;">
-                            <option value="Weight">Weight</option>
-                            <option value="Length">Length</option>
-                            <option value="BMI">BMI</option>
-                        </select>   
-                    </div>
-                    
-                </td> 
-                <form action="demo_form.asp">
-                        <input type="radio" id="horizon-mode-mirror" name="FirstName" value="Mickey"></input> <label for="horizon-mode-mirror"> Weight</label>
-                        <input type="radio" id="horizon-mode-offset" name="LastName" value="Mouse"></input> <label for="horizon-mode-offset"> Length</label>
-                    </form>
-                    --> 
-                
                 <td>
                     <div id="helpdiv">
                         <button id="helpbutton" title="">Help</button>   
@@ -377,11 +336,9 @@
     <script type="text/javascript" src="iGrow.js"></script>
     
     <!--do the quantiles
-        calculateQ2
-        I think lengthq is already set before reaching calculateQ2 
-        edit a measure. when i change the date, the date changes also for the other measure
-        fix quantile to integer, not .0. maybe that happens when i edit measures
         Look what Loh=L or H is in the WHO files! That causes the knick in the plot!
+        edit a measure. when i change the date, the date changes also for the other measure
+        fix quantile to integer, not .0. maybe that happens when i edit measures        
         put radio buttons on top of grahp, but how? see http://bl.ocks.org/mbostock/1483226
         good: "NaN": it's ok because I have toFixed..
         good: i can add line, then select table and delete line. that snot bad, but can i screw it up? No

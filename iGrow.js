@@ -40,10 +40,6 @@ var Page = function() {
     
     return {
         //Functions about retrieving data related to the babies object from DOM or babies itself 
-        // //Get the currently plotted measurement
-        // getMeasureType: function(){
-        //     return $("#measureselect2").val();
-        // },
         //Get the baby's name from the dropdown
         getCurrName: function(){
             var value = $("#dropdown").val();
@@ -527,9 +523,8 @@ var Dialog = function(){
     DMYToDate: function(dmy){
 	 return date.parse(dmy.substring(3,5) + "/" + dmy.substring(0,2) + "/" + dmy.substring(6,10))	
     },
-    
-     
-    calculateQ2: function(days,measure,measuretype,selLine){
+       
+    calculateQ: function(days,measure,measuretype,selLine){
         // Check for the various File API support.
         if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
             } else alert('The File APIs are not fully supported in this browser.');        
@@ -550,13 +545,12 @@ var Dialog = function(){
                 break;
         }
         var str=";"+Page.getCurrGender()+","+days+",";
-            console.log("calculateQ2: days,measure,measuretype,str=",days,measure,measuretype,str);
-            
+//            console.log("calculateQ: days,measure,measuretype,str=",days,measure,measuretype,str);          
             var stuff={selLine:selLine,measure:measure,str:str,cellNum:cellNum};
-            Dialog.loadDoc2(url, stuff, Dialog.writeQ);
+            Dialog.loadDoc(url, stuff, Dialog.writeQ);
     },
     
-    loadDoc2: function(url, stuff, cfunc) {
+    loadDoc: function(url, stuff, cfunc) {
             var xhttp=new XMLHttpRequest();
             xhttp.onreadystatechange = function() {
                 if (xhttp.readyState == 4 && xhttp.status == 200) {
@@ -581,76 +575,25 @@ var Dialog = function(){
                 var measure=stuff.measure;
                 var mean=array[3];
                 var std=array[4]*mean;
-console.log("  mean,std=",mean,std);
-console.log("  array=",array);
                 var quantile=Math.round(cdf(measure,mean,std)*100);    
                 //Write the quantile
                 var text=isNaN(quantile)?(""):quantile.toFixed(1);
                 $("table #"+stuff.selLine+" :nth-child("+stuff.cellNum+")").text(text);
             }
         },
-
-    // calculateQ: function(days,measure,measuretype){
-    //     // Check for the various File API support.
-    //     if (window.File && window.FileReader && window.FileList && window.Blob){// All the File APIs are supported
-    //         } else alert('The File APIs are not fully supported in this browser.');
-    //     this.str=";"+Page.getCurrGender()+","+days+",";        
-    //     var url;
-    //     switch (measuretype){
-    //         case "weight":
-    //             url ="weianthro.txt"; //to do: watch out loh in weight
-    //             break;
-    //         case "length":
-    //             url ="lenanthro.txt";
-    //             break;
-    //         case "bmi":
-    //             url ="bmianthro.txt";
-    //             break;
-    //     };
-    //     if (isNaN(measure)) $("#"+url.split(".")[0]).text(NaN);
-    //     console.log("calculateQ: days,measure,measuretype=",days,measure,measuretype);
-        
-    //     var measure=$("#"+url.split(".")[0]).text(measure);
-    //     Dialog.loadDoc(url, Dialog.getLine);
-    // },
-    
-    loadDoc: function(url, cfunc) {
-        var xhttp=new XMLHttpRequest();
-        xhttp.onreadystatechange = function() {
-            if (xhttp.readyState == 4 && xhttp.status == 200) {
-            cfunc(xhttp.responseText,url);
-            }
-        }
-        xhttp.overrideMimeType('text/plain');
-        xhttp.open("GET", url, true);
-        xhttp.send();
-    },
-    
     //Find string with the desired data in txt file. str should begin with ";" eg ";1,3,"
     getLine: function(resp,url) {
         if (resp){
-            console.log("getLine: url=",url);
             resp=resp.replace(/\n/g, ';').replace(/\t/g, ',');
             var start=resp.indexOf(Dialog.str)+1;
             if (start==-1) console.log("getLine: str not found. Dialog.str=",Dialog.str);
             var end=resp.indexOf(";",start);
-            // Dialog.line=resp.substring(start,end);
-            // console.log("getLine: Dialog.line=",Dialog.line);
-            // Dialog.line.split(",").map(Number);
             var array = resp.substring(start,end).split(",").map(Number);
             var measure=$("#"+url.split(".")[0]).text();
             var mean=array[3];
             var std=array[4];
             var quantile=Math.round(cdf(measure,mean,std)*100);    
             $("#"+url.split(".")[0]).text(quantile);
-            
-    //                    console.log("calculateQ: $(#+url.split(.)[0]).text()",$("#"+url.split(".")[0]).text())
-            // var array = $("#"+url.split(".")[0]).text().split(",").map(Number);
-        // console.log("calculateQ: array",array)
-                // return quantile;
-
-            
-            return Dialog.line; //does not work
         }
     },
 
@@ -690,10 +633,8 @@ console.log("  array=",array);
     babiesToJSON: function(){
                 var json=new Array();
                 for (var index=0,len=babies.length; index<len; index++) {
-//console.log("len,index=",len,index)
                     var datalength=babies[index]["Data"].length;
                     if (datalength===0) {
-//console.log("if, index=",index)
                         json.push({
                                 Name:       babies[index].Name,
                                 BirthDate:  babies[index].BirthDate,
@@ -721,8 +662,6 @@ console.log("  array=",array);
       }
     }
 }(); //end Dialog
-
-
 
 
 
@@ -817,11 +756,6 @@ $("#editbabybutton").click(function() {
     $("#birthdatep").val("Birthdate");
     $("#babydialog").dialog("open");
 });
-
-//track measurement type
-// $(document).on("change", "#measureselect2", function(e) {
-//     Dialog.changeMeasurementType();
-// })
 
 $(document).on("change", "#measureselectdialog", function(e) {
     $("#weightSpinner").spinner("option","disabled",false);
@@ -956,8 +890,7 @@ $(function() {
                     }
                 }
             }
-        }
-        
+        }        
         //Get data from the table        
         var row=Dialog.getSelectedFromTable();
         //Get the currently plotted measure
@@ -969,8 +902,6 @@ $(function() {
             case "Length":
                 var weight=(row.length)?(row.weight):(NaN);
                 var length=measure;
-                //var lengthq=Dialog.calculateQ2(days,length,"length",row.line); //to do  It was calculateQ(days,length,"length");
-                //var lengthq=Number($("#lenanthro").text());
                 break;
         };
         
@@ -1037,13 +968,11 @@ $(function() {
             $("table #"+sel.line + " :nth-child(7)").text(text);
             //Comment
             $("table #"+sel.line + " :nth-child(9)").text(comment);
-        };
-        
+        };        
         //Calculate and set all the quantiles (recalculate because date could change)
-        if (!isNaN(weight)) Dialog.calculateQ2(days,weight,"weight",sel.line);
-        if (!isNaN(length)) Dialog.calculateQ2(days,length,"length",sel.line);
-        if ((typeof bmi !== 'undefined') && !isNaN(bmi)) Dialog.calculateQ2(days,bmi,"bmi",sel.line);        
-        
+        if (!isNaN(weight)) Dialog.calculateQ(days,weight,"weight",sel.line);
+        if (!isNaN(length)) Dialog.calculateQ(days,length,"length",sel.line);
+        if ((typeof bmi !== 'undefined') && !isNaN(bmi)) Dialog.calculateQ(days,bmi,"bmi",sel.line);               
         //hide accordion, reveal dialog buttons
         Dialog.hideAccordion();
         return true;       
@@ -1073,10 +1002,6 @@ $(function() {
 
 //Disable selection div after the page has loaded
 window.addEventListener("load", Page.pageFullyLoaded, false);
-
-
-
-
 
 //Actions on Dialog
 $(function() {
@@ -1159,9 +1084,7 @@ $("#table").on("click", "tr", function(event) {
   //Ignore clicking on the header
   if (this.id==="tr0") return;
   //Ignore clicking when accordion is open and you are adding a measure    to do this created problems with quantiles where I select a line
-  if ((!$("#accordion").attr("hidden"))&&(!$("#addmeasure").attr("disabled"))){
-      console.log("ignore")
-      return;} 
+  if ((!$("#accordion").attr("hidden"))&&(!$("#addmeasure").attr("disabled"))) return;
   //Select the row in the table
   if ($(this).hasClass('selected')) {
     $(this).removeClass('selected');
@@ -1179,10 +1102,6 @@ $("#table").on("click", "tr", function(event) {
     $("#deletemeasure").removeAttr("disabled");
   }
 });
-
-
-
-
 
 //Export
 $(document).ready(function(){
@@ -1226,72 +1145,6 @@ $(document).on("change", "#measureselect2 input[name=mode]",function() {
     Page.readTSV(this.value);
     //Page.changeGraph();
 });
-
-
-// function readSingleFile(evt) {
-    // //Retrieve the first (and only!) File from the FileList object
-    // var f = evt.target.files[0]; 
-
-    // if (f) {
-    //   var r = new FileReader();
-    //   r.onload = function(e) { 
-	//       var contents = e.target.result;
-    //     alert( "Got the file.n" 
-    //           +"name: " + f.name + "n"
-    //           +"type: " + f.type + "n"
-    //           +"size: " + f.size + " bytesn"
-    //           + "starts with: " + contents.substr(1, contents.indexOf("n"))
-    //     );  
-    //   }
-    //   r.readAsText(f);
-    // } else { 
-    //   alert("Failed to load file");
-    // }
-  // }
-
-  // document.getElementById('fileinput').addEventListener('change', readSingleFile, false);
-
-// //works but i need whole path
-// function readTextFile(file)
-// {
-//     var rawFile = new XMLHttpRequest();
-//     rawFile.open("GET", file, false);
-//     rawFile.onreadystatechange = function ()
-//     {
-//         if(rawFile.readyState === 4)
-//         {
-//             if(rawFile.status === 200 || rawFile.status == 0)
-//             {
-//                 var allText = rawFile.responseText;
-//                 alert(allText);
-//             }
-//         }
-//     }
-//     rawFile.send(null);
-// }
-// readTextFile("file:////home/amarin/VSCode/iGrow/bmianthro.txt");
-
-
-
-// //Not working
-// $.get( "bmianthro.txt", function( data ) {
-//   alert( "Data Loaded: " + data );
-// });
-
-// var xhr;
-// if (window.XMLHttpRequest) {
-//     xhr = new XMLHttpRequest();
-// } else if (window.ActiveXObject) {
-//     xhr = new ActiveXObject("Microsoft.XMLHTTP");
-// }
-
-// xhr.onreadystatechange = function(){
-//     alert(xhr.readyState)
-//     alert(xhr.responseText);
-//     };
-// xhr.open("GET","bmianthro.txt"); //assuming kgr.bss is plaintext
-// xhr.send();
-
 
 
 
