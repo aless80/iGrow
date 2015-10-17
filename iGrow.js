@@ -722,10 +722,7 @@ $("#babydialog").dialog({
                 var text = $("#inputfordropdown").val();
                 Page.removeBaby(text);  
                 Page.autocomplete();
-                if (babies.length===0) {
-                    $("#dialogbutton").attr("disabled","true");
-                    
-                }
+                if (babies.length===0) $("#dialogbutton").attr("disabled","true");
                 $(this).dialog("close");
                 $(".ui-dialog-buttonpane button:contains('Delete')").button("disable");
             }
