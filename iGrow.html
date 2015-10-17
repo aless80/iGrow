@@ -11,12 +11,16 @@
 </head>
 <body>
 
-
+<div id="horizon-controls">
+  <input name="mode" type="radio" value="mirror" id="horizon-mode-mirror" checked><label for="horizon-mode-mirror"> Mirror</label>
+  <input name="mode" type="radio" value="offset" id="horizon-mode-offset"><label for="horizon-mode-offset"> Offset</label>
+  <span id="horizon-bands"><span id="horizon-bands-value">1</span> <button class="first">&#x2212;</button><button class="last">+</button></span>
+</div>
 
 <!--Plot-->
-    <tr style="vertical-align:top;">
+    <tr style="vertical-align:top;" position: absolute; top: 0;>
         <td style="padding-bottom:8px;">
-        <div>
+        <div >
             <table class="group"  cellspacing="10" cellpadding="2">
             <tbody>            
                 <tr>
