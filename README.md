@@ -11,8 +11,8 @@ The buttons on the bottom allows the user to add their desired data as follows:
 ![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow1.png "iGrow 1")
 
 2. Add, Edit or Remove a weight/length/BMI measurement: click on the "Edit measures" button.
-![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow1.png "iGrow 2")
+![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow2.png "iGrow 2")
 
 3. You can zoom in the graph using the mouse wheel. Clicking on the datapoints allows the user to delete them, and hovering over a datapoint displays more information.
-![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow1.png "iGrow 3")
+![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow3.png "iGrow 3")
 
