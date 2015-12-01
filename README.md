@@ -7,6 +7,7 @@ The graph shows the average weight [Kg], length [cm] or BMI [Kg/m2] of a baby be
 ![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow.png "iGrow 1")
 
 The buttons on the bottom allows the user to add their desired data as follows: 
+
 1. Add a baby: click on Edit babies. In the pop up dialog fill in the Name, Gender and Birthdate.
 ![Alt text](https://github.com/aless80/iGrow/blob/master/iGrow1.png "iGrow 1")
 
