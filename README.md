@@ -1,4 +1,6 @@
 # iGrow
+This was my first project using front-end software. Looking back on it, it was very useful to learn not only HTML, but also javascript. I would now use a higher level framework to improve the UI, use SQL or even better noSQL storage, and starting working with technologies that are mobile app friendly. 
+
 Follow this link to try this application: 
 [edosil.net/igrow/](http://edosil.net/igrow/ "iGrow")
 
